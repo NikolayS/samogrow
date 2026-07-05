@@ -288,9 +288,12 @@
         <div class="eyebrow fade d1">DIY · AI-controlled · indoor herb garden</div>
         <h1 class="fade d2">samo<span class="sprout">grow</span></h1>
         <p class="lede fade d3">
-          Always-fresh parsley &amp; greens on your countertop. The brain is
-          <b>Claude on your laptop</b>; the garden is a <b>dumb Wi-Fi appliance</b>.
-          No soldering, no Raspberry&nbsp;Pi, no subscription.
+          Fresh herbs on your counter all year — without remembering to water or
+          guessing about light. An <b>AI checks your plants through a camera</b> every
+          few hours, waters and lights them, and texts you photos on Telegram.
+          Countertop gardens cost $200–400 up front and lock you into pod
+          subscriptions; this is <b>~$266 of ordinary parts</b> and seeds that cost
+          pennies — and you own all of it.
         </p>
         <div class="cta-row fade d4">
           <a class="btn btn-solid" href="https://github.com/NikolayS/samogrow/blob/main/spec/SPEC.md">Read the spec →</a>
@@ -318,9 +321,11 @@
         <h2>How it works</h2>
       </div>
       <p class="sec-sub">
-        Three network appliances on your home Wi-Fi. A small TypeScript/Bun service on any
-        always-on machine pulls a camera snapshot, asks Claude what to do, and toggles two
-        smart plugs — all reported through Telegram.
+        The garden itself is just three off-the-shelf Wi-Fi gadgets — two smart plugs and a
+        camera — with nothing to maintain. All the smarts live in a small program running on a
+        laptop or spare machine you already leave on: it grabs a camera photo, asks Claude what
+        to do, flips the plugs for the light and pump, and reports on Telegram. Because it is
+        plain software, you can read it and change it — no proprietary black box.
       </p>
 
       <div class="arch">
@@ -450,8 +455,8 @@
         <div class="feat">
           <span class="ico">🔍</span>
           <span class="fnum">F.01</span>
-          <h3>AI photo analysis on a schedule</h3>
-          <p>During light hours the brain pulls an RTSP still and asks Claude for a structured verdict — water, light hours, health notes, confidence — every couple of hours.</p>
+          <h3>An AI that actually looks at your plants</h3>
+          <p>Every couple of hours during daylight, it snaps a photo through the camera and asks Claude what it sees — whether the plants need water, how they look, and what to flag — then acts on the answer.</p>
         </div>
         <div class="feat">
           <span class="ico">🚰</span>
@@ -468,8 +473,8 @@
         <div class="feat">
           <span class="ico">🧪</span>
           <span class="fnum">F.04</span>
-          <h3>Mock mode — build software first</h3>
-          <p><span class="mono">SAMOGROW_MOCK=1</span> runs the full loop with no plugs or camera. Validate the Claude call, JSON parsing, and Telegram push before any hardware arrives.</p>
+          <h3>Try it before the parts arrive</h3>
+          <p>A built-in practice mode runs the whole system on your computer with no plugs or camera plugged in — so you can set up the AI and the Telegram texts against a sample photo while your order is still in the mail.</p>
         </div>
       </div>
     </div>
@@ -496,13 +501,13 @@
         </div>
         <div class="step">
           <span class="n">STEP 03</span>
-          <h3>Run the software in mock mode</h3>
-          <p>Install Bun, grab a bot token from BotFather, and run the loop end-to-end against a sample photo — no devices required yet.</p>
+          <h3>Set up the software in practice mode</h3>
+          <p>Get the program running on your computer and connect the Telegram bot, then test the whole loop against a sample photo — no devices needed yet.</p>
         </div>
         <div class="step">
           <span class="n">STEP 04</span>
           <h3>Plug in when parts arrive</h3>
-          <p>Build the DWC reservoir, onboard the plugs + camera, reserve their IPs, wire up config, and install the service under launchd/systemd.</p>
+          <p>Build the water reservoir, get the plugs and camera onto your Wi-Fi, point the software at them, and set it to run on its own and restart itself.</p>
         </div>
       </div>
     </div>
