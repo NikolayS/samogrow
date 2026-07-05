@@ -219,6 +219,12 @@
   .cost-stack .total { background: var(--leaf); color: var(--paper); border-bottom: 0; padding: 18px 20px; }
   .cost-stack .total .amt { color: var(--paper); font-size: 1.5rem; font-weight: 600; }
   .cost-stack .total .lbl { letter-spacing: .12em; text-transform: uppercase; font-size: .74rem; }
+  .variants { margin-top: 14px; border: 1px solid var(--line); background: var(--card); }
+  .variants .vcap { padding: 11px 20px 4px; font-family: var(--font-mono); font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-faint); }
+  .variants .vt { display: flex; justify-content: space-between; align-items: baseline; padding: 9px 20px; border-top: 1px solid var(--line-soft); font-family: var(--font-mono); font-size: .82rem; }
+  .variants .vt small { display: block; font-size: .66rem; color: var(--ink-faint); margin-top: 2px; }
+  .variants .vt .amt { color: var(--ink); white-space: nowrap; }
+  .variants .vt.pick { color: var(--leaf); }
 
   .cmp { border-collapse: collapse; width: 100%; font-family: var(--font-mono); font-size: .8rem; }
   .cmp caption { text-align: left; font-family: var(--font-mono); font-size: .7rem; letter-spacing: .16em; text-transform: uppercase; color: var(--leaf); margin-bottom: 14px; }
@@ -350,9 +356,9 @@
         </figure>
         <aside class="spec-card fade d4">
           <span class="eyebrow">At a glance</span>
-          <div class="spec-row"><span>All-in hardware</span><span class="hi">~$266</span></div>
-          <div class="spec-row"><span>Appliance side</span><span>$68</span></div>
-          <div class="spec-row"><span>Grow side</span><span>$198</span></div>
+          <div class="spec-row"><span>All-in hardware</span><span class="hi">~$220–320 (variants)</span></div>
+          <div class="spec-row"><span>Appliance side</span><span>$38–68</span></div>
+          <div class="spec-row"><span>Grow side</span><span>$192–198</span></div>
           <div class="spec-row"><span>Consumables</span><span>~$35 / yr</span></div>
           <div class="spec-row"><span>Claude API</span><span>$3–7 / mo</span></div>
           <div class="spec-row"><span>Vendor subscription</span><span class="hi">none</span></div>
@@ -452,6 +458,7 @@
       </p>
 
       <div class="cost-grid">
+        <div>
         <div class="cost-stack">
           <div class="line">
             <span>Network appliances<small>2 smart plugs · camera · pump</small></span>
@@ -465,6 +472,14 @@
             <span class="lbl">Core build total</span>
             <span class="amt">~$266</span>
           </div>
+        </div>
+
+        <div class="variants">
+          <div class="vcap">Build it in tiers</div>
+          <div class="vt pick"><span>A · Manual start<small>you pour when the AI says</small></span><span class="amt">~$220</span></div>
+          <div class="vt"><span>B · + Auto top-up<small>pump does the watering</small></span><span class="amt">~$266</span></div>
+          <div class="vt"><span>C · + Water safety<small>gauge · leak sensor · tray</small></span><span class="amt">+~$55</span></div>
+        </div>
         </div>
 
         <div>
