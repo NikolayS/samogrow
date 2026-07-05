@@ -77,6 +77,8 @@ Nik is the user. He wants:
 
 ## 3. Architecture
 
+![samogrow system schematic — an always-on machine runs the Bun brain, talks to the Claude API and Telegram over the internet, and over home Wi-Fi commands two Kasa smart plugs (light and top-up pump), a jug pump feeding the DWC tote, an always-on air pump, and a Tapo RTSP camera watching the plants](../docs/img/schematic.svg)
+
 Growing method (per `research/02-hydroponics-parts.md`): **Deep Water Culture
 (DWC)** in a shared opaque tote — roots sit in aerated nutrient solution, an air
 pump + air stone oxygenate 24/7, and a plain-water top-up jug keeps the level up
@@ -252,6 +254,8 @@ timer units is small; the AI-tier savings are enormous.
 ---
 
 ## 5. Assembly plan
+
+![Field-guide illustration of the samogrow parts laid out — two full-spectrum T5 light strips above a DWC tote of basil, parsley, cilantro and lettuce in net cups, a top-up water jug with a small pump, a Wi-Fi camera, an air pump feeding an air stone, and two smart plugs on a power strip](../docs/img/build-illustration.jpg)
 
 No soldering, no wiring. Assembly is plumbing + plugging in + network config.
 

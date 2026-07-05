@@ -260,6 +260,44 @@
   .foot-brand { font-family: var(--font-serif); font-size: 2rem; }
   .foot-brand b { color: var(--leaf); }
 
+  /* ---------- imagery ---------- */
+  figure.shot { margin: 0; }
+  .shot img {
+    display: block; width: 100%; height: auto; max-width: 100%;
+    border: 1px solid var(--line); border-radius: 10px;
+    box-shadow: 0 22px 50px -30px var(--shadow);
+  }
+  figure.shot figcaption,
+  .fig-cap {
+    font-family: var(--font-mono); font-size: .68rem; letter-spacing: .05em;
+    color: var(--ink-faint); margin-top: 11px; line-height: 1.5;
+  }
+  .fig-cap b { color: var(--soil); font-weight: 600; }
+
+  .hero-shot { grid-column: 1 / -1; margin-top: 40px; }
+
+  /* schematic sits on its own cream card, legible on dark */
+  .schematic { margin: 34px auto 0; max-width: 720px; }
+  .schematic img {
+    display: block; width: 100%; height: auto; max-width: 100%;
+    border: 1px solid var(--line); border-radius: 10px;
+  }
+  .schematic figcaption { text-align: center; }
+
+  /* "the parts" gallery */
+  .parts-head { font-family: var(--font-serif); font-weight: 400; font-size: 1.4rem; margin: 0 0 6px; }
+  .parts-sub { color: var(--ink-soft); font-size: .95rem; margin: 0 0 22px; }
+  .parts { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 14px; }
+  .part { display: flex; flex-direction: column; gap: 9px; text-decoration: none; text-align: center; }
+  .part img {
+    width: 100%; aspect-ratio: 1 / 1; object-fit: contain;
+    background: #fbf7ec; border: 1px solid var(--line); border-radius: 8px; padding: 9px;
+    box-shadow: 0 10px 26px -24px var(--shadow); transition: border-color .12s ease, transform .12s ease;
+  }
+  .part .cap { font-family: var(--font-mono); font-size: .62rem; line-height: 1.4; color: var(--ink-soft); letter-spacing: .01em; }
+  .part:hover img { border-color: var(--leaf); transform: translateY(-2px); }
+  .part:hover .cap { color: var(--leaf); }
+
   /* reveal on load */
   .fade { opacity: 0; transform: translateY(14px); animation: rise .8s cubic-bezier(.2,.7,.2,1) forwards; }
   @keyframes rise { to { opacity: 1; transform: none; } }
@@ -310,6 +348,13 @@
         <div class="spec-row"><span>Subscription</span><span class="hi">none</span></div>
         <div class="spec-row"><span>Soldering</span><span class="hi">none</span></div>
       </aside>
+
+      <figure class="shot hero-shot fade d4">
+        <img src="img/hero-mock.jpg"
+             alt="Finished samogrow build on a kitchen counter: a dark opaque tote of basil, parsley, cilantro and lettuce in net cups under two adjustable full-spectrum T5 strips, with a top-up water jug and pump, an air pump, a Wi-Fi camera, and two smart plugs."
+             width="1536" height="1024">
+        <figcaption><b>AI render of the finished build</b> — a mock-up of what you end up with, not a photo of a shipped unit.</figcaption>
+      </figure>
     </div>
   </header>
 
@@ -381,6 +426,13 @@
       <p class="arrow-flow arrow mono">
         snapshot → <b>Claude</b> → JSON verdict → <b>toggle plugs</b> (within safety caps) → Telegram
       </p>
+
+      <figure class="shot schematic">
+        <img src="img/schematic.svg"
+             alt="samogrow system schematic: an always-on machine runs the Bun brain, which talks to the Claude API and Telegram over the internet and, over home Wi-Fi, commands two Kasa smart plugs (light and top-up pump), a jug pump feeding the DWC tote, an always-on air pump, and a Tapo RTSP camera watching the plants."
+             loading="lazy">
+        <figcaption>The same loop as a wiring-free system schematic — three network appliances, one laptop brain.</figcaption>
+      </figure>
     </div>
   </section>
 
@@ -441,6 +493,65 @@
         <div><span class="big">$3–7</span><small>/ month — Claude Haiku vision, ~24–48 photos a day.</small></div>
         <div><span class="big">$0</span><small>/ month — subscription. There isn't one.</small></div>
       </div>
+
+      <div style="margin-top:52px">
+        <h3 class="parts-head">The parts</h3>
+        <p class="parts-sub">Every item is ordinary consumer gear — tap a thumbnail to view the source listing.</p>
+        <div class="parts">
+          <a class="part" href="https://www.amazon.com/dp/B0BYGRLRS1" target="_blank" rel="noopener">
+            <img src="img/components/kasa-smart-plug.jpg" alt="Kasa smart plugs, 2-pack" loading="lazy">
+            <span class="cap">Kasa smart plugs (2-pack)</span>
+          </a>
+          <a class="part" href="https://www.amazon.com/dp/B0CH45HPZT" target="_blank" rel="noopener">
+            <img src="img/components/tapo-camera.jpg" alt="TP-Link Tapo C120 Wi-Fi camera" loading="lazy">
+            <span class="cap">Tapo C120 Wi-Fi camera</span>
+          </a>
+          <a class="part" href="https://www.amazon.com/dp/B0892DKNR3" target="_blank" rel="noopener">
+            <img src="img/components/submersible-pump.jpg" alt="Small 120 V submersible fountain pump" loading="lazy">
+            <span class="cap">Top-up fountain pump</span>
+          </a>
+          <a class="part" href="https://www.homedepot.com/p/HDX-7-Gal-Tough-Storage-Tote-in-Black-with-Yellow-Lid-999-7G-HDX/328027039" target="_blank" rel="noopener">
+            <img src="img/components/storage-tote.jpg" alt="Opaque HDX storage tote for the DWC reservoir" loading="lazy">
+            <span class="cap">Opaque DWC tote</span>
+          </a>
+          <a class="part" href="https://www.amazon.com/dp/B07VQVCRWV" target="_blank" rel="noopener">
+            <img src="img/components/net-pots.jpg" alt="3-inch net pots, 25-pack" loading="lazy">
+            <span class="cap">3&quot; net pots</span>
+          </a>
+          <a class="part" href="https://www.amazon.com/dp/B071S1DHDQ" target="_blank" rel="noopener">
+            <img src="img/components/rockwool-plugs.jpg" alt="Grodan A-OK rockwool starter plugs" loading="lazy">
+            <span class="cap">Rockwool starter plugs</span>
+          </a>
+          <a class="part" href="https://www.amazon.com/dp/B01KYYZ9DE" target="_blank" rel="noopener">
+            <img src="img/components/clay-pebbles.jpg" alt="Hydroton LECA clay pebbles" loading="lazy">
+            <span class="cap">LECA clay pebbles</span>
+          </a>
+          <a class="part" href="https://www.amazon.com/dp/B01EBXI7PG" target="_blank" rel="noopener">
+            <img src="img/components/air-pump.jpg" alt="Adjustable dual-outlet aquarium air pump" loading="lazy">
+            <span class="cap">Aquarium air pump</span>
+          </a>
+          <a class="part" href="https://www.amazon.com/dp/B01MV5C1I4" target="_blank" rel="noopener">
+            <img src="img/components/air-stone.jpg" alt="Air stone / disc diffuser, 2-pack" loading="lazy">
+            <span class="cap">Air stones</span>
+          </a>
+          <a class="part" href="https://www.amazon.com/dp/B071L15G5Y" target="_blank" rel="noopener">
+            <img src="img/components/masterblend-nutrients.jpg" alt="MasterBlend 4-18-38 nutrient combo kit" loading="lazy">
+            <span class="cap">MasterBlend nutrients</span>
+          </a>
+          <a class="part" href="https://www.amazon.com/dp/B000BNKWZY" target="_blank" rel="noopener">
+            <img src="img/components/ph-control-kit.jpg" alt="General Hydroponics pH control kit" loading="lazy">
+            <span class="cap">pH control kit</span>
+          </a>
+          <a class="part" href="https://www.amazon.com/dp/B0BKPF8D8G" target="_blank" rel="noopener">
+            <img src="img/components/barrina-light-strips.jpg" alt="Barrina T5 full-spectrum grow-light strips, 4-pack" loading="lazy">
+            <span class="cap">Barrina T5 light strips</span>
+          </a>
+          <a class="part" href="https://www.amazon.com/dp/B07CTMVKT9" target="_blank" rel="noopener">
+            <img src="img/components/seed-packets.jpg" alt="Sow Right five-herb seed collection" loading="lazy">
+            <span class="cap">Herb seed collection</span>
+          </a>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -487,6 +598,14 @@
         <span class="sec-num">04</span>
         <h2>Getting started — day one</h2>
       </div>
+
+      <figure class="shot" style="margin-bottom:38px">
+        <img src="img/build-illustration.jpg"
+             alt="Field-guide illustration of the samogrow parts laid out: two full-spectrum T5 light strips above a green DWC tote of basil, parsley, cilantro and lettuce in net cups, a top-up water jug with a small pump, a Wi-Fi camera, an air pump feeding an air stone, and two smart plugs on a power strip."
+             width="1536" height="1024" loading="lazy">
+        <figcaption>What you assemble — reservoir, light, top-up jug + pump, air pump, camera, and two smart plugs. No soldering, no wiring.</figcaption>
+      </figure>
+
       <div class="steps">
         <div class="step">
           <span class="n">STEP 01</span>
