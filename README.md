@@ -2,9 +2,9 @@
 
 DIY AI-controlled indoor herb garden — always-fresh herbs and greens: parsley, basil, cilantro, mint, lettuce.
 
-![AI render of a finished samogrow build — basil, parsley, cilantro and lettuce in an opaque DWC tote under adjustable T5 grow lights, with a top-up jug, air pump, Wi-Fi camera and smart plugs](docs/img/hero-mock.jpg)
+![Field-guide illustration of the samogrow build — T5 grow lights above a DWC tote of herbs in net cups, top-up jug with pump, Wi-Fi camera, air pump, and two smart plugs](docs/img/build-illustration.jpg)
 
-*AI render of the finished build — a mock-up of the end result, not a photo of a shipped unit.*
+*The build, illustrated — real photos will replace this once the first unit is assembled. (An [AI-generated mock-up](docs/img/hero-mock.jpg) of the finished result also exists — explicitly a render, not a photo.)*
 
 An affordable, kit-style alternative to commercial smart gardens (Auk, Click & Grow, Rise Gardens).
 The garden device itself is dumb and Wi-Fi-only: smart plugs switch the grow light and the pump,
@@ -24,4 +24,4 @@ On a timer during light hours, the brain pulls a camera snapshot, asks Claude fo
 - `spec/` — the build spec (samospec-style): goal, architecture, BOM with prices, assembly plan, sprint plan
 - `software/` — the brain: control loop, camera + AI vision analysis, Telegram bot
 
-Status: research in progress.
+Status: spec + shopping list + software ready — see the [project brief](https://nikolays.github.io/samogrow/), [SPEC](spec/SPEC.md), and [shopping list](spec/SHOPPING-LIST.md).

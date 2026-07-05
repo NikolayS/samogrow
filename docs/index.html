@@ -1,7 +1,7 @@
 <meta charset="utf-8">
 <title>samogrow (nombox) — DIY AI herb garden</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="samogrow (nombox) — a DIY, AI-controlled indoor herb garden. Fresh herbs and greens on your counter all year — parsley, basil, cilantro, mint, lettuce — for ~$266 all-in, no soldering, no subscription. An AI checks your plants through a camera, waters and lights them, and texts you photos on Telegram.">
+<meta name="description" content="samogrow (nombox) — an open, AI-run indoor herb garden you build from commodity parts (~$266 all-in, no soldering). A camera checks the plants, smart plugs control light and water, and Telegram tells you what happened. No vendor subscription and no proprietary pods; the only recurring cost is ~$3–7/mo in Claude API calls.">
 <style>
   :root {
     --paper:      #f2ede0;
@@ -106,15 +106,17 @@
   @media (max-width: 720px) { .topnav { display: none; } }
 
   /* ---------- hero ---------- */
-  .hero { padding: 76px 0 40px; position: relative; }
+  .hero { padding: 76px 0 40px; position: relative; overflow: clip; }
   .hero::after {
     content: ""; position: absolute; right: -80px; top: 0; bottom: 0; width: 380px;
     background:
       radial-gradient(closest-side at 60% 35%, color-mix(in srgb, var(--leaf) 26%, transparent), transparent 70%);
     filter: blur(10px); pointer-events: none; opacity: .8;
   }
-  .hero-grid { display: grid; grid-template-columns: 1.55fr 1fr; gap: 40px; align-items: end; }
-  @media (max-width: 860px) { .hero-grid { grid-template-columns: 1fr; gap: 28px; } }
+  .hero-grid { display: grid; grid-template-columns: 1.25fr 1fr; gap: 46px; align-items: start; }
+  @media (max-width: 860px) { .hero-grid { grid-template-columns: 1fr; gap: 30px; } }
+  .hero-lead { min-width: 0; }
+  .hero-side { display: flex; flex-direction: column; gap: 22px; min-width: 0; }
 
   .hero h1 {
     font-family: var(--font-serif);
@@ -194,6 +196,8 @@
   }
   .arrow { font-family: var(--font-serif); font-style: italic; font-size: 1rem; color: var(--ink-soft); text-align: center; max-width: 62ch; margin: 26px auto 0; padding-top: 20px; border-top: 1px dotted var(--line); }
   .arrow-flow b { color: var(--leaf); }
+  .safety-note { max-width: 64ch; margin: 20px auto 0; text-align: center; font-family: var(--font-serif); font-size: .98rem; line-height: 1.5; color: var(--ink-soft); }
+  .safety-tag { font-family: var(--font-mono); font-size: .62rem; letter-spacing: .18em; text-transform: uppercase; color: var(--leaf); border: 1px solid var(--leaf); padding: 2px 8px; margin-right: 10px; white-space: nowrap; }
 
   /* ---------- features ---------- */
   .feat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); }
@@ -273,7 +277,9 @@
   }
   .fig-cap b { color: var(--soil); font-weight: 600; }
 
-  .hero-shot { grid-column: 1 / -1; margin-top: 40px; }
+  .hero-illo { margin: 0; }
+  .hero-illo img { border-radius: 10px; }
+  .hero-illo figcaption { margin-top: 9px; }
 
   /* schematic sits on its own cream card, legible on dark */
   .schematic { margin: 34px auto 0; max-width: 720px; }
@@ -321,40 +327,38 @@
   <!-- HERO -->
   <header class="hero">
     <div class="col hero-grid">
-      <div>
+      <div class="hero-lead">
         <div class="eyebrow fade d1">DIY · AI-controlled · indoor herb garden</div>
         <h1 class="fade d2">samo<span class="sprout">grow</span> <span style="font-size:.32em;letter-spacing:0;font-style:italic;color:var(--ink-faint);">(nombox)</span></h1>
         <p class="lede fade d3">
-          Fresh herbs on your counter all year — parsley, basil, cilantro, mint,
-          lettuce — without remembering to water or guessing about light. An
-          <b>AI checks your plants through a camera</b> every few hours, waters and
-          lights them, and texts you photos on Telegram.
-          Countertop gardens cost $200–400 up front and keep you buying their
-          proprietary seed pods ($5–10 each); this is <b>~$266 of ordinary parts</b>
-          and seeds that cost pennies — and you own all of it.
+          An open, <b>AI-run herb garden</b> you build from commodity parts. A camera
+          checks the plants, smart plugs control light and water, and Telegram tells you
+          what happened.
         </p>
         <div class="cta-row fade d4">
           <a class="btn btn-solid" href="https://github.com/NikolayS/samogrow/blob/main/spec/SPEC.md">Read the spec →</a>
           <a class="btn btn-ghost" href="https://github.com/NikolayS/samogrow">View on GitHub</a>
         </div>
       </div>
-      <aside class="spec-card fade d4">
-        <span class="eyebrow">At a glance</span>
-        <div class="spec-row"><span>All-in hardware</span><span class="hi">~$266</span></div>
-        <div class="spec-row"><span>Appliance side</span><span>$68</span></div>
-        <div class="spec-row"><span>Grow side</span><span>$198</span></div>
-        <div class="spec-row"><span>Consumables</span><span>~$35 / yr</span></div>
-        <div class="spec-row"><span>Claude API</span><span>$3–7 / mo</span></div>
-        <div class="spec-row"><span>Subscription</span><span class="hi">none</span></div>
-        <div class="spec-row"><span>Soldering</span><span class="hi">none</span></div>
-      </aside>
 
-      <figure class="shot hero-shot fade d4">
-        <img src="img/hero-mock.jpg"
-             alt="Finished samogrow build on a kitchen counter: a dark opaque tote of basil, parsley, cilantro and lettuce in net cups under two adjustable full-spectrum T5 strips, with a top-up water jug and pump, an air pump, a Wi-Fi camera, and two smart plugs."
-             width="1536" height="1024">
-        <figcaption><b>AI render of the finished build</b> — a mock-up of what you end up with, not a photo of a shipped unit.</figcaption>
-      </figure>
+      <div class="hero-side">
+        <figure class="shot hero-illo fade d3">
+          <img src="img/build-illustration.jpg"
+               alt="Field-guide illustration of the samogrow build: two full-spectrum T5 light strips above a green DWC tote of basil, parsley, cilantro and lettuce in net cups, a top-up water jug with a small pump, a Wi-Fi camera, an air pump feeding an air stone, and two smart plugs."
+               width="1536" height="1024">
+          <figcaption>The build, illustrated — real photos will replace this once the first unit is assembled.</figcaption>
+        </figure>
+        <aside class="spec-card fade d4">
+          <span class="eyebrow">At a glance</span>
+          <div class="spec-row"><span>All-in hardware</span><span class="hi">~$266</span></div>
+          <div class="spec-row"><span>Appliance side</span><span>$68</span></div>
+          <div class="spec-row"><span>Grow side</span><span>$198</span></div>
+          <div class="spec-row"><span>Consumables</span><span>~$35 / yr</span></div>
+          <div class="spec-row"><span>Claude API</span><span>$3–7 / mo</span></div>
+          <div class="spec-row"><span>Vendor subscription</span><span class="hi">none</span></div>
+          <div class="spec-row"><span>Soldering</span><span class="hi">none</span></div>
+        </aside>
+      </div>
     </div>
   </header>
 
@@ -419,6 +423,10 @@
         Each cycle: the brain grabs a snapshot, <b>Claude</b> returns a verdict, the brain
         <b>switches the plugs</b> within fixed safety caps, and the result lands in Telegram.
       </p>
+      <p class="safety-note">
+        <span class="safety-tag">Safety</span>
+        Pump run-time caps, a bounded top-up jug (worst-case spill is just the jug's volume), and an optional float/leak sensor.
+      </p>
 
       <figure class="shot schematic">
         <img src="img/schematic.svg"
@@ -437,9 +445,10 @@
         <h2>What it costs</h2>
       </div>
       <p class="sec-sub">
-        Same one-time price bracket as the <em>no-AI</em> countertop units — while
-        delivering the camera + AI capability that otherwise only exists on a $899 Gardyn
-        with a ~$408/yr subscription.
+        About <b>~$266 of ordinary parts</b>, and the seeds cost pennies — no proprietary
+        pods to keep buying. That is the same one-time bracket as the <em>no-AI</em>
+        countertop units, while delivering the camera + AI capability that otherwise only
+        exists on a $899 Gardyn with a ~$408/yr subscription.
       </p>
 
       <div class="cost-grid">
@@ -484,7 +493,7 @@
       <div class="ongoing">
         <div><span class="big">~$35</span><small>/ year — rockwool, seeds, pH refills. Nutrient kit lasts years.</small></div>
         <div><span class="big">$3–7</span><small>/ month — Claude Haiku vision, ~24–48 photos a day.</small></div>
-        <div><span class="big">$0</span><small>/ month — subscription. There isn't one.</small></div>
+        <div><span class="big">$0</span><small>/ month — vendor subscription. No proprietary pods, ever.</small></div>
       </div>
 
       <div style="margin-top:52px">
@@ -593,10 +602,10 @@
       </div>
 
       <figure class="shot" style="margin-bottom:38px">
-        <img src="img/build-illustration.jpg"
-             alt="Field-guide illustration of the samogrow parts laid out: two full-spectrum T5 light strips above a green DWC tote of basil, parsley, cilantro and lettuce in net cups, a top-up water jug with a small pump, a Wi-Fi camera, an air pump feeding an air stone, and two smart plugs on a power strip."
+        <img src="img/hero-mock.jpg"
+             alt="Rendered mock-up of a finished samogrow build on a kitchen counter: a dark opaque tote of basil, parsley, cilantro and lettuce in net cups under two adjustable full-spectrum T5 strips, with a top-up water jug and pump, an air pump, a Wi-Fi camera, and two smart plugs."
              width="1536" height="1024" loading="lazy">
-        <figcaption>What you assemble — reservoir, light, top-up jug + pump, air pump, camera, and two smart plugs. No soldering, no wiring.</figcaption>
+        <figcaption><b>AI-generated mock-up</b> — what the finished build looks like once assembled (reservoir, light, top-up jug + pump, air pump, camera, two smart plugs). Not a photo of a shipped unit.</figcaption>
       </figure>
 
       <div class="steps">
@@ -622,6 +631,10 @@
           <p>Build the water reservoir, get the plugs and camera onto your Wi-Fi, point the software at them, and set it to run on its own and restart itself.</p>
         </div>
       </div>
+      <p class="safety-note">
+        <span class="safety-tag">Harvest</span>
+        Basil and mint come fast — first cuts about 3–4 weeks after transplant. Parsley is the patient one, months to full production. Lettuce depends on light and heat, and bolts when it gets too warm.
+      </p>
     </div>
   </section>
 
@@ -632,7 +645,7 @@
         <div class="foot-brand">samo<b>grow</b> 🌿</div>
         <p class="foot-note">
           An open, kit-style alternative to Auk, Click &amp; Grow, and Gardyn.
-          Deep Water Culture · commodity consumables · zero recurring fees.
+          Deep Water Culture · commodity consumables · no vendor subscription / no proprietary pods.
         </p>
       </div>
       <div class="foot-links">
