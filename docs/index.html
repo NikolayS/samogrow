@@ -1,0 +1,528 @@
+<meta charset="utf-8">
+<title>samogrow — DIY AI herb garden</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="samogrow — a DIY, AI-controlled indoor herb garden. Always-fresh parsley and greens for ~$266 all-in, no soldering, no subscription. The brain is Claude on your laptop; the garden is a dumb Wi-Fi appliance.">
+<style>
+  :root {
+    --paper:      #f2ede0;
+    --paper-2:    #ebe4d2;
+    --ink:        #1c2216;
+    --ink-soft:   #4a5340;
+    --ink-faint:  #7c8470;
+    --line:       #cdc4ac;
+    --line-soft:  #ddd5bf;
+    --leaf:       #35722f;
+    --leaf-br:    #4a9640;
+    --soil:       #a8632a;
+    --card:       #f7f3e8;
+    --shadow:     rgba(28,34,22,.10);
+    --grain-op:   .045;
+    --font-serif: Georgia, "Iowan Old Style", "Palatino Linotype", "Times New Roman", serif;
+    --font-mono:  ui-monospace, "SF Mono", "Menlo", "Consolas", "Liberation Mono", monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper:    #10140d;
+      --paper-2:  #161c11;
+      --ink:      #e9e7d7;
+      --ink-soft: #b3b6a2;
+      --ink-faint:#7f8571;
+      --line:     #2c3423;
+      --line-soft:#232a1b;
+      --leaf:     #6fb861;
+      --leaf-br:  #8fd67f;
+      --soil:     #d59a5c;
+      --card:     #171d10;
+      --shadow:   rgba(0,0,0,.35);
+      --grain-op: .06;
+    }
+  }
+  :root[data-theme="light"] {
+    --paper:#f2ede0; --paper-2:#ebe4d2; --ink:#1c2216; --ink-soft:#4a5340;
+    --ink-faint:#7c8470; --line:#cdc4ac; --line-soft:#ddd5bf; --leaf:#35722f;
+    --leaf-br:#4a9640; --soil:#a8632a; --card:#f7f3e8; --shadow:rgba(28,34,22,.10);
+    --grain-op:.045;
+  }
+  :root[data-theme="dark"] {
+    --paper:#10140d; --paper-2:#161c11; --ink:#e9e7d7; --ink-soft:#b3b6a2;
+    --ink-faint:#7f8571; --line:#2c3423; --line-soft:#232a1b; --leaf:#6fb861;
+    --leaf-br:#8fd67f; --soil:#d59a5c; --card:#171d10; --shadow:rgba(0,0,0,.35);
+    --grain-op:.06;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background-color: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-serif);
+    font-size: 18px;
+    line-height: 1.62;
+    overflow-x: hidden;
+  }
+  /* grain + subtle vertical botanical wash */
+  body::before {
+    content: "";
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: var(--grain-op);
+    mix-blend-mode: multiply;
+  }
+  @media (prefers-color-scheme: dark) { body::before { mix-blend-mode: screen; } }
+  :root[data-theme="dark"] body::before { mix-blend-mode: screen; }
+
+  ::selection { background: var(--leaf); color: var(--paper); }
+
+  .wrap { position: relative; z-index: 1; }
+  .col { max-width: 1080px; margin: 0 auto; padding: 0 28px; }
+
+  a { color: inherit; text-decoration-color: var(--line); text-underline-offset: 3px; }
+  a:hover { text-decoration-color: var(--leaf); }
+
+  .mono { font-family: var(--font-mono); }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: .72rem;
+    letter-spacing: .28em;
+    text-transform: uppercase;
+    color: var(--leaf);
+    font-weight: 600;
+  }
+
+  /* ---------- top bar ---------- */
+  .topbar {
+    position: sticky; top: 0; z-index: 20;
+    background: color-mix(in srgb, var(--paper) 88%, transparent);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line);
+  }
+  .topbar .col { display: flex; align-items: baseline; justify-content: space-between; height: 54px; }
+  .brand { font-family: var(--font-mono); font-weight: 600; letter-spacing: .04em; font-size: .95rem; }
+  .brand b { color: var(--leaf); }
+  .topnav { display: flex; gap: 22px; font-family: var(--font-mono); font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; }
+  .topnav a { text-decoration: none; color: var(--ink-soft); }
+  .topnav a:hover { color: var(--leaf); }
+  @media (max-width: 720px) { .topnav { display: none; } }
+
+  /* ---------- hero ---------- */
+  .hero { padding: 76px 0 40px; position: relative; }
+  .hero::after {
+    content: ""; position: absolute; right: -80px; top: 0; bottom: 0; width: 380px;
+    background:
+      radial-gradient(closest-side at 60% 35%, color-mix(in srgb, var(--leaf) 26%, transparent), transparent 70%);
+    filter: blur(10px); pointer-events: none; opacity: .8;
+  }
+  .hero-grid { display: grid; grid-template-columns: 1.55fr 1fr; gap: 40px; align-items: end; }
+  @media (max-width: 860px) { .hero-grid { grid-template-columns: 1fr; gap: 28px; } }
+
+  .hero h1 {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    font-size: clamp(3.2rem, 11vw, 7rem);
+    line-height: .9;
+    letter-spacing: -.02em;
+    margin: .28em 0 .18em;
+  }
+  .hero h1 .sprout { color: var(--leaf); font-style: italic; }
+  .hero .lede {
+    font-size: clamp(1.15rem, 2.4vw, 1.5rem);
+    line-height: 1.4; color: var(--ink-soft); max-width: 34ch; margin: 0;
+  }
+  .hero .lede b { color: var(--ink); font-weight: 400; font-style: italic; }
+
+  .spec-card {
+    border: 1px solid var(--line);
+    background: var(--card);
+    box-shadow: 0 18px 40px -28px var(--shadow);
+    padding: 22px 24px;
+  }
+  .spec-card .eyebrow { display: block; margin-bottom: 14px; }
+  .spec-row { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; border-bottom: 1px dotted var(--line); font-family: var(--font-mono); font-size: .82rem; }
+  .spec-row:last-child { border-bottom: 0; }
+  .spec-row span:first-child { color: var(--ink-soft); }
+  .spec-row span:last-child { color: var(--ink); text-align: right; }
+  .spec-row .hi { color: var(--leaf); font-weight: 600; }
+
+  .cta-row { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 34px; }
+  .btn {
+    font-family: var(--font-mono); font-size: .78rem; letter-spacing: .1em; text-transform: uppercase;
+    padding: 13px 22px; text-decoration: none; border: 1px solid var(--ink);
+    display: inline-flex; align-items: center; gap: 9px; transition: transform .12s ease, background .12s ease, color .12s ease;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn-solid { background: var(--leaf); border-color: var(--leaf); color: var(--paper); }
+  .btn-solid:hover { background: var(--leaf-br); border-color: var(--leaf-br); }
+  .btn-ghost { color: var(--ink); }
+  .btn-ghost:hover { background: var(--ink); color: var(--paper); }
+
+  /* ---------- section scaffolding ---------- */
+  section { padding: 60px 0; border-top: 1px solid var(--line); }
+  .sec-head { display: flex; align-items: baseline; gap: 16px; margin-bottom: 34px; }
+  .sec-num { font-family: var(--font-mono); font-size: .8rem; color: var(--leaf); font-weight: 600; }
+  .sec-head h2 { font-family: var(--font-serif); font-weight: 400; font-size: clamp(1.9rem, 4.4vw, 2.9rem); letter-spacing: -.015em; margin: 0; line-height: 1.05; }
+  .sec-sub { color: var(--ink-soft); max-width: 60ch; margin: -18px 0 34px; font-size: 1.05rem; }
+
+  /* ---------- architecture diagram ---------- */
+  .arch { display: grid; grid-template-columns: 1fr auto 1fr; gap: 0; align-items: center; }
+  @media (max-width: 820px) { .arch { grid-template-columns: 1fr; } }
+
+  .node {
+    border: 1px solid var(--line); background: var(--card); padding: 18px 20px;
+    box-shadow: 0 12px 30px -26px var(--shadow);
+  }
+  .node .eyebrow { font-size: .66rem; }
+  .node h3 { font-family: var(--font-serif); font-weight: 400; font-size: 1.3rem; margin: 8px 0 8px; }
+  .node ul { margin: 0; padding: 0; list-style: none; font-family: var(--font-mono); font-size: .76rem; line-height: 1.9; color: var(--ink-soft); }
+  .node ul li::before { content: "› "; color: var(--leaf); }
+
+  .brain-node { border-left: 3px solid var(--leaf); }
+  .cloud-node { border-top: 3px dashed var(--soil); margin-top: 18px; }
+
+  .appliances { display: grid; gap: 14px; }
+  .appliance { display: flex; gap: 14px; align-items: center; border: 1px solid var(--line); background: var(--card); padding: 14px 16px; }
+  .appliance .ico { font-size: 1.5rem; line-height: 1; flex-shrink: 0; width: 34px; text-align: center; }
+  .appliance b { font-family: var(--font-serif); font-weight: 400; font-size: 1.05rem; display: block; }
+  .appliance small { font-family: var(--font-mono); font-size: .68rem; color: var(--ink-faint); letter-spacing: .04em; }
+
+  .link-rail { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px 26px; gap: 10px; }
+  .link-rail .wifi { font-family: var(--font-mono); font-size: .64rem; letter-spacing: .2em; text-transform: uppercase; color: var(--soil); writing-mode: horizontal-tb; }
+  .link-rail .bar { width: 100%; height: 1px; background: repeating-linear-gradient(90deg, var(--leaf) 0 6px, transparent 6px 12px); }
+  @media (max-width: 820px) {
+    .link-rail { flex-direction: row; padding: 12px 0; }
+    .link-rail .bar { width: 1px; height: 30px; background: repeating-linear-gradient(0deg, var(--leaf) 0 6px, transparent 6px 12px); }
+    .cloud-node { margin-top: 14px; }
+  }
+  .arrow { font-family: var(--font-mono); font-size: .82rem; color: var(--ink-soft); text-align: center; margin-top: 26px; padding-top: 20px; border-top: 1px dotted var(--line); }
+  .arrow-flow b { color: var(--leaf); }
+
+  /* ---------- features ---------- */
+  .feat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); }
+  @media (max-width: 700px) { .feat-grid { grid-template-columns: 1fr; } }
+  .feat { background: var(--paper); padding: 26px 26px 30px; position: relative; }
+  .feat .fnum { font-family: var(--font-mono); font-size: .7rem; color: var(--leaf); letter-spacing: .1em; }
+  .feat h3 { font-family: var(--font-serif); font-weight: 400; font-size: 1.4rem; margin: 12px 0 8px; letter-spacing: -.01em; }
+  .feat p { margin: 0; color: var(--ink-soft); font-size: .98rem; line-height: 1.55; }
+  .feat .ico { position: absolute; top: 22px; right: 24px; font-size: 1.35rem; opacity: .85; }
+
+  /* ---------- cost ---------- */
+  .cost-grid { display: grid; grid-template-columns: 1fr 1.15fr; gap: 34px; align-items: start; }
+  @media (max-width: 820px) { .cost-grid { grid-template-columns: 1fr; gap: 28px; } }
+
+  .cost-stack { border: 1px solid var(--line); background: var(--card); }
+  .cost-stack .line { display: flex; justify-content: space-between; align-items: baseline; padding: 15px 20px; border-bottom: 1px solid var(--line-soft); font-family: var(--font-mono); font-size: .85rem; }
+  .cost-stack .line small { display: block; font-size: .68rem; color: var(--ink-faint); letter-spacing: .02em; margin-top: 3px; }
+  .cost-stack .line .amt { font-size: 1.05rem; color: var(--ink); white-space: nowrap; }
+  .cost-stack .total { background: var(--leaf); color: var(--paper); border-bottom: 0; padding: 18px 20px; }
+  .cost-stack .total .amt { color: var(--paper); font-size: 1.5rem; font-weight: 600; }
+  .cost-stack .total .lbl { letter-spacing: .12em; text-transform: uppercase; font-size: .74rem; }
+
+  .cmp { border-collapse: collapse; width: 100%; font-family: var(--font-mono); font-size: .8rem; }
+  .cmp caption { text-align: left; font-family: var(--font-mono); font-size: .7rem; letter-spacing: .16em; text-transform: uppercase; color: var(--leaf); margin-bottom: 14px; }
+  .cmp th, .cmp td { text-align: right; padding: 11px 10px; border-bottom: 1px solid var(--line-soft); }
+  .cmp th:first-child, .cmp td:first-child { text-align: left; }
+  .cmp thead th { color: var(--ink-faint); font-weight: 600; font-size: .68rem; letter-spacing: .08em; text-transform: uppercase; border-bottom: 1px solid var(--line); }
+  .cmp .us td { color: var(--ink); font-weight: 600; }
+  .cmp .us { background: color-mix(in srgb, var(--leaf) 12%, transparent); }
+  .cmp .us td:first-child { color: var(--leaf); }
+  .cmp .yes { color: var(--leaf); }
+  .cmp .no { color: var(--ink-faint); }
+  .cmp-note { font-size: .95rem; color: var(--ink-soft); margin-top: 18px; line-height: 1.55; }
+  .cmp-note b { color: var(--ink); font-style: italic; font-weight: 400; }
+  .cmp-scroll { overflow-x: auto; }
+
+  .ongoing { display: flex; gap: 24px; flex-wrap: wrap; margin-top: 26px; font-family: var(--font-mono); font-size: .82rem; }
+  .ongoing div { flex: 1; min-width: 150px; border-top: 2px solid var(--soil); padding-top: 10px; }
+  .ongoing .big { font-family: var(--font-serif); font-size: 1.7rem; color: var(--ink); display: block; }
+  .ongoing small { color: var(--ink-faint); }
+
+  /* ---------- getting started ---------- */
+  .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; }
+  @media (max-width: 860px) { .steps { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 520px) { .steps { grid-template-columns: 1fr; } }
+  .step { padding: 26px 22px 30px; border-right: 1px solid var(--line); border-top: 3px solid var(--line); position: relative; }
+  .step:last-child { border-right: 0; }
+  @media (max-width: 860px) { .step:nth-child(2) { border-right: 0; } }
+  .step .n { font-family: var(--font-mono); font-size: .72rem; color: var(--leaf); letter-spacing: .12em; }
+  .step h3 { font-family: var(--font-serif); font-weight: 400; font-size: 1.25rem; margin: 12px 0 8px; line-height: 1.1; }
+  .step p { margin: 0; font-size: .92rem; color: var(--ink-soft); line-height: 1.5; }
+  .step.crit { border-top-color: var(--soil); }
+  .step .flag { font-family: var(--font-mono); font-size: .6rem; letter-spacing: .14em; text-transform: uppercase; color: var(--soil); display: inline-block; margin-top: 12px; border: 1px solid var(--soil); padding: 3px 7px; }
+
+  /* ---------- footer ---------- */
+  footer { border-top: 1px solid var(--line); padding: 50px 0 70px; }
+  .foot-grid { display: flex; justify-content: space-between; align-items: flex-start; gap: 30px; flex-wrap: wrap; }
+  .foot-links { display: flex; flex-direction: column; gap: 10px; font-family: var(--font-mono); font-size: .82rem; }
+  .foot-links a { text-decoration: none; color: var(--ink-soft); display: inline-flex; gap: 10px; align-items: center; }
+  .foot-links a:hover { color: var(--leaf); }
+  .foot-links a .arr { color: var(--leaf); }
+  .foot-note { font-family: var(--font-mono); font-size: .72rem; color: var(--ink-faint); max-width: 40ch; line-height: 1.7; letter-spacing: .02em; }
+  .foot-brand { font-family: var(--font-serif); font-size: 2rem; }
+  .foot-brand b { color: var(--leaf); }
+
+  /* reveal on load */
+  .fade { opacity: 0; transform: translateY(14px); animation: rise .8s cubic-bezier(.2,.7,.2,1) forwards; }
+  @keyframes rise { to { opacity: 1; transform: none; } }
+  .d1{animation-delay:.05s}.d2{animation-delay:.15s}.d3{animation-delay:.28s}.d4{animation-delay:.4s}
+  @media (prefers-reduced-motion: reduce) { .fade { animation: none; opacity: 1; transform: none; } }
+</style>
+
+<div class="wrap">
+  <div class="topbar">
+    <div class="col">
+      <div class="brand">samo<b>grow</b> 🌿</div>
+      <nav class="topnav">
+        <a href="#how">Architecture</a>
+        <a href="#cost">Cost</a>
+        <a href="#features">Features</a>
+        <a href="#start">Get started</a>
+        <a href="https://github.com/NikolayS/samogrow">GitHub ↗</a>
+      </nav>
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="col hero-grid">
+      <div>
+        <div class="eyebrow fade d1">DIY · AI-controlled · indoor herb garden</div>
+        <h1 class="fade d2">samo<span class="sprout">grow</span></h1>
+        <p class="lede fade d3">
+          Always-fresh parsley &amp; greens on your countertop. The brain is
+          <b>Claude on your laptop</b>; the garden is a <b>dumb Wi-Fi appliance</b>.
+          No soldering, no Raspberry&nbsp;Pi, no subscription.
+        </p>
+        <div class="cta-row fade d4">
+          <a class="btn btn-solid" href="https://github.com/NikolayS/samogrow/blob/main/spec/SPEC.md">Read the spec →</a>
+          <a class="btn btn-ghost" href="https://github.com/NikolayS/samogrow">View on GitHub</a>
+        </div>
+      </div>
+      <aside class="spec-card fade d4">
+        <span class="eyebrow">At a glance</span>
+        <div class="spec-row"><span>All-in hardware</span><span class="hi">~$266</span></div>
+        <div class="spec-row"><span>Appliance side</span><span>$68</span></div>
+        <div class="spec-row"><span>Grow side</span><span>$198</span></div>
+        <div class="spec-row"><span>Consumables</span><span>~$35 / yr</span></div>
+        <div class="spec-row"><span>Claude API</span><span>$3–7 / mo</span></div>
+        <div class="spec-row"><span>Subscription</span><span class="hi">none</span></div>
+        <div class="spec-row"><span>Soldering</span><span class="hi">none</span></div>
+      </aside>
+    </div>
+  </header>
+
+  <!-- HOW IT WORKS -->
+  <section id="how">
+    <div class="col">
+      <div class="sec-head">
+        <span class="sec-num">01</span>
+        <h2>How it works</h2>
+      </div>
+      <p class="sec-sub">
+        Three network appliances on your home Wi-Fi. A small TypeScript/Bun service on any
+        always-on machine pulls a camera snapshot, asks Claude what to do, and toggles two
+        smart plugs — all reported through Telegram.
+      </p>
+
+      <div class="arch">
+        <!-- brain -->
+        <div>
+          <div class="node brain-node">
+            <span class="eyebrow">The brain — your laptop / VM</span>
+            <h3>samogrow service</h3>
+            <ul>
+              <li>Bun + TypeScript</li>
+              <li>Claude vision → JSON verdict</li>
+              <li>Toggles light &amp; pump plugs</li>
+              <li>grammY Telegram bot</li>
+            </ul>
+          </div>
+          <div class="node cloud-node">
+            <span class="eyebrow" style="color:var(--soil)">Cloud</span>
+            <h3>Claude API · Telegram</h3>
+            <ul>
+              <li>Haiku vision, structured JSON</li>
+              <li>Commands, alerts, daily digest</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- link -->
+        <div class="link-rail">
+          <span class="wifi">Wi-Fi</span>
+          <span class="bar"></span>
+          <span class="wifi" style="color:var(--leaf)">LAN</span>
+        </div>
+
+        <!-- appliances -->
+        <div class="appliances">
+          <div class="appliance">
+            <span class="ico">💡</span>
+            <span><b>Grow light</b><small>Kasa smart plug · scheduled</small></span>
+          </div>
+          <div class="appliance">
+            <span class="ico">💧</span>
+            <span><b>Top-up pump</b><small>Kasa smart plug · hard timer caps</small></span>
+          </div>
+          <div class="appliance">
+            <span class="ico">📷</span>
+            <span><b>Wi-Fi camera</b><small>Tapo RTSP · local snapshot</small></span>
+          </div>
+          <div class="appliance">
+            <span class="ico">🫧</span>
+            <span><b>Air pump</b><small>dumb outlet · always on 24/7</small></span>
+          </div>
+        </div>
+      </div>
+      <p class="arrow-flow arrow mono">
+        snapshot → <b>Claude</b> → JSON verdict → <b>toggle plugs</b> (within safety caps) → Telegram
+      </p>
+    </div>
+  </section>
+
+  <!-- COST -->
+  <section id="cost">
+    <div class="col">
+      <div class="sec-head">
+        <span class="sec-num">02</span>
+        <h2>What it costs</h2>
+      </div>
+      <p class="sec-sub">
+        Same one-time price bracket as the <em>no-AI</em> countertop units — while
+        delivering the camera + AI capability that otherwise only exists on a $899 Gardyn
+        with a ~$408/yr subscription.
+      </p>
+
+      <div class="cost-grid">
+        <div class="cost-stack">
+          <div class="line">
+            <span>Network appliances<small>2 smart plugs · camera · pump</small></span>
+            <span class="amt">$68</span>
+          </div>
+          <div class="line">
+            <span>Grow side<small>DWC reservoir · light · nutrient · seeds</small></span>
+            <span class="amt">$198</span>
+          </div>
+          <div class="line total">
+            <span class="lbl">Core build total</span>
+            <span class="amt">~$266</span>
+          </div>
+        </div>
+
+        <div>
+          <div class="cmp-scroll">
+            <table class="cmp">
+              <caption>2-year total cost of ownership</caption>
+              <thead>
+                <tr><th>System</th><th>Hardware</th><th>2-yr extras</th><th>AI</th><th>2-yr total</th></tr>
+              </thead>
+              <tbody>
+                <tr class="us"><td>samogrow</td><td>$266</td><td>$190</td><td class="yes">yes</td><td>~$456</td></tr>
+                <tr><td>Gardyn Home 4</td><td>$899</td><td>$816</td><td class="yes">yes</td><td>~$1,715</td></tr>
+                <tr><td>Click &amp; Grow SG9</td><td>$200</td><td>$400</td><td class="no">no</td><td>~$600</td></tr>
+                <tr><td>Auk Mini 2</td><td>$229</td><td>$0</td><td class="no">no</td><td>~$229</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="cmp-note">
+            <b>The pop:</b> ~$456 all-in over two years — roughly <b>$1,260 cheaper than Gardyn</b>,
+            the only commercial unit with real camera + AI, and below even a Click &amp; Grow's
+            2-year cost. Open, commodity consumables mean no vendor lock-in.
+          </p>
+        </div>
+      </div>
+
+      <div class="ongoing">
+        <div><span class="big">~$35</span><small>/ year — rockwool, seeds, pH refills. Nutrient kit lasts years.</small></div>
+        <div><span class="big">$3–7</span><small>/ month — Claude Haiku vision, ~24–48 photos a day.</small></div>
+        <div><span class="big">$0</span><small>/ month — subscription. There isn't one.</small></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section id="features">
+    <div class="col">
+      <div class="sec-head">
+        <span class="sec-num">03</span>
+        <h2>Key features</h2>
+      </div>
+      <div class="feat-grid">
+        <div class="feat">
+          <span class="ico">🔍</span>
+          <span class="fnum">F.01</span>
+          <h3>AI photo analysis on a schedule</h3>
+          <p>During light hours the brain pulls an RTSP still and asks Claude for a structured verdict — water, light hours, health notes, confidence — every couple of hours.</p>
+        </div>
+        <div class="feat">
+          <span class="ico">🚰</span>
+          <span class="fnum">F.02</span>
+          <h3>Auto top-up with hard safety caps</h3>
+          <p>The AI can request water; it cannot override the cap. Per-run and per-day pump limits are the flood backstop, backed by a bounded 1–2 gal jug.</p>
+        </div>
+        <div class="feat">
+          <span class="ico">📨</span>
+          <span class="fnum">F.03</span>
+          <h3>Telegram control &amp; daily digest</h3>
+          <p>A daily photo + health note, inline “Water now / Report” buttons, and ad-hoc questions from your phone. The bot obeys only your chat ID.</p>
+        </div>
+        <div class="feat">
+          <span class="ico">🧪</span>
+          <span class="fnum">F.04</span>
+          <h3>Mock mode — build software first</h3>
+          <p><span class="mono">SAMOGROW_MOCK=1</span> runs the full loop with no plugs or camera. Validate the Claude call, JSON parsing, and Telegram push before any hardware arrives.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GETTING STARTED -->
+  <section id="start">
+    <div class="col">
+      <div class="sec-head">
+        <span class="sec-num">04</span>
+        <h2>Getting started — day one</h2>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <span class="n">STEP 01</span>
+          <h3>Order the parts</h3>
+          <p>Place the full core-build order — two Kasa plugs, a Tapo camera, a pump, and the grow side. All standard consumer gear.</p>
+        </div>
+        <div class="step crit">
+          <span class="n">STEP 02</span>
+          <h3>Germinate parsley immediately</h3>
+          <p>Soak seeds 12–24 h, then sow into moist rockwool the moment they arrive. Parsley takes 10–28 days — everything else waits on it.</p>
+          <span class="flag">Critical path</span>
+        </div>
+        <div class="step">
+          <span class="n">STEP 03</span>
+          <h3>Run the software in mock mode</h3>
+          <p>Install Bun, grab a bot token from BotFather, and run the loop end-to-end against a sample photo — no devices required yet.</p>
+        </div>
+        <div class="step">
+          <span class="n">STEP 04</span>
+          <h3>Plug in when parts arrive</h3>
+          <p>Build the DWC reservoir, onboard the plugs + camera, reserve their IPs, wire up config, and install the service under launchd/systemd.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="col foot-grid">
+      <div>
+        <div class="foot-brand">samo<b>grow</b> 🌿</div>
+        <p class="foot-note">
+          An open, kit-style alternative to Auk, Click &amp; Grow, and Gardyn.
+          Deep Water Culture · commodity consumables · zero recurring fees.
+        </p>
+      </div>
+      <div class="foot-links">
+        <a href="https://github.com/NikolayS/samogrow"><span class="arr">→</span> GitHub repository</a>
+        <a href="https://github.com/NikolayS/samogrow/blob/main/spec/SPEC.md"><span class="arr">→</span> SPEC.md — full build spec</a>
+        <a href="https://github.com/NikolayS/samogrow/blob/main/spec/SHOPPING-LIST.md"><span class="arr">→</span> SHOPPING-LIST.md — copy-paste order list</a>
+      </div>
+    </div>
+  </footer>
+</div>
