@@ -1,0 +1,184 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 580" width="1400" height="580" role="img" aria-label="Career trajectory meme in four flat field-guide panels: junior engineer hunched at a laptop with coffee cups, senior engineer tired at two monitors, staff engineer presenting a whiteboard of boxes and arrows, and finally a serene farmer cutting basil from a samogrow tote garden. Caption: a good head start.">
+  <defs>
+    <style>
+      .h { font-family: Georgia, "Times New Roman", serif; }
+      .m { font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; }
+      .ink   { fill: none; stroke: #1c2216; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+      .inkT  { fill: none; stroke: #1c2216; stroke-width: 1.5; stroke-linejoin: round; stroke-linecap: round; }
+      .scene { fill: #eef1e4; stroke: #cdc4ac; stroke-width: 1.6; }
+    </style>
+    <marker id="arw" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#a8632a"/>
+    </marker>
+  </defs>
+
+  <!-- cream card -->
+  <rect x="8" y="8" width="1384" height="564" rx="20" fill="#f7f3e8" stroke="#cdc4ac" stroke-width="1.5"/>
+
+  <!-- eyebrow -->
+  <text class="m" x="700" y="44" font-size="15" letter-spacing="7" fill="#35722f" text-anchor="middle" font-weight="600">CAREER  TRAJECTORY</text>
+
+  <!-- ============================ PANEL 1 — junior engineer ============================ -->
+  <g>
+    <rect class="scene" x="50" y="70" width="280" height="310" rx="12"/>
+    <!-- desk -->
+    <rect x="70" y="300" width="240" height="10" rx="3" fill="#c98a3c" stroke="#1c2216" stroke-width="1.6"/>
+    <!-- figure (seated) -->
+    <path d="M124,300 L124,262 a26,26 0 0 1 52,0 L176,300 Z" fill="#a8632a" stroke="#1c2216" stroke-width="1.6"/>
+    <rect x="144" y="234" width="12" height="18" fill="#e7c9a0" stroke="#1c2216" stroke-width="1.4"/>
+    <circle cx="150" cy="216" r="21" fill="#e7c9a0" stroke="#1c2216" stroke-width="1.6"/>
+    <path d="M129,212 a21,21 0 0 1 42,-2 q-10,-8 -21,-6 q-12,-1 -21,8 Z" fill="#2a2018"/>
+    <circle cx="143" cy="218" r="2" fill="#1c2216"/><circle cx="157" cy="218" r="2" fill="#1c2216"/>
+    <path class="inkT" d="M145,228 q5,3 10,0"/>
+    <!-- arm to laptop -->
+    <path class="ink" d="M172,268 q30,2 34,18"/>
+    <!-- laptop -->
+    <path d="M190,298 l64,0 l-8,-8 l-48,0 Z" fill="#8a9382" stroke="#1c2216" stroke-width="1.5"/>
+    <rect x="200" y="258" width="44" height="32" rx="2" fill="#3a4a2c" stroke="#1c2216" stroke-width="1.6"/>
+    <rect x="205" y="263" width="34" height="22" rx="1" fill="#5a6b52"/>
+    <!-- coffee cups -->
+    <g>
+      <rect x="82" y="288" width="15" height="14" rx="2" fill="#f7f3e8" stroke="#1c2216" stroke-width="1.4"/>
+      <path class="inkT" d="M97,291 a4,4 0 0 1 0,8"/>
+      <path class="inkT" d="M86,284 q-2,-4 2,-7 M92,284 q-2,-4 2,-7"/>
+      <rect x="104" y="290" width="13" height="12" rx="2" fill="#f7f3e8" stroke="#1c2216" stroke-width="1.4"/>
+      <path class="inkT" d="M117,292 a3.5,3.5 0 0 1 0,7"/>
+      <rect x="256" y="290" width="13" height="12" rx="2" fill="#f7f3e8" stroke="#1c2216" stroke-width="1.4"/>
+      <path class="inkT" d="M269,292 a3.5,3.5 0 0 1 0,7"/>
+      <path class="inkT" d="M260,286 q-2,-4 2,-7"/>
+    </g>
+    <text class="m" x="190" y="408" font-size="19" fill="#1c2216" text-anchor="middle" font-weight="600">junior engineer</text>
+  </g>
+
+  <!-- arrow 1->2 -->
+  <path d="M348,225 H384" stroke="#a8632a" stroke-width="3" fill="none" marker-end="url(#arw)"/>
+
+  <!-- ============================ PANEL 2 — senior engineer ============================ -->
+  <g>
+    <rect class="scene" x="390" y="70" width="280" height="310" rx="12"/>
+    <rect x="410" y="300" width="240" height="10" rx="3" fill="#c98a3c" stroke="#1c2216" stroke-width="1.6"/>
+    <!-- figure -->
+    <path d="M504,300 L504,262 a26,26 0 0 1 52,0 L556,300 Z" fill="#a8632a" stroke="#1c2216" stroke-width="1.6"/>
+    <rect x="524" y="234" width="12" height="18" fill="#e7c9a0" stroke="#1c2216" stroke-width="1.4"/>
+    <circle cx="530" cy="216" r="21" fill="#e7c9a0" stroke="#1c2216" stroke-width="1.6"/>
+    <path d="M509,212 a21,21 0 0 1 42,-2 q-10,-8 -21,-6 q-12,-1 -21,8 Z" fill="#2a2018"/>
+    <!-- tired: droopy open eyes, heavy bags, flat mouth -->
+    <path class="inkT" d="M519,214 q4,-2 8,0 M533,214 q4,-2 8,0"/>
+    <circle cx="523" cy="218" r="2" fill="#1c2216"/><circle cx="537" cy="218" r="2" fill="#1c2216"/>
+    <path class="inkT" d="M519,224 q4,2 8,0 M533,224 q4,2 8,0" stroke="#7c8470"/>
+    <path class="inkT" d="M525,231 q5,-1 10,0"/>
+    <!-- two monitors -->
+    <rect x="452" y="252" width="52" height="36" rx="2" fill="#3a4a2c" stroke="#1c2216" stroke-width="1.6"/>
+    <rect x="472" y="288" width="12" height="8" fill="#7c8470" stroke="#1c2216" stroke-width="1.3"/>
+    <rect x="556" y="252" width="52" height="36" rx="2" fill="#3a4a2c" stroke="#1c2216" stroke-width="1.6"/>
+    <rect x="576" y="288" width="12" height="8" fill="#7c8470" stroke="#1c2216" stroke-width="1.3"/>
+    <!-- extra coffee cups (more) -->
+    <g>
+      <rect x="418" y="288" width="15" height="14" rx="2" fill="#f7f3e8" stroke="#1c2216" stroke-width="1.4"/>
+      <path class="inkT" d="M433,291 a4,4 0 0 1 0,8"/>
+      <path class="inkT" d="M422,284 q-2,-4 2,-7 M428,284 q-2,-4 2,-7"/>
+      <rect x="438" y="290" width="12" height="12" rx="2" fill="#f7f3e8" stroke="#1c2216" stroke-width="1.4"/>
+      <rect x="622" y="290" width="13" height="12" rx="2" fill="#f7f3e8" stroke="#1c2216" stroke-width="1.4"/>
+      <path class="inkT" d="M635,292 a3.5,3.5 0 0 1 0,7"/>
+      <rect x="636" y="292" width="12" height="10" rx="2" fill="#f7f3e8" stroke="#1c2216" stroke-width="1.4"/>
+      <path class="inkT" d="M627,286 q-2,-4 2,-7"/>
+    </g>
+    <text class="m" x="530" y="408" font-size="19" fill="#1c2216" text-anchor="middle" font-weight="600">senior engineer</text>
+  </g>
+
+  <!-- arrow 2->3 -->
+  <path d="M688,225 H724" stroke="#a8632a" stroke-width="3" fill="none" marker-end="url(#arw)"/>
+
+  <!-- ============================ PANEL 3 — staff engineer ============================ -->
+  <g>
+    <rect class="scene" x="730" y="70" width="280" height="310" rx="12"/>
+    <!-- whiteboard -->
+    <rect x="748" y="96" width="192" height="126" rx="4" fill="#f7f3e8" stroke="#1c2216" stroke-width="1.8"/>
+    <!-- boxes + arrows scribble -->
+    <g>
+      <rect x="762" y="116" width="34" height="20" rx="2" fill="#dfe6d2" stroke="#35722f" stroke-width="1.4"/>
+      <rect x="828" y="112" width="34" height="20" rx="2" fill="#f0dcc2" stroke="#a8632a" stroke-width="1.4"/>
+      <rect x="890" y="120" width="34" height="20" rx="2" fill="#dfe6d2" stroke="#35722f" stroke-width="1.4"/>
+      <rect x="792" y="168" width="34" height="20" rx="2" fill="#f0dcc2" stroke="#a8632a" stroke-width="1.4"/>
+      <rect x="862" y="172" width="34" height="20" rx="2" fill="#dfe6d2" stroke="#35722f" stroke-width="1.4"/>
+      <path class="inkT" d="M796,126 H828" stroke="#4a5340" marker-end="url(#arw)"/>
+      <path class="inkT" d="M862,124 H890" stroke="#4a5340" marker-end="url(#arw)"/>
+      <path class="inkT" d="M810,136 V168" stroke="#4a5340" marker-end="url(#arw)"/>
+      <path class="inkT" d="M845,132 Q846,150 872,172" stroke="#4a5340" marker-end="url(#arw)"/>
+      <path class="inkT" d="M907,140 Q900,160 896,172" stroke="#4a5340" marker-end="url(#arw)"/>
+    </g>
+    <!-- presenter (standing), pointing at board -->
+    <circle cx="905" cy="250" r="20" fill="#e7c9a0" stroke="#1c2216" stroke-width="1.6"/>
+    <path d="M886,246 a20,20 0 0 1 40,-2 q-10,-7 -20,-5 q-11,-1 -20,7 Z" fill="#2a2018"/>
+    <circle cx="899" cy="251" r="2" fill="#1c2216"/><circle cx="912" cy="251" r="2" fill="#1c2216"/>
+    <path class="inkT" d="M900,262 q6,3 12,-1"/>
+    <path d="M888,344 L888,286 a17,17 0 0 1 34,0 L922,344 Z" fill="#a8632a" stroke="#1c2216" stroke-width="1.6"/>
+    <!-- legs -->
+    <rect x="891" y="344" width="12" height="26" rx="2" fill="#4a5340" stroke="#1c2216" stroke-width="1.4"/>
+    <rect x="907" y="344" width="12" height="26" rx="2" fill="#4a5340" stroke="#1c2216" stroke-width="1.4"/>
+    <!-- pointing arm toward board -->
+    <path class="ink" d="M890,296 Q862,286 846,250"/>
+    <!-- a listener silhouette (meeting) -->
+    <circle cx="770" cy="300" r="14" fill="#cdd6bd" stroke="#1c2216" stroke-width="1.4"/>
+    <path d="M754,344 L754,318 a16,16 0 0 1 32,0 L786,344 Z" fill="#cdd6bd" stroke="#1c2216" stroke-width="1.4"/>
+    <text class="m" x="870" y="408" font-size="19" fill="#1c2216" text-anchor="middle" font-weight="600">staff engineer</text>
+  </g>
+
+  <!-- arrow 3->4 -->
+  <path d="M1028,225 H1064" stroke="#a8632a" stroke-width="3" fill="none" marker-end="url(#arw)"/>
+
+  <!-- ============================ PANEL 4 — farmer (our build) ============================ -->
+  <g>
+    <rect class="scene" x="1070" y="70" width="280" height="310" rx="12"/>
+    <!-- calm sun rays -->
+    <g stroke="#c98a3c" stroke-width="2" stroke-linecap="round" opacity="0.7">
+      <line x1="1300" y1="104" x2="1300" y2="92"/>
+      <line x1="1284" y1="110" x2="1277" y2="101"/>
+      <line x1="1316" y1="110" x2="1323" y2="101"/>
+    </g>
+    <circle cx="1300" cy="118" r="12" fill="none" stroke="#c98a3c" stroke-width="2"/>
+    <!-- samogrow tote garden -->
+    <!-- light frame uprights + bar -->
+    <path class="inkT" d="M1150,300 V150 M1300,300 V150 M1150,150 H1300" stroke="#7c8470"/>
+    <rect x="1160" y="150" width="130" height="10" rx="3" fill="#f7f3e8" stroke="#1c2216" stroke-width="1.4"/>
+    <g stroke="#c98a3c" stroke-width="1.4" stroke-dasharray="3 4" opacity="0.8">
+      <line x1="1180" y1="162" x2="1180" y2="182"/><line x1="1210" y1="162" x2="1210" y2="182"/>
+      <line x1="1240" y1="162" x2="1240" y2="182"/><line x1="1270" y1="162" x2="1270" y2="182"/>
+    </g>
+    <!-- tote -->
+    <rect x="1156" y="252" width="150" height="76" rx="8" fill="#dfe6d2" stroke="#1c2216" stroke-width="1.8"/>
+    <rect x="1156" y="252" width="150" height="16" rx="4" fill="#cdd6bd" stroke="#1c2216" stroke-width="1.4"/>
+    <!-- net pots + basil -->
+    <g>
+      <circle cx="1178" cy="260" r="6" fill="#b3742f"/><circle cx="1210" cy="260" r="6" fill="#b3742f"/>
+      <circle cx="1242" cy="260" r="6" fill="#b3742f"/><circle cx="1274" cy="260" r="6" fill="#b3742f"/>
+      <g fill="#35722f" stroke="#2a5a26" stroke-width="1">
+        <circle cx="1174" cy="246" r="7"/><circle cx="1183" cy="244" r="7"/><circle cx="1179" cy="238" r="6"/>
+        <circle cx="1206" cy="246" r="7"/><circle cx="1215" cy="244" r="7"/><circle cx="1211" cy="237" r="6"/>
+        <circle cx="1238" cy="246" r="7"/><circle cx="1247" cy="244" r="7"/><circle cx="1243" cy="238" r="6"/>
+        <circle cx="1270" cy="247" r="6"/><circle cx="1278" cy="245" r="6"/>
+      </g>
+    </g>
+    <!-- farmer figure (serene), left of tote, holding scissors -->
+    <circle cx="1118" cy="212" r="21" fill="#e7c9a0" stroke="#1c2216" stroke-width="1.6"/>
+    <path d="M1097,208 a21,21 0 0 1 42,-2 q-10,-8 -21,-6 q-12,-1 -21,8 Z" fill="#2a2018"/>
+    <circle cx="1111" cy="213" r="2" fill="#1c2216"/><circle cx="1125" cy="213" r="2" fill="#1c2216"/>
+    <path class="inkT" d="M1111,224 q7,6 14,0"/>
+    <!-- apron torso -->
+    <path d="M1092,330 L1092,258 a26,26 0 0 1 52,0 L1144,330 Z" fill="#a8632a" stroke="#1c2216" stroke-width="1.6"/>
+    <path d="M1108,262 h20 v40 a10,10 0 0 1 -20,0 Z" fill="#7c8470" opacity="0.5"/>
+    <!-- legs -->
+    <rect x="1102" y="330" width="14" height="28" rx="2" fill="#4a5340" stroke="#1c2216" stroke-width="1.4"/>
+    <rect x="1120" y="330" width="14" height="28" rx="2" fill="#4a5340" stroke="#1c2216" stroke-width="1.4"/>
+    <!-- arm + scissors reaching to basil -->
+    <path class="ink" d="M1140,270 Q1160,258 1170,250"/>
+    <path class="inkT" d="M1170,250 l10,-5 M1170,250 l9,3"/>
+    <circle cx="1181" cy="243" r="3" fill="none" stroke="#1c2216" stroke-width="1.4"/>
+    <circle cx="1181" cy="252" r="3" fill="none" stroke="#1c2216" stroke-width="1.4"/>
+    <text class="m" x="1210" y="408" font-size="19" fill="#1c2216" text-anchor="middle" font-weight="600">farmer</text>
+  </g>
+
+  <!-- ============================ bottom caption strip ============================ -->
+  <rect x="50" y="452" width="1300" height="86" rx="14" fill="#35722f"/>
+  <text class="h" x="700" y="508" font-size="38" font-style="italic" font-weight="700" fill="#f4efe2" text-anchor="middle">&#8220;a good head start.&#8221;</text>
+</svg>
