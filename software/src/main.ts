@@ -7,6 +7,7 @@ import { Db } from "./state.ts";
 import { Brain } from "./brain.ts";
 import { Controller } from "./controller.ts";
 import { GardenBot } from "./bot.ts";
+import { applyOverrides, loadOverrides, type BaseCaps } from "./overrides.ts";
 
 function log(msg: string): void {
   console.log(`[${new Date().toISOString()}] [main] ${msg}`);
@@ -14,6 +15,14 @@ function log(msg: string): void {
 
 async function main(): Promise<void> {
   const cfg = loadConfig();
+  // Capture the config.json pump caps as the hard ceiling BEFORE merging any
+  // remote overrides — overrides can only lower them, never raise.
+  const baseCaps: BaseCaps = {
+    maxSecondsPerRun: cfg.pump.maxSecondsPerRun,
+    maxSecondsPerDay: cfg.pump.maxSecondsPerDay,
+  };
+  const overrides = loadOverrides(cfg.dataDir);
+  applyOverrides(cfg, overrides, baseCaps); // effective config (caps clamped) before hardware is built
   log(`starting samogrow (mock=${cfg.mockHardware}, model=${cfg.brain.model})`);
 
   const hw = new Hardware(cfg);
@@ -22,7 +31,7 @@ async function main(): Promise<void> {
   await hw.pump.ensureOff();
   const db = new Db(cfg);
   const brain = new Brain(cfg);
-  const controller = new Controller(cfg, hw, db, brain);
+  const controller = new Controller(cfg, hw, db, brain, baseCaps, overrides);
 
   let bot: GardenBot | null = null;
   if (cfg.telegramToken) {

@@ -1,5 +1,5 @@
 import { expect, test, describe } from "bun:test";
-import { parseVerdict, MAX_WATER_ML } from "./brain.ts";
+import { parseVerdict, parseDeepReview, MAX_WATER_ML } from "./brain.ts";
 
 describe("parseVerdict", () => {
   test("passes a well-formed verdict through", () => {
@@ -57,5 +57,60 @@ describe("parseVerdict", () => {
       healthScore: 7,
       waterTopUpMl: 40,
     });
+  });
+
+  test("defaults plants to an empty array", () => {
+    expect(parseVerdict({}).plants).toEqual([]);
+    expect(parseVerdict({ plants: "nope" }).plants).toEqual([]);
+  });
+
+  test("reservoirLevel accepts ok/low and defaults unknown", () => {
+    expect(parseVerdict({ reservoirLevel: "low" }).reservoirLevel).toBe("low");
+    expect(parseVerdict({ reservoirLevel: "ok" }).reservoirLevel).toBe("ok");
+    expect(parseVerdict({}).reservoirLevel).toBe("unknown");
+    expect(parseVerdict({ reservoirLevel: "flooded" }).reservoirLevel).toBe("unknown");
+  });
+
+  test("validates and clamps per-pot entries", () => {
+    const v = parseVerdict({
+      plants: [
+        { pot: 1.7, species: "basil", stage: "vegetative", health: 8, note: "lush" },
+        { pot: -2, species: "  ", stage: "sideways", health: 42, note: 5 },
+      ],
+    });
+    expect(v.plants[0]).toEqual({ pot: 2, species: "basil", stage: "vegetative", health: 8, note: "lush" });
+    // invalid stage falls back, empty species -> null, health clamps, note coerced to ""
+    expect(v.plants[1]).toEqual({ pot: 0, species: null, stage: "seedling", health: 10, note: "" });
+  });
+});
+
+describe("parseDeepReview", () => {
+  test("keeps well-formed recommendations and their config mapping", () => {
+    const r = parseDeepReview({
+      digest: "Looking healthy.",
+      recommendations: [
+        { text: "Raise light to 6am", configKey: "light.onHour", configValue: 6 },
+        { text: "Thin the cilantro" },
+      ],
+    });
+    expect(r.digest).toBe("Looking healthy.");
+    expect(r.recommendations).toHaveLength(2);
+    expect(r.recommendations[0]).toMatchObject({ configKey: "light.onHour", configValue: 6 });
+    expect(r.recommendations[1]!.configKey).toBeUndefined();
+  });
+
+  test("drops empty recs and non-whitelisted config keys", () => {
+    const r = parseDeepReview({
+      recommendations: [
+        { text: "" },
+        { text: "tweak", configKey: "pump.mlPerSecond", configValue: 1 },
+      ],
+    });
+    expect(r.recommendations).toHaveLength(1);
+    expect(r.recommendations[0]!.configKey).toBeUndefined(); // non-settable key stripped
+  });
+
+  test("survives malformed input", () => {
+    expect(parseDeepReview("nope")).toEqual({ digest: "", recommendations: [] });
   });
 });

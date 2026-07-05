@@ -10,7 +10,18 @@
 import type { Config } from "./config.ts";
 import type { Hardware } from "./hardware.ts";
 import type { Db } from "./state.ts";
-import type { Brain, Verdict } from "./brain.ts";
+import type { Brain, Verdict, DeepReview, DeepRecommendation } from "./brain.ts";
+import { dailyBuckets, describeDelta, lightOnHoursByDay, sparkline, weekOverWeek } from "./trends.ts";
+import {
+  applyOverrides,
+  effectiveValue,
+  saveOverrides,
+  SETTABLE_KEYS,
+  validateOverride,
+  type BaseCaps,
+  type OverrideMap,
+  type SetResult,
+} from "./overrides.ts";
 
 // --- pure schedule helpers (unit tested) ---------------------------------
 
@@ -49,9 +60,19 @@ export interface ReportPayload {
   text: string;
   photo?: string;
 }
+export interface DeepReviewPayload {
+  digest: string;
+  recommendations: DeepRecommendation[];
+  photo?: string;
+}
+export interface PumpAlertPayload {
+  reason: string;
+}
 export interface ControllerCallbacks {
   onAlert?: (p: AlertPayload) => void;
   onReport?: (p: ReportPayload) => void;
+  onDeepReview?: (p: DeepReviewPayload) => void;
+  onPumpAlert?: (p: PumpAlertPayload) => void;
 }
 
 export interface Status {
@@ -59,19 +80,27 @@ export interface Status {
   override: LightOverride | null;
   pumpBudgetUsedSeconds: number;
   pumpBudgetTotalSeconds: number;
+  pumpLocked: boolean;
+  pumpLockReason: string | null;
   uptimeSeconds: number;
   lastVerdict: Verdict | null;
   lastAnalysisTs: string | null;
 }
 
+// Minimum run length for a power sample to be trusted (short runs may sample
+// before the motor is at full draw).
+const PUMP_HEALTH_MIN_SECONDS = 2;
+
 export class Controller {
   private override: LightOverride | null = null;
   private lastAnalysisMs = 0;
   private lastReportDay = "";
+  private lastDeepReviewDay = "";
   private timer: ReturnType<typeof setInterval> | null = null;
   private readonly startedAt = Date.now();
   private callbacks: ControllerCallbacks = {};
   private analyzing = false;
+  private reviewing = false;
   private firstTick = true;
 
   constructor(
@@ -79,6 +108,10 @@ export class Controller {
     private readonly hw: Hardware,
     private readonly db: Db,
     private readonly brain: Brain,
+    // config.json pump caps (the ceiling caps may never be raised above) and the
+    // persisted overrides map, for remote /set tuning.
+    private readonly baseCaps: BaseCaps = { maxSecondsPerRun: cfg.pump.maxSecondsPerRun, maxSecondsPerDay: cfg.pump.maxSecondsPerDay },
+    private readonly overrides: OverrideMap = {},
   ) {}
 
   setCallbacks(cb: ControllerCallbacks): void {
@@ -86,8 +119,18 @@ export class Controller {
   }
 
   start(): void {
+    this.restoreLockout();
     void this.tick();
     this.timer = setInterval(() => void this.tick(), 60_000);
+  }
+
+  // Re-apply a persisted pump lockout after a restart (safety survives crashes).
+  restoreLockout(): void {
+    const lk = this.db.getPumpLock();
+    if (lk?.locked && !this.hw.pump.isLocked) {
+      this.hw.pump.lock(lk.reason);
+      this.log(`pump lockout restored: ${lk.reason}`);
+    }
   }
 
   stop(): void {
@@ -97,6 +140,14 @@ export class Controller {
 
   private log(msg: string): void {
     console.log(`[${new Date().toISOString()}] [ctrl] ${msg}`);
+  }
+
+  // Switch the light and log the transition as an event (feeds the light-hours
+  // trend). No-op when already in the desired state.
+  private async applyLight(on: boolean): Promise<void> {
+    if (on === this.hw.light.isOn) return;
+    on ? await this.hw.light.on() : await this.hw.light.off();
+    this.db.logEvent("light", { state: on ? "on" : "off" });
   }
 
   private async tick(): Promise<void> {
@@ -118,7 +169,7 @@ export class Controller {
       }
       if (desired !== this.hw.light.isOn) {
         this.log(`light schedule -> ${desired ? "ON" : "OFF"} (hour ${now.getHours()})`);
-        desired ? await this.hw.light.on() : await this.hw.light.off();
+        await this.applyLight(desired);
       }
 
       // Analysis cadence, during light hours only.
@@ -133,6 +184,16 @@ export class Controller {
       if (now.getHours() === this.cfg.brain.dailyReportHour && day !== this.lastReportDay) {
         this.lastReportDay = day;
         this.sendDailyReport();
+      }
+
+      // Weekly deep review (configurable day + hour).
+      if (
+        now.getDay() === this.cfg.brain.deepReviewDay &&
+        now.getHours() === this.cfg.brain.deepReviewHour &&
+        day !== this.lastDeepReviewDay
+      ) {
+        this.lastDeepReviewDay = day;
+        void this.runDeepReview();
       }
     } catch (e) {
       this.log(`tick error: ${e}`);
@@ -158,13 +219,21 @@ export class Controller {
         lightOn: this.hw.light.isOn,
         recentEvents: this.db.recentEvents(10).map((e) => ({ ts: e.ts, kind: e.kind })),
       });
+      // A low reservoir sight-gauge reading is itself alert-worthy and pump-health
+      // context — fold it into the alert.
+      if (verdict.reservoirLevel === "low" && !verdict.alert) {
+        verdict.alert = true;
+        verdict.alertReason = `${verdict.alertReason ? verdict.alertReason + "; " : ""}reservoir level low`;
+      }
+
       this.db.saveAnalysis({ photoPaths: photos, model: this.cfg.brain.model, verdict, raw });
-      this.db.logEvent("analysis", { healthScore: verdict.healthScore, alert: verdict.alert });
+      this.db.logEvent("analysis", { healthScore: verdict.healthScore, alert: verdict.alert, reservoir: verdict.reservoirLevel });
       this.log(`analysis: health ${verdict.healthScore}/10 — ${verdict.summary}`);
 
       if (verdict.waterTopUpMl > 0) {
         const ml = await this.hw.pump.waterMl(verdict.waterTopUpMl);
         if (ml > 0) this.db.logEvent("water", { requestedMl: verdict.waterTopUpMl, actualMl: ml, source: "brain" });
+        this.evalPumpHealth("brain");
       }
 
       if (verdict.alert) {
@@ -181,21 +250,76 @@ export class Controller {
     }
   }
 
+  // --- pump health ---------------------------------------------------------
+
+  // Inspect the power draw of the run that just finished. Logs watts for trends
+  // and, if the draw is below the health floor (dead / unplugged / running dry),
+  // locks the pump against automatic runs and alerts the owner.
+  private evalPumpHealth(source: string): void {
+    const watts = this.hw.pump.lastRunWatts;
+    const secs = this.hw.pump.lastRunSeconds;
+    if (watts === null || secs < PUMP_HEALTH_MIN_SECONDS) return; // unmeasured / too short to trust
+    this.db.logEvent("pumpRun", { watts, seconds: secs, source });
+    if (watts < this.cfg.pump.minWatts && !this.hw.pump.isLocked) {
+      const reason = `pump drew ${watts.toFixed(1)}W (< ${this.cfg.pump.minWatts}W) — dead, unplugged, or running dry`;
+      this.hw.pump.lock(reason);
+      this.db.setPumpLock(true, reason);
+      this.db.logEvent("pumpLock", { reason, watts });
+      this.log(`pump UNHEALTHY: ${reason}`);
+      this.callbacks.onPumpAlert?.({ reason });
+    }
+  }
+
+  // Clear a pump lockout (owner acknowledged the fix).
+  enablePump(): void {
+    this.hw.pump.unlock();
+    this.db.setPumpLock(false, "");
+    this.db.logEvent("pumpUnlock", {});
+    this.log("pump lockout cleared");
+  }
+
+  pumpLocked(): boolean {
+    return this.hw.pump.isLocked;
+  }
+
+  // Per-pot one-liner from a verdict, e.g. "Pots: #1 basil vegetative 8/10 | ...".
+  private plantsLine(v: Verdict): string {
+    if (!v.plants.length) return "";
+    return "Pots: " + v.plants.map((p) => `#${p.pot} ${p.species ?? "?"} ${p.stage} ${p.health}/10`).join(" | ");
+  }
+
+  // 14-day sparklines (health + water) and light-hours, with week-over-week
+  // deltas in words. Shared by the daily report and the deep-review context.
+  private trendSummary(days = 14): string {
+    const health = this.db.healthSeries(days).map((h) => ({ ts: h.ts, value: h.score }));
+    const water = this.db.waterSeries(days).map((w) => ({ ts: w.ts, value: w.ml }));
+    const light = this.db.lightSeries(days);
+    const healthDaily = dailyBuckets(health, days, "avg");
+    const waterDaily = dailyBuckets(water, days, "sum");
+    const lightHours = lightOnHoursByDay(light, days);
+    const watts = this.db.wattsSeries(days).map((w) => ({ ts: w.ts, value: w.watts }));
+    const lines = [
+      `Health ${sparkline(healthDaily)} — ${describeDelta("health", weekOverWeek(health, "avg"))}`,
+      `Water  ${sparkline(waterDaily)} — ${describeDelta("water", weekOverWeek(water, "sum"), { unit: "ml", digits: 0 })}`,
+      `Light  ${sparkline(lightHours)} (hours/day)`,
+    ];
+    if (watts.length) lines.push(`Pump W ${sparkline(dailyBuckets(watts, days, "avg"))} (draw per run)`);
+    return lines.join("\n");
+  }
+
   private buildReportText(): string {
     const rows = this.db.recentAnalyses(10);
     if (rows.length === 0) return "No analyses recorded yet.";
     const latest = rows[0]!;
-    const trend = rows
-      .slice()
-      .reverse()
-      .map((r) => r.verdict.healthScore)
-      .join(" → ");
+    const pots = this.plantsLine(latest.verdict);
     const lines = [
       `🌿 Daily report`,
       `Health: ${latest.verdict.healthScore}/10`,
       latest.verdict.summary,
       latest.verdict.issues.length ? `Issues: ${latest.verdict.issues.join("; ")}` : "No issues noted.",
-      `Health trend (older → newer): ${trend}`,
+      ...(pots ? [pots] : []),
+      "",
+      this.trendSummary(14),
       `Pump budget today: ${this.hw.pump.budgetUsedSeconds}s / ${this.hw.pump.budgetTotalSeconds}s`,
     ];
     return lines.join("\n");
@@ -218,6 +342,8 @@ export class Controller {
       override: this.override,
       pumpBudgetUsedSeconds: this.hw.pump.budgetUsedSeconds,
       pumpBudgetTotalSeconds: this.hw.pump.budgetTotalSeconds,
+      pumpLocked: this.hw.pump.isLocked,
+      pumpLockReason: this.hw.pump.isLocked ? this.hw.pump.lockoutReason : null,
       uptimeSeconds: Math.floor((Date.now() - this.startedAt) / 1000),
       lastVerdict: last?.verdict ?? null,
       lastAnalysisTs: last?.ts ?? null,
@@ -231,9 +357,12 @@ export class Controller {
     return photos;
   }
 
-  async waterNow(ml: number): Promise<number> {
-    const actual = await this.hw.pump.waterMl(ml);
-    this.db.logEvent("water", { requestedMl: ml, actualMl: actual, source: "manual" });
+  // Manual watering. `override` bypasses a pump lockout (explicit owner intent);
+  // the per-run/per-day caps still apply.
+  async waterNow(ml: number, opts: { override?: boolean } = {}): Promise<number> {
+    const actual = await this.hw.pump.waterMl(ml, opts.override ?? false);
+    this.db.logEvent("water", { requestedMl: ml, actualMl: actual, source: opts.override ? "manual-override" : "manual" });
+    if (actual > 0) this.evalPumpHealth(opts.override ? "manual-override" : "manual");
     return actual;
   }
 
@@ -247,7 +376,7 @@ export class Controller {
     }
     // Apply immediately.
     const desired = resolveLightState(new Date(), this.cfg.light.onHour, this.cfg.light.offHour, this.override);
-    if (desired !== this.hw.light.isOn) desired ? await this.hw.light.on() : await this.hw.light.off();
+    await this.applyLight(desired);
   }
 
   async analyzeNow(): Promise<Verdict | null> {
@@ -261,5 +390,121 @@ export class Controller {
 
   reportText(): string {
     return this.buildReportText();
+  }
+
+  // --- weekly deep review --------------------------------------------------
+
+  private buildDeepContext(): string {
+    const j = this.db.journal(7);
+    const notes = j
+      .slice(-8)
+      .map((r) => {
+        const v = r.verdict;
+        const pots = v.plants
+          .map((p) => `#${p.pot} ${p.species ?? "?"} ${p.stage} ${p.health}/10${p.note ? ` (${p.note})` : ""}`)
+          .join("; ");
+        return `${r.ts}: health ${v.healthScore}/10 — ${v.summary}${pots ? ` | ${pots}` : ""}`;
+      })
+      .join("\n");
+    return [
+      `Weekly deep review. ${j.length} analyses in the last 7 days.`,
+      this.trendSummary(14),
+      `Current settings: ${SETTABLE_KEYS.map((k) => `${k}=${effectiveValue(this.cfg, k)}`).join(", ")}`,
+      `Recent per-analysis notes:\n${notes || "(none)"}`,
+    ].join("\n\n");
+  }
+
+  async runDeepReview(): Promise<DeepReview | null> {
+    if (this.reviewing) return null;
+    this.reviewing = true;
+    try {
+      const { listCameraFrames, sampleFrames } = await import("./timelapse.ts");
+      const frames = sampleFrames(await listCameraFrames(this.cfg, 0, 7), 10);
+      const review = await this.brain.deepReview(frames, this.buildDeepContext());
+      this.db.logEvent("deepReview", { recommendations: review.recommendations.length });
+      this.log(`deep review: ${review.recommendations.length} recommendation(s)`);
+      this.callbacks.onDeepReview?.({
+        digest: review.digest,
+        recommendations: review.recommendations,
+        photo: frames[frames.length - 1],
+      });
+      return review;
+    } catch (e) {
+      this.log(`deep review error: ${e}`);
+      this.db.logEvent("error", { where: "deepReview", message: String(e) });
+      return null;
+    } finally {
+      this.reviewing = false;
+    }
+  }
+
+  // --- remote tuning -------------------------------------------------------
+
+  // Validate, persist, and hot-apply a settings change. Pump caps are re-applied
+  // to the running Pump so a lowered cap takes effect immediately.
+  setSetting(key: string, value: string | number): SetResult {
+    const res = validateOverride(key, value, this.baseCaps);
+    if (!res.ok || res.key === undefined || res.value === undefined) return res;
+    this.overrides[res.key] = res.value;
+    saveOverrides(this.cfg.dataDir, this.overrides);
+    applyOverrides(this.cfg, this.overrides, this.baseCaps);
+    this.hw.pump.setCaps(this.cfg.pump.maxSecondsPerRun, this.cfg.pump.maxSecondsPerDay);
+    this.db.logEvent("set", { key: res.key, value: res.value });
+    this.log(`set ${res.key} = ${res.value}`);
+    return res;
+  }
+
+  effectiveConfig(): { key: string; value: string | number }[] {
+    return SETTABLE_KEYS.map((k) => ({ key: k, value: effectiveValue(this.cfg, k) }));
+  }
+
+  // --- conversation-facing read text (implements ConvController) -----------
+
+  statusText(): string {
+    const s = this.status();
+    const lines = [
+      `Light: ${s.lightOn ? "ON" : "OFF"}${s.override ? ` (override ${s.override.mode})` : ""}`,
+      `Pump budget: ${s.pumpBudgetUsedSeconds}s / ${s.pumpBudgetTotalSeconds}s today`,
+      ...(s.pumpLocked ? [`⚠️ Pump LOCKED: ${s.pumpLockReason}`] : []),
+      `Uptime: ${s.uptimeSeconds}s`,
+      s.lastVerdict
+        ? `Last check (${s.lastAnalysisTs}): health ${s.lastVerdict.healthScore}/10 — ${s.lastVerdict.summary}`
+        : "No analysis yet.",
+    ];
+    if (s.lastVerdict) {
+      const p = this.plantsLine(s.lastVerdict);
+      if (p) lines.push(p);
+    }
+    return lines.join("\n");
+  }
+
+  lastAnalysisText(): string {
+    const v = this.lastAnalysis();
+    if (!v) return "No analysis yet.";
+    const lines = [
+      `Health ${v.healthScore}/10 — ${v.summary}`,
+      v.issues.length ? `Issues: ${v.issues.join("; ")}` : "No issues noted.",
+    ];
+    const p = this.plantsLine(v);
+    if (p) lines.push(p);
+    if (v.waterTopUpMl) lines.push(`Suggested top-up: ${v.waterTopUpMl} ml`);
+    if (v.lightAdjustment !== "none") lines.push(`Light: ${v.lightAdjustment}`);
+    return lines.join("\n");
+  }
+
+  historyText(days: number): string {
+    const water = this.db.waterSeries(days);
+    const totalMl = water.reduce((a, w) => a + w.ml, 0);
+    const analyses = this.db.healthSeries(days).length;
+    return [
+      `Last ${days} day(s): ${analyses} analyses, ${water.length} waterings totalling ${totalMl.toFixed(0)} ml.`,
+      this.trendSummary(Math.max(days, 14)),
+    ].join("\n");
+  }
+
+  configText(): string {
+    return this.effectiveConfig()
+      .map((c) => `${c.key} = ${c.value}`)
+      .join("\n");
   }
 }

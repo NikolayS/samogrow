@@ -10,7 +10,8 @@
     "plugType": "kasa",
     "maxSecondsPerRun": 30,
     "maxSecondsPerDay": 180,
-    "mlPerSecond": 15
+    "mlPerSecond": 15,
+    "minWatts": 2
   },
   "cameras": {
     "devices": [
@@ -22,8 +23,11 @@
   },
   "brain": {
     "model": "claude-haiku-4-5-20251001",
+    "deepModel": "claude-sonnet-5",
     "analysisIntervalMinutes": 120,
     "dailyReportHour": 9,
+    "deepReviewDay": 0,
+    "deepReviewHour": 10,
     "maxTokens": 1024
   },
   "mockHardware": false,

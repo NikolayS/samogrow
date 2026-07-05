@@ -23,6 +23,7 @@ export interface PumpConfig {
   maxSecondsPerRun: number;
   maxSecondsPerDay: number; // hard safety cap: never flood the reservoir
   mlPerSecond: number; // calibrate with a measuring cup
+  minWatts: number; // health floor: a run drawing less means dead/unplugged/dry
 }
 
 export interface CameraConfig {
@@ -36,8 +37,11 @@ export interface CameraConfig {
 
 export interface BrainConfig {
   model: string;
+  deepModel: string; // stronger model for the weekly deep review
   analysisIntervalMinutes: number; // photo + AI check cadence during light hours
   dailyReportHour: number;
+  deepReviewDay: number; // 0=Sun..6=Sat; day the weekly deep review runs
+  deepReviewHour: number; // local hour the weekly deep review runs
   maxTokens: number;
 }
 
@@ -66,6 +70,7 @@ const DEFAULTS = {
     maxSecondsPerRun: 30,
     maxSecondsPerDay: 180,
     mlPerSecond: 15,
+    minWatts: 2,
   } as PumpConfig,
   cameras: {
     devices: ["rtsp://user:pass@192.168.1.50:554/stream1"],
@@ -74,8 +79,11 @@ const DEFAULTS = {
   } as CameraConfig,
   brain: {
     model: "claude-haiku-4-5-20251001",
+    deepModel: "claude-sonnet-5",
     analysisIntervalMinutes: 120,
     dailyReportHour: 9,
+    deepReviewDay: 0, // Sunday
+    deepReviewHour: 10,
     maxTokens: 1024,
   } as BrainConfig,
 };

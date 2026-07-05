@@ -28,10 +28,24 @@ export interface Switch {
   readonly isOn: boolean;
   on(): Promise<void>;
   off(): Promise<void>;
+  // Instantaneous power draw in watts, or null if the plug has no energy meter
+  // / the reading failed. Used for pump-health monitoring (KP125M emeter).
+  readPowerWatts?(): Promise<number | null>;
 }
 
-class MockSwitch implements Switch {
+// Parse a Kasa/KLAP emeter get_realtime response into watts. Newer firmware
+// reports milliwatts (power_mw); older reports watts (power).
+export function emeterWatts(resp: unknown): number | null {
+  const rt = (resp as { emeter?: { get_realtime?: Record<string, unknown> } } | null)?.emeter?.get_realtime;
+  if (!rt) return null;
+  if (typeof rt.power_mw === "number") return rt.power_mw / 1000;
+  if (typeof rt.power === "number") return rt.power;
+  return null;
+}
+
+export class MockSwitch implements Switch {
   isOn = false;
+  watts = 5; // fake healthy draw; tests set this low to exercise the lockout
   constructor(private readonly name: string) {}
   async on(): Promise<void> {
     this.isOn = true;
@@ -40,6 +54,9 @@ class MockSwitch implements Switch {
   async off(): Promise<void> {
     this.isOn = false;
     log(`[mock] ${this.name} OFF`);
+  }
+  async readPowerWatts(): Promise<number | null> {
+    return this.isOn ? this.watts : 0;
   }
 }
 
@@ -121,6 +138,13 @@ class KasaSwitch implements Switch {
     await this.setRelay(0);
     this.isOn = false;
     log(`${this.name} (kasa ${this.host}) OFF`);
+  }
+  async readPowerWatts(): Promise<number | null> {
+    try {
+      return emeterWatts(await kasaSend(this.host, { emeter: { get_realtime: {} } }));
+    } catch {
+      return null;
+    }
   }
 }
 
@@ -314,6 +338,14 @@ class KlapSwitch implements Switch {
     this.isOn = false;
     log(`${this.name} (klap ${this.host}) OFF`);
   }
+  async readPowerWatts(): Promise<number | null> {
+    // Kasa-branded KLAP devices (KP125M) still expose the legacy emeter module.
+    try {
+      return emeterWatts(await this.conn.request({ emeter: { get_realtime: {} } }));
+    } catch {
+      return null;
+    }
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -373,6 +405,9 @@ class AutoDetectSwitch implements Switch {
   async off(): Promise<void> {
     await (await this.resolve()).off();
   }
+  async readPowerWatts(): Promise<number | null> {
+    return (await (await this.resolve()).readPowerWatts?.()) ?? null;
+  }
 }
 
 // Build a plug switch for the given transport. Omitted plugType auto-detects
@@ -402,17 +437,59 @@ export function clampPumpSeconds(requested: number, b: PumpBudget): number {
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+// Delay after turn-on before sampling power draw, and the minimum run length for
+// a sample to be trustworthy (short runs may sample before the motor spins up).
+const HEALTH_SAMPLE_MS = 2000;
+
 export class Pump {
   private usedToday = 0;
   private day = new Date().toDateString();
   private running = false;
+  // Lockout lives here in the hardware layer alongside the caps, so NO caller
+  // (bot, brain, conversation tool, /set) can bypass it without an explicit
+  // override. The controller decides when to lock; the Pump enforces it.
+  private locked = false;
+  private lockReason = "";
+  private lastWatts: number | null = null;
+  private lastSeconds = 0;
 
   constructor(
     private readonly sw: Switch,
-    private readonly maxSecondsPerRun: number,
-    private readonly maxSecondsPerDay: number,
+    private maxSecondsPerRun: number,
+    private maxSecondsPerDay: number,
     private readonly mlPerSecond: number,
   ) {}
+
+  lock(reason: string): void {
+    this.locked = true;
+    this.lockReason = reason;
+  }
+  unlock(): void {
+    this.locked = false;
+    this.lockReason = "";
+  }
+  get isLocked(): boolean {
+    return this.locked;
+  }
+  get lockoutReason(): string {
+    return this.lockReason;
+  }
+  // Power draw sampled during the most recent run (null if unavailable) and its
+  // length in seconds — read by the controller to judge pump health.
+  get lastRunWatts(): number | null {
+    return this.lastWatts;
+  }
+  get lastRunSeconds(): number {
+    return this.lastSeconds;
+  }
+
+  // Hot-adjust the caps at runtime (remote /set tuning). The clamp in
+  // clampPumpSeconds always reads the current caps, so a lowered cap takes
+  // effect on the very next run regardless of the caller.
+  setCaps(maxSecondsPerRun: number, maxSecondsPerDay: number): void {
+    if (maxSecondsPerRun > 0) this.maxSecondsPerRun = maxSecondsPerRun;
+    if (maxSecondsPerDay > 0) this.maxSecondsPerDay = maxSecondsPerDay;
+  }
 
   private rollDay(): void {
     const today = new Date().toDateString();
@@ -444,9 +521,17 @@ export class Pump {
   }
 
   // Run the pump for a clamped number of seconds; always turns off (twice) in
-  // finally. Returns the number of seconds actually run.
-  async timedPumpRun(seconds: number): Promise<number> {
+  // finally. Returns the number of seconds actually run. When locked, refuses
+  // unless `override` is set (the explicit manual-water path). Samples power
+  // draw ~2s in for health monitoring.
+  async timedPumpRun(seconds: number, override = false): Promise<number> {
     this.rollDay();
+    this.lastWatts = null;
+    this.lastSeconds = 0;
+    if (this.locked && !override) {
+      log(`pump LOCKED (${this.lockReason}); refusing run`);
+      return 0;
+    }
     if (this.running) {
       log("pump already running; ignoring concurrent request");
       return 0;
@@ -463,19 +548,23 @@ export class Pump {
     this.running = true;
     try {
       await this.sw.on();
-      await sleep(secs * 1000);
+      const sampleAt = Math.min(HEALTH_SAMPLE_MS, Math.max(0, secs * 1000 - 50));
+      await sleep(sampleAt);
+      this.lastWatts = (await this.sw.readPowerWatts?.()) ?? null;
+      await sleep(secs * 1000 - sampleAt);
     } finally {
       await this.ensureOff();
       this.running = false;
       this.usedToday += secs;
+      this.lastSeconds = secs;
     }
-    log(`pump ran ${secs}s (budget used ${this.usedToday}/${this.maxSecondsPerDay}s)`);
+    log(`pump ran ${secs}s (budget used ${this.usedToday}/${this.maxSecondsPerDay}s${this.lastWatts !== null ? `, ${this.lastWatts.toFixed(1)}W` : ""})`);
     return secs;
   }
 
   // Convert millilitres to a timed run. Returns millilitres actually dispensed.
-  async waterMl(ml: number): Promise<number> {
-    const secs = await this.timedPumpRun(ml / this.mlPerSecond);
+  async waterMl(ml: number, override = false): Promise<number> {
+    const secs = await this.timedPumpRun(ml / this.mlPerSecond, override);
     return secs * this.mlPerSecond;
   }
 }
