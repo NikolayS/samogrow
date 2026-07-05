@@ -159,7 +159,7 @@ Prices are USD, mid-2026. Items marked **(est.)** are market-typical estimates f
 the research files (Amazon renders prices in JavaScript, so live figures weren't
 machine-readable); expect ±30% from coupons/sellers. Sources:
 `research/02-hydroponics-parts.md` (grow side) and `research/03-electronics.md`
-(smart plugs, camera).
+(smart plugs, camera). Direct purchase links: see `spec/SHOPPING-LIST.md`.
 
 Two tiers: **Core build** is a complete working AI garden. **Nice to have** is the
 second-tier upgrades the software anticipates.
