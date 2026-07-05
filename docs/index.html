@@ -201,11 +201,7 @@
   .safety-tag { font-family: var(--font-mono); font-size: .62rem; letter-spacing: .18em; text-transform: uppercase; color: var(--leaf); border: 1px solid var(--leaf); padding: 2px 8px; margin-right: 10px; white-space: nowrap; }
 
   /* one-wink meme interstitial */
-  .meme-strip { border-top: 1px solid var(--line); background: var(--paper-2); }
-  .meme-strip .col { padding-top: 17px; padding-bottom: 17px; }
-  .meme-line { font-family: var(--font-mono); font-size: .82rem; letter-spacing: .04em; color: var(--ink-soft); text-align: center; margin: 0; }
-  .meme-line b { color: var(--leaf); font-weight: 600; }
-  .meme-cite { font-family: var(--font-mono); font-size: .61rem; letter-spacing: .01em; color: var(--ink-faint); text-align: center; margin: 9px 0 0; line-height: 1.5; }
+  .meme-cite { font-family: var(--font-mono); font-size: .61rem; letter-spacing: .01em; color: var(--ink-faint); text-align: center; margin: 14px 0 0; line-height: 1.5; }
   .meme-cite a { color: var(--ink-faint); text-decoration-color: var(--line); }
   .meme-cite a:hover { color: var(--leaf); }
 
@@ -387,19 +383,6 @@
       </div>
     </div>
   </header>
-
-  <!-- one-wink meme strip -->
-  <div class="meme-strip">
-    <div class="col">
-      <p class="meme-line">junior → senior → staff engineer → <b>farmer</b>&nbsp;&nbsp;//&nbsp;&nbsp;a good head start.</p>
-      <p class="meme-cite">
-        A real genre — see the Microsoft engineer whose title became "goose farmer"
-        (<a href="https://www.threads.com/@nixcraft/post/C6Zvz6cyg9I" target="_blank" rel="noopener">@nixcraft</a>),
-        and <a href="https://engineerdog.com/2023/05/29/why-do-so-many-programmers-want-to-be-farmers-how-to-build-a-corrugated-steel-garden-box/" target="_blank" rel="noopener">EngineerDog</a>
-        on why: gardening is "the exact opposite of coding."
-      </p>
-    </div>
-  </div>
 
   <!-- HOW IT WORKS -->
   <section id="how">
@@ -648,6 +631,23 @@
           <p>A daily photo + health note, inline “Water now / Report” buttons, and ad-hoc questions from your phone. The bot obeys only your chat ID.</p>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- one-wink meme: career-path illustration -->
+  <section class="meme-panel">
+    <div class="col">
+      <figure class="shot">
+        <img src="img/career-path.svg"
+             alt="Field-guide career path in four panels: a junior engineer at a laptop, then a senior engineer, then a staff engineer buried in dashboards, and finally the same person tending a samogrow herb garden — captioned 'a good head start.'"
+             width="1400" height="580" loading="lazy">
+      </figure>
+      <p class="meme-cite">
+        A real genre — see the Microsoft engineer whose title became "goose farmer"
+        (<a href="https://www.threads.com/@nixcraft/post/C6Zvz6cyg9I" target="_blank" rel="noopener">@nixcraft</a>),
+        and <a href="https://engineerdog.com/2023/05/29/why-do-so-many-programmers-want-to-be-farmers-how-to-build-a-corrugated-steel-garden-box/" target="_blank" rel="noopener">EngineerDog</a>
+        on why: gardening is "the exact opposite of coding."
+      </p>
     </div>
   </section>
 
