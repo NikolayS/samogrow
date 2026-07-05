@@ -6,6 +6,7 @@
       .node { fill: #fbf7ec; stroke: #3a4a2c; stroke-width: 1.6; }
       .wPow { stroke: #a8632a; stroke-width: 2.4; fill: none; stroke-linejoin: round; }
       .wNet { stroke: #35722f; stroke-width: 2.4; fill: none; stroke-linejoin: round; }
+      .wCmd { stroke: #35722f; stroke-width: 3.4; fill: none; stroke-linejoin: round; }
       .wTube{ stroke: #6f8465; stroke-width: 2.2; fill: none; stroke-dasharray: 5 4; stroke-linecap: round; }
       .wView{ stroke: #4a9640; stroke-width: 2;   fill: none; stroke-dasharray: 1.5 5; stroke-linecap: round; }
     </style>
@@ -28,20 +29,27 @@
   <text class="m" x="168" y="36" font-size="11" letter-spacing="2.5" fill="#7c8470">SYSTEM  SCHEMATIC</text>
   <line x1="30" y1="44" x2="690" y2="44" stroke="#ddd5bf" stroke-width="1"/>
 
-  <!-- ============ BRAIN ============ -->
-  <rect class="node" x="28" y="56" width="300" height="126" rx="10"/>
+  <!-- ============ BRAIN (the AI controller) ============ -->
+  <rect class="node" x="28" y="56" width="300" height="126" rx="10" stroke="#a8632a" stroke-width="2.2"/>
   <text class="m" x="46" y="80" font-size="9" letter-spacing="1.8" fill="#35722f">ALWAYS-ON MACHINE</text>
   <text class="h" x="44" y="104" font-size="17" font-weight="700" fill="#1c2216">The brain</text>
   <text class="m" x="46" y="134" font-size="10.5" fill="#4a5340">Bun service on your laptop or VM</text>
   <text class="m" x="46" y="156" font-size="10.5" fill="#4a5340">reads photos, decides, switches plugs</text>
+  <!-- AI badge: an AI is in control here -->
+  <g>
+    <rect x="248" y="65" width="66" height="24" rx="12" fill="#a8632a"/>
+    <path d="M266,70 L267.4,75.3 L272.7,77 L267.4,78.7 L266,84 L264.6,78.7 L259.3,77 L264.6,75.3 Z" fill="#f4efe2"/>
+    <text class="m" x="279" y="81" font-size="11.5" font-weight="700" letter-spacing="1.5" fill="#f4efe2">AI</text>
+  </g>
 
   <!-- ============ CLOUD ============ -->
   <g>
     <!-- Claude API pill -->
-    <rect class="node" x="520" y="60" width="170" height="48" rx="24"/>
+    <rect class="node" x="520" y="60" width="170" height="48" rx="24" fill="#f3ead6" stroke="#a8632a" stroke-width="2.4"/>
     <path d="M545,90 a10,10 0 0 1 4,-19 a13,13 0 0 1 24,3 a9,9 0 0 1 -2,16 z" fill="#eef3e6" stroke="#3a4a2c" stroke-width="1.3"/>
-    <text class="h" x="588" y="82" font-size="13" font-weight="700" fill="#1c2216">Claude API</text>
-    <text class="m" x="588" y="97" font-size="8.5" fill="#7c8470">reads each photo</text>
+    <path d="M556,66 L557.2,70 L561.2,71.2 L557.2,72.4 L556,76.4 L554.8,72.4 L550.8,71.2 L554.8,70 Z" fill="#a8632a"/>
+    <text class="h" x="590" y="82" font-size="13" font-weight="700" fill="#1c2216">Claude AI</text>
+    <text class="m" x="590" y="97" font-size="8.5" font-weight="700" fill="#a8632a">the decision-maker</text>
     <!-- Telegram pill -->
     <rect class="node" x="520" y="126" width="170" height="48" rx="24"/>
     <path d="M545,156 a10,10 0 0 1 4,-19 a13,13 0 0 1 24,3 a9,9 0 0 1 -2,16 z" fill="#eef3e6" stroke="#3a4a2c" stroke-width="1.3"/>
@@ -66,10 +74,10 @@
   <circle cx="362" cy="244" r="1.7" fill="#35722f"/>
   <text class="m" x="336" y="258" font-size="9.5" fill="#4a5340">Wi-Fi router</text>
 
-  <!-- brain -> router trunk (home LAN) -->
-  <path class="wNet" d="M178,182 V202 H362 V224" marker-end="url(#aNet)"/>
-  <rect x="228" y="194" width="118" height="16" rx="3" fill="#f4efe2"/>
-  <text class="m" x="287" y="206" font-size="9" fill="#35722f" text-anchor="middle">home Wi-Fi / LAN</text>
+  <!-- brain -> router trunk: the AI's command path -->
+  <path class="wCmd" d="M178,182 V202 H362 V224" marker-end="url(#aNet)"/>
+  <rect x="222" y="194" width="130" height="16" rx="3" fill="#f4efe2"/>
+  <text class="m" x="287" y="206" font-size="9" font-weight="700" fill="#a8632a" text-anchor="middle">decides &amp; commands</text>
 
   <!-- ============ LEGEND ============ -->
   <g>
@@ -89,15 +97,16 @@
   <rect x="28" y="296" width="664" height="248" rx="12" fill="#eef2e4" stroke="#4a9640" stroke-width="1.4" stroke-dasharray="7 5"/>
   <text class="m" x="44" y="318" font-size="9.5" letter-spacing="1.5" fill="#35722f">GARDEN DEVICE — Wi-Fi appliances on the home LAN</text>
 
-  <!-- LAN bus from router down into the panel -->
-  <path class="wNet" d="M362,264 V284"/>
-  <path class="wNet" d="M150,284 H560"/>
+  <!-- LAN bus from router down into the panel (command backbone) -->
+  <path class="wCmd" d="M362,264 V284"/>
+  <path class="wCmd" d="M150,284 H560"/>
   <circle cx="362" cy="284" r="2.4" fill="#35722f"/>
 
-  <!-- net drops to the three endpoints -->
-  <path class="wNet" d="M152,284 V340" marker-end="url(#aNet)"/>
-  <path class="wNet" d="M306,284 V340" marker-end="url(#aNet)"/>
-  <path class="wNet" d="M560,284 V340" marker-end="url(#aNet)"/>
+  <!-- command drops to the two plugs; camera link points back up to the brain (sees) -->
+  <path class="wCmd" d="M152,284 V340" marker-end="url(#aNet)"/>
+  <path class="wCmd" d="M306,284 V340" marker-end="url(#aNet)"/>
+  <path class="wNet" d="M560,340 V284" marker-end="url(#aNet)"/>
+  <text class="m" x="574" y="316" font-size="9" font-weight="700" fill="#35722f">sees</text>
   <circle cx="152" cy="284" r="2.4" fill="#35722f"/>
   <circle cx="306" cy="284" r="2.4" fill="#35722f"/>
   <circle cx="560" cy="284" r="2.4" fill="#35722f"/>
