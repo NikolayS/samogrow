@@ -1,6 +1,6 @@
-# samogrow 🌿
+# samogrow (nombox) 🌿
 
-DIY AI-controlled indoor herb garden — always-fresh parsley and greens.
+DIY AI-controlled indoor herb garden — always-fresh herbs and greens: parsley, basil, cilantro, mint, lettuce.
 
 ![AI render of a finished samogrow build — basil, parsley, cilantro and lettuce in an opaque DWC tote under adjustable T5 grow lights, with a top-up jug, air pump, Wi-Fi camera and smart plugs](docs/img/hero-mock.jpg)
 

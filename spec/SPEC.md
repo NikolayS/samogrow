@@ -1,12 +1,13 @@
-# samogrow — Build Spec
+# samogrow (nombox) — Build Spec
 
 **Version:** v1.1
 **Date:** 2026-07-04
 **Owner:** Nik (nik@postgres.ai)
 **Status:** Ready to build
 
-A DIY, AI-controlled indoor hydroponic herb garden — always-fresh parsley and
-greens on a countertop or shelf. An affordable, open, kit-style alternative to
+A DIY, AI-controlled indoor hydroponic herb garden — always-fresh herbs and
+greens (parsley, basil, cilantro, mint, lettuce) on a countertop or shelf. An
+affordable, open, kit-style alternative to
 Auk, Click & Grow, and (the real target) Gardyn.
 
 **No microcontroller in the garden.** The brain — a TypeScript/Bun service that
@@ -19,7 +20,8 @@ There is nothing to solder, no GPIO, no relay board, no 12 V wiring.
 
 ## 1. Goal & why
 
-**Goal:** grow a continuous supply of parsley and leafy herbs indoors, year-round,
+**Goal:** grow a continuous supply of herbs and leafy greens — parsley, basil,
+cilantro, mint, lettuce — indoors, year-round,
 with plant care automated and monitored by AI — for a one-time hardware cost in the
 low-to-mid hundreds and **no subscription**.
 
