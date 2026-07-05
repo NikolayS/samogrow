@@ -24,13 +24,28 @@ export interface PumpConfig {
   maxSecondsPerDay: number; // hard safety cap: never flood the reservoir
   mlPerSecond: number; // calibrate with a measuring cup
   minWatts: number; // health floor: a run drawing less means dead/unplugged/dry
+  // Which garden unit (camera label) this pump waters. Omitted => the first
+  // unit. Only that unit's brain verdict drives the pump; other units' water
+  // needs become manual top-up reminders.
+  unit?: string;
 }
 
+// A single garden unit's camera: one source URL plus a human label ("diy",
+// "auk", …). One camera == one unit; each is analysed on its own.
+export interface CameraDevice {
+  url: string;
+  label: string;
+}
+
+// Raw config form for a device: a plain URL string (back-compat) or an object
+// with an optional label. Normalised into CameraDevice[] at load.
+export type RawCameraDevice = string | { url: string; label?: string };
+
 export interface CameraConfig {
-  // Each entry is a camera source URL:
+  // Each entry is a camera source, one per garden unit:
   //   rtsp://user:pass@host:554/stream1   (snapshotted via ffmpeg)
   //   http(s)://host/snapshot.jpg          (single-frame HTTP snapshot)
-  devices: string[];
+  devices: CameraDevice[];
   width: number;
   height: number;
 }
@@ -73,7 +88,7 @@ const DEFAULTS = {
     minWatts: 2,
   } as PumpConfig,
   cameras: {
-    devices: ["rtsp://user:pass@192.168.1.50:554/stream1"],
+    devices: [{ url: "rtsp://user:pass@192.168.1.50:554/stream1", label: "unit-1" }],
     width: 1920,
     height: 1080,
   } as CameraConfig,
@@ -88,6 +103,33 @@ const DEFAULTS = {
   } as BrainConfig,
 };
 
+// Normalise the raw cameras.devices array (plain strings and/or {url,label}
+// objects) into labelled CameraDevice[]. A missing/blank label falls back to
+// "unit-N" (1-based by position); duplicate labels are disambiguated with a
+// "-N" suffix so per-unit trend separation always has a unique key.
+export function normalizeDevices(raw: unknown): CameraDevice[] {
+  if (!Array.isArray(raw)) return [];
+  const seen = new Set<string>();
+  const out: CameraDevice[] = [];
+  raw.forEach((d, i) => {
+    let url: string | undefined;
+    let label: string | undefined;
+    if (typeof d === "string") {
+      url = d;
+    } else if (d && typeof d === "object" && typeof (d as { url?: unknown }).url === "string") {
+      url = (d as { url: string }).url;
+      const l = (d as { label?: unknown }).label;
+      if (typeof l === "string" && l.trim()) label = l.trim();
+    }
+    if (!url) return; // skip malformed entries
+    let final = label ?? `unit-${i + 1}`;
+    if (seen.has(final)) final = `${final}-${i + 1}`;
+    seen.add(final);
+    out.push({ url, label: final });
+  });
+  return out;
+}
+
 export function loadConfig(path = "config.json"): Config {
   let raw: Partial<Record<string, unknown>> = {};
   if (existsSync(path)) {
@@ -100,10 +142,14 @@ export function loadConfig(path = "config.json"): Config {
   const photoDir = join(dataDir, "photos");
   mkdirSync(photoDir, { recursive: true });
 
+  const rawCameras = (raw.cameras as { devices?: unknown } | undefined) ?? {};
+  const devices =
+    rawCameras.devices !== undefined ? normalizeDevices(rawCameras.devices) : DEFAULTS.cameras.devices;
+
   const cfg: Config = {
     light: { ...DEFAULTS.light, ...(raw.light as object) },
     pump: { ...DEFAULTS.pump, ...(raw.pump as object) },
-    cameras: { ...DEFAULTS.cameras, ...(raw.cameras as object) },
+    cameras: { ...DEFAULTS.cameras, ...rawCameras, devices },
     brain: { ...DEFAULTS.brain, ...(raw.brain as object) },
     mockHardware: Boolean(raw.mockHardware) || process.env.SAMOGROW_MOCK === "1",
     dataDir,

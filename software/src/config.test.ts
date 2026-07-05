@@ -1,5 +1,5 @@
 import { expect, test, describe, afterAll } from "bun:test";
-import { loadConfig } from "./config.ts";
+import { loadConfig, normalizeDevices } from "./config.ts";
 import { mkdtempSync, writeFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -53,5 +53,57 @@ describe("loadConfig", () => {
       if (prev === undefined) delete process.env.SAMOGROW_MOCK;
       else process.env.SAMOGROW_MOCK = prev;
     }
+  });
+
+  test("a plain-string camera keeps back-compat with an index-based label", () => {
+    const cfg = loadConfig(writeConfig({ dataDir: scratch, cameras: { devices: ["rtsp://cam/a"] } }));
+    expect(cfg.cameras.devices).toEqual([{ url: "rtsp://cam/a", label: "unit-1" }]);
+  });
+
+  test("a mix of string and {url,label} device forms parses to labelled units", () => {
+    const cfg = loadConfig(
+      writeConfig({
+        dataDir: scratch,
+        cameras: {
+          devices: [{ url: "rtsp://cam/a", label: "diy" }, "rtsp://cam/b"],
+        },
+      }),
+    );
+    expect(cfg.cameras.devices).toEqual([
+      { url: "rtsp://cam/a", label: "diy" },
+      { url: "rtsp://cam/b", label: "unit-2" }, // string fallback keeps its positional index
+    ]);
+  });
+
+  test("the default single camera is one labelled unit", () => {
+    const cfg = loadConfig(join(scratch, "does-not-exist.json"));
+    expect(cfg.cameras.devices).toHaveLength(1);
+    expect(cfg.cameras.devices[0]!.label).toBe("unit-1");
+  });
+});
+
+describe("normalizeDevices", () => {
+  test("labels both device formats, defaulting to unit-N by position", () => {
+    expect(normalizeDevices(["rtsp://a", { url: "rtsp://b", label: "auk" }])).toEqual([
+      { url: "rtsp://a", label: "unit-1" },
+      { url: "rtsp://b", label: "auk" },
+    ]);
+  });
+
+  test("disambiguates duplicate labels so trend keys stay unique", () => {
+    const out = normalizeDevices([
+      { url: "rtsp://a", label: "bed" },
+      { url: "rtsp://b", label: "bed" },
+    ]);
+    expect(out[0]!.label).toBe("bed");
+    expect(out[1]!.label).not.toBe("bed");
+    expect(new Set(out.map((d) => d.label)).size).toBe(2);
+  });
+
+  test("skips malformed entries and blank labels fall back to unit-N", () => {
+    expect(normalizeDevices([{ url: "rtsp://a", label: "  " }, 42, { nope: 1 }])).toEqual([
+      { url: "rtsp://a", label: "unit-1" },
+    ]);
+    expect(normalizeDevices("not-an-array")).toEqual([]);
   });
 });

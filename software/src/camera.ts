@@ -67,6 +67,12 @@ async function httpSnapshot(url: string, path: string): Promise<void> {
   await writeFile(path, Buffer.from(await res.arrayBuffer()));
 }
 
+// One camera's capture tagged with its unit label.
+export interface UnitCapture {
+  label: string;
+  path: string;
+}
+
 async function captureOne(cfg: Config, url: string): Promise<string> {
   const path = join(cfg.photoDir, `${timestamp()}_${sourceId(url)}.jpg`);
 
@@ -90,14 +96,21 @@ async function captureOne(cfg: Config, url: string): Promise<string> {
   return path;
 }
 
-// Capture every configured camera. Failures are logged and skipped so a single
-// broken camera can't stop the control loop. Returns the paths that succeeded.
-export async function captureAll(cfg: Config): Promise<string[]> {
-  const results = await Promise.allSettled(cfg.cameras.devices.map((d) => captureOne(cfg, d)));
-  const paths: string[] = [];
+// Capture every configured camera, one per garden unit. Failures are logged
+// and skipped so a single broken camera can't stop the control loop. Returns
+// the successful captures tagged with their unit label.
+export async function captureUnits(cfg: Config): Promise<UnitCapture[]> {
+  const results = await Promise.allSettled(cfg.cameras.devices.map((d) => captureOne(cfg, d.url)));
+  const out: UnitCapture[] = [];
   for (const [i, r] of results.entries()) {
-    if (r.status === "fulfilled") paths.push(r.value);
-    else log(`camera ${cfg.cameras.devices[i]} failed: ${r.reason}`);
+    const device = cfg.cameras.devices[i]!;
+    if (r.status === "fulfilled") out.push({ label: device.label, path: r.value });
+    else log(`camera ${device.label} (${device.url}) failed: ${r.reason}`);
   }
-  return paths;
+  return out;
+}
+
+// Paths only, in device order — for callers that don't need unit labels.
+export async function captureAll(cfg: Config): Promise<string[]> {
+  return (await captureUnits(cfg)).map((u) => u.path);
 }

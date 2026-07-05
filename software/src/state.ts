@@ -12,11 +12,16 @@ import type { Verdict } from "./brain.ts";
 export interface AnalysisRow {
   id: number;
   ts: string;
+  unit: string; // garden unit label this analysis is for
   photoPaths: string[];
   model: string;
   verdict: Verdict;
   raw: string;
 }
+
+// Default unit label — the single-unit / legacy value. Kept in sync with the
+// index-based label the first camera gets (see config.normalizeDevices).
+export const DEFAULT_UNIT = "unit-1";
 
 export interface EventRow {
   id: number;
@@ -41,6 +46,7 @@ export class Db {
       CREATE TABLE IF NOT EXISTS analyses (
         id         INTEGER PRIMARY KEY AUTOINCREMENT,
         ts         TEXT NOT NULL,
+        unit       TEXT NOT NULL DEFAULT '${DEFAULT_UNIT}',
         photoPaths TEXT NOT NULL,
         model      TEXT NOT NULL,
         verdict    TEXT NOT NULL,
@@ -57,6 +63,12 @@ export class Db {
         value TEXT NOT NULL
       );
     `);
+    // Migration: older DBs created before per-unit analysis have no `unit`
+    // column. Add it (legacy rows default to the single-unit label).
+    const cols = this.db.query("PRAGMA table_info(analyses)").all() as { name: string }[];
+    if (!cols.some((c) => c.name === "unit")) {
+      this.db.exec(`ALTER TABLE analyses ADD COLUMN unit TEXT NOT NULL DEFAULT '${DEFAULT_UNIT}';`);
+    }
   }
 
   // --- small key/value store (survives restarts) ---------------------------
@@ -86,11 +98,12 @@ export class Db {
       .run(new Date().toISOString(), kind, JSON.stringify(detail));
   }
 
-  saveAnalysis(a: { photoPaths: string[]; model: string; verdict: Verdict; raw: string }): void {
+  saveAnalysis(a: { unit?: string; photoPaths: string[]; model: string; verdict: Verdict; raw: string }): void {
     const ts = new Date().toISOString();
+    const unit = a.unit ?? DEFAULT_UNIT;
     const res = this.db
-      .query("INSERT INTO analyses (ts, photoPaths, model, verdict, raw) VALUES (?, ?, ?, ?, ?)")
-      .run(ts, JSON.stringify(a.photoPaths), a.model, JSON.stringify(a.verdict), a.raw);
+      .query("INSERT INTO analyses (ts, unit, photoPaths, model, verdict, raw) VALUES (?, ?, ?, ?, ?, ?)")
+      .run(ts, unit, JSON.stringify(a.photoPaths), a.model, JSON.stringify(a.verdict), a.raw);
     // Journal: one row per photo, linking it to this analysis (growth journal).
     const analysisId = Number(res.lastInsertRowid);
     const ins = this.db.query("INSERT INTO journal (analysisId, ts, photoPath) VALUES (?, ?, ?)");
@@ -139,12 +152,38 @@ export class Db {
     return new Date(Date.now() - days * 86_400_000).toISOString();
   }
 
-  // Whole-garden health score per analysis over the last N days (chronological).
-  healthSeries(days: number): { ts: string; score: number }[] {
-    const rows = this.db
-      .query("SELECT ts, verdict FROM analyses WHERE ts >= ? ORDER BY id ASC")
-      .all(this.sinceIso(days)) as { ts: string; verdict: string }[];
+  // Health score per analysis over the last N days (chronological). Pass a unit
+  // label to restrict to one garden unit; omit (or "all") for the whole-garden
+  // rollup across every unit.
+  healthSeries(days: number, unit?: string): { ts: string; score: number }[] {
+    const perUnit = unit !== undefined && unit !== "all";
+    const sql = perUnit
+      ? "SELECT ts, verdict FROM analyses WHERE ts >= ? AND unit = ? ORDER BY id ASC"
+      : "SELECT ts, verdict FROM analyses WHERE ts >= ? ORDER BY id ASC";
+    const rows = (
+      perUnit ? this.db.query(sql).all(this.sinceIso(days), unit) : this.db.query(sql).all(this.sinceIso(days))
+    ) as { ts: string; verdict: string }[];
     return rows.map((r) => ({ ts: r.ts, score: (JSON.parse(r.verdict) as Verdict).healthScore }));
+  }
+
+  // Distinct garden-unit labels seen in analyses over the last N days, in the
+  // order they first appeared.
+  unitLabels(days: number): string[] {
+    const rows = this.db
+      .query("SELECT unit, MIN(id) AS firstId FROM analyses WHERE ts >= ? GROUP BY unit ORDER BY firstId ASC")
+      .all(this.sinceIso(days)) as { unit: string }[];
+    return rows.map((r) => r.unit);
+  }
+
+  // The most recent analysis for each garden unit (one row per unit), newest
+  // unit first.
+  latestPerUnit(): AnalysisRow[] {
+    const rows = this.db
+      .query(
+        "SELECT * FROM analyses WHERE id IN (SELECT MAX(id) FROM analyses GROUP BY unit) ORDER BY id DESC",
+      )
+      .all() as Record<string, unknown>[];
+    return rows.map((r) => this.toAnalysis(r));
   }
 
   // Water top-ups (actual ml dispensed) over the last N days.
@@ -196,6 +235,7 @@ export class Db {
     return {
       id: r.id as number,
       ts: r.ts as string,
+      unit: (r.unit as string | undefined) ?? DEFAULT_UNIT,
       photoPaths: JSON.parse(r.photoPaths as string),
       model: r.model as string,
       verdict: JSON.parse(r.verdict as string),

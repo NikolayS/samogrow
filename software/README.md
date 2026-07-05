@@ -18,7 +18,9 @@ entirely over Wi-Fi:
   empty and there's no pump at all — the garden runs in **manual watering mode**
   (below).
 - **Camera(s)** → Wi-Fi camera(s) exposing an RTSP stream (snapshotted with
-  `ffmpeg`) or a plain HTTP snapshot URL.
+  `ffmpeg`) or a plain HTTP snapshot URL. **Each camera is its own garden unit**
+  and is analysed separately (A/B), so you can run two units off one service and
+  compare them — see *Cameras & garden units* below.
 
 Because watering is only a timed plug switch, the pump safety caps are the sole
 flood/dry-run protection — see below.
@@ -48,9 +50,9 @@ Watering comes in two tiers, chosen by whether `pump.plugHost` is set:
 | --- | --- |
 | `config.ts` | Settings from `config.json`, secrets from env vars |
 | `hardware.ts` | Light + pump smart-plug switches (Kasa 9999 + KLAP transports, auto-detected); pump safety caps; energy-meter reads + lockout |
-| `camera.ts` | One timestamped JPEG per camera (RTSP via ffmpeg, or HTTP snapshot) |
-| `state.ts` | `bun:sqlite` store of events + analyses + growth journal; trend queries |
-| `brain.ts` | Claude vision analysis → strict, clamped JSON verdict (per-pot); weekly deep review |
+| `camera.ts` | One timestamped JPEG per camera / garden unit (RTSP via ffmpeg, or HTTP snapshot) |
+| `state.ts` | `bun:sqlite` store of events + per-unit analyses + growth journal; per-unit trend queries |
+| `brain.ts` | Claude vision analysis → strict, clamped JSON verdict (per-pot), one call per unit; weekly deep review |
 | `trends.ts` | Pure sparkline + daily-aggregation + week-over-week helpers |
 | `overrides.ts` | Remote-tuning whitelist + `overrides.json` merge (pump caps lower-only) |
 | `conversation.ts` | Conversational Telegram: Claude tool-use loop over the controller API |
@@ -160,18 +162,52 @@ service (KLAP and Kasa are local-only — a plug on a separate IoT VLAN is
 unreachable). For KLAP specifically, an auth failure almost always means the
 email/password don't match the account that set the plug up.
 
-### Cameras
+### Cameras & garden units (A/B)
 
-Each entry in `cameras.devices` is a URL:
+**Each camera is one garden unit, analysed on its own.** A camera entry can be a
+plain URL string or an object with a `label`:
 
-- RTSP: `rtsp://user:pass@192.168.1.50:554/stream1` (e.g. Tapo C110 — create a
-  camera account in the Tapo app under *Advanced → Camera Account*, and use the
-  device's LAN IP). Snapshotted with `ffmpeg -rtsp_transport tcp -i <url> -frames:v 1`.
-- HTTP: `http://user:pass@192.168.1.51/snapshot.jpg` for cameras exposing a
-  single-frame endpoint (Basic auth from the URL is applied automatically).
+```json
+"cameras": {
+  "devices": [
+    { "url": "rtsp://user:pass@192.168.1.50:554/stream1", "label": "diy" },
+    { "url": "rtsp://user:pass@192.168.1.51:554/stream1", "label": "auk" }
+  ]
+}
+```
 
-Multiple cameras are supported; one failing camera never stops the loop. Give
-cameras static IPs / DHCP reservations too.
+- A plain string (`"rtsp://…"`) still works and gets an index-based label
+  (`unit-1`, `unit-2`, …), so old configs keep running unchanged.
+- Each entry is a source URL:
+  - RTSP: `rtsp://user:pass@192.168.1.50:554/stream1` (e.g. Tapo C110 — create a
+    camera account in the Tapo app under *Advanced → Camera Account*, and use the
+    device's LAN IP). Snapshotted with `ffmpeg -rtsp_transport tcp -i <url> -frames:v 1`.
+  - HTTP: `http://user:pass@192.168.1.51/snapshot.jpg` for cameras exposing a
+    single-frame endpoint (Basic auth from the URL is applied automatically).
+
+Give cameras static IPs / DHCP reservations too. One failing camera never stops
+the loop.
+
+**Real per-unit analysis (the A/B comparison).** Every analysis cycle runs a
+**separate Claude vision call per unit** and stores a **separate verdict**
+(health, per-pot, `waterTopUpMl`, `reservoirLevel`) tagged with the unit label.
+Trends, sparklines, `/status`, `/report`, and the growth journal are all
+per-unit, with an "all" rollup across units. With more than one unit the daily
+report and `/status` show a health line per unit, and the weekly deep review is
+explicitly asked to **compare the units and give an A/B verdict**. One unit
+behaves exactly as before (a single verdict, a single message).
+
+**Watering with multiple units.** There is one pump, plumbed to one unit's
+reservoir. Set `pump.unit` to that unit's label (default: the first unit); only
+that unit's verdict drives the pump. Every other unit's water need becomes a
+manual top-up **reminder** — hand-water that unit's reservoir and log it. Per
+cycle the bot sends **one combined summary** (compact per-unit lines) instead of
+N separate messages.
+
+**Cost.** Analysis cost scales with units: **N units ≈ N× the per-analysis API
+cost** (N vision calls per cycle) plus the weekly deep review. Budget for it via
+`brain.analysisIntervalMinutes` and the number of cameras you point at the
+garden.
 
 ## Telegram setup
 
@@ -185,12 +221,12 @@ cameras static IPs / DHCP reservations too.
 
 | Command | Action |
 | --- | --- |
-| `/status` | Light state, last analysis summary + health score, per-pot line, pump budget, uptime |
-| `/photo` | Capture and send photos now |
+| `/status` | Light state, per-unit health lines (or last analysis + per-pot for one unit), pump budget, uptime |
+| `/photo` | Capture and send photos now (labelled per unit when >1) |
 | `/water <ml>` | Water now (default 100 ml); confirms with an inline button |
 | `/light on\|off\|auto [minutes]` | Override the light (default 60 min) or return to schedule |
 | `/report` | Send the daily-style digest now (14-day sparklines + week-over-week deltas) |
-| `/analyze` | Run an AI check now and reply with the verdict |
+| `/analyze [unit]` | Run an AI check now (all units, or just the named unit) and reply with the verdict(s) |
 | `/timelapse [days]` | Build an MP4 timelapse of camera 0 (default 7 days) and send it |
 | `/review` | Run the weekly deep review now |
 | `/set [<key> <value>]` | List effective settings, or change one (safe whitelist) |
@@ -223,19 +259,22 @@ first. The conversation keeps a short rolling history (last ~10 turns); `/new` c
 ### Growth journal, trends & per-pot tracking
 
 Each analysis records a per-pot breakdown (`species`, `stage`, `health`, `note`) alongside
-the whole-garden verdict, and links its photos in a **journal** table. The daily report
-and `/report` show 14-day unicode sparklines (`▁▂▃▄▅▆▇█`) for health and water plus
-week-over-week deltas in words (e.g. *"health up 1.2 (+18%) vs last week"*). `/timelapse`
+the unit's verdict, tagged with the **unit label**, and links its photos in a **journal**
+table. The daily report and `/report` show 14-day unicode sparklines (`▁▂▃▄▅▆▇█`) for health
+and water plus week-over-week deltas in words (e.g. *"health up 1.2 (+18%) vs last week"*);
+with more than one unit the health sparkline breaks out a line per unit and the report lists
+a health line per unit. `/timelapse`
 stitches the archived JPEGs of camera 0 into a 720p MP4 (2 fps, evenly sampled, capped at
 ~300 frames) via ffmpeg.
 
 ### Weekly deep review
 
 Once a week (`brain.deepReviewDay` / `brain.deepReviewHour`) a **stronger model**
-(`brain.deepModel`, default `claude-sonnet-5`) looks at a week of sampled photos plus the
-full trend data and returns a husbandry digest — pH/EC checks, thinning, harvest timing,
-schedule tweaks. Recommendations that map to a config change come with **[Apply] / [Skip]**
-buttons; `/review` triggers it on demand.
+(`brain.deepModel`, default `claude-sonnet-5`) looks at a week of sampled photos **from every
+unit** plus the full per-unit trend data and returns a husbandry digest — pH/EC checks,
+thinning, harvest timing, schedule tweaks. With more than one unit it is explicitly asked to
+**compare the units and finish with an A/B verdict paragraph**. Recommendations that map to a
+config change come with **[Apply] / [Skip]** buttons; `/review` triggers it on demand.
 
 ### Remote tuning (`/set` + `overrides.json`)
 

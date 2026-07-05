@@ -7,7 +7,7 @@ import { Bot, InlineKeyboard, InputFile } from "grammy";
 import Anthropic from "@anthropic-ai/sdk";
 import { join } from "node:path";
 import type { Config } from "./config.ts";
-import type { Controller, DeepReviewPayload, WaterReminderPayload } from "./controller.ts";
+import type { Controller, DeepReviewPayload, WaterReminderPayload, CycleSummaryPayload } from "./controller.ts";
 import type { Verdict, DeepRecommendation } from "./brain.ts";
 import { runConversation } from "./conversation.ts";
 import { buildTimelapse } from "./timelapse.ts";
@@ -66,6 +66,7 @@ export class GardenBot {
       onDeepReview: (p) => void this.pushReview(p),
       onPumpAlert: (p) => void this.pushPumpAlert(p.reason),
       onWaterReminder: (p) => void this.pushWaterReminder(p),
+      onCycleSummary: (p) => void this.pushCycleSummary(p),
     });
   }
 
@@ -78,11 +79,11 @@ export class GardenBot {
       ctx.reply(
         [
           "/status – light, last analysis (per-pot), pump budget, uptime",
-          "/photo – capture and send photos now",
+          "/photo – capture and send photos now (labelled per unit)",
           "/water <ml> – water now (default 100, asks to confirm; in manual mode, logs a hand top-up)",
           "/light on|off|auto [minutes] – override the light",
           "/report – send the daily digest now (with trend sparklines)",
-          "/analyze – run an AI check now",
+          "/analyze [unit] – run an AI check now (optionally just one unit)",
           "/timelapse [days] – build an MP4 timelapse of camera 0 (default 7)",
           "/review – run the weekly deep review now",
           "/set [<key> <value>] – list or change a tunable setting",
@@ -106,20 +107,35 @@ export class GardenBot {
               s.pumpLocked ? `⚠️ Pump LOCKED: ${s.pumpLockReason}` : "Pump: healthy",
             ]),
         `Uptime: ${fmtUptime(s.uptimeSeconds)}`,
-        s.lastVerdict
-          ? `Last check (${s.lastAnalysisTs}): health ${s.lastVerdict.healthScore}/10 — ${s.lastVerdict.summary}`
-          : "No analysis yet.",
       ];
-      if (s.lastVerdict) lines.push(`Reservoir: ${s.lastVerdict.reservoirLevel}`);
-      if (s.lastVerdict && s.lastVerdict.plants.length) lines.push(fmtPlants(s.lastVerdict));
+      const units = this.controller.unitSummaries();
+      if (units.length > 1) {
+        lines.push(`Units (${units.length}) — pump waters ${this.controller.pumpUnit()}:`);
+        for (const u of units) {
+          const v = u.verdict;
+          lines.push(`• ${u.label}: health ${v.healthScore}/10 — ${v.summary} (reservoir ${v.reservoirLevel})`);
+          if (v.plants.length) lines.push(`  ${fmtPlants(v)}`);
+        }
+      } else if (s.lastVerdict) {
+        lines.push(
+          `Last check (${s.lastAnalysisTs}): health ${s.lastVerdict.healthScore}/10 — ${s.lastVerdict.summary}`,
+          `Reservoir: ${s.lastVerdict.reservoirLevel}`,
+        );
+        if (s.lastVerdict.plants.length) lines.push(fmtPlants(s.lastVerdict));
+      } else {
+        lines.push("No analysis yet.");
+      }
       return ctx.reply(lines.join("\n"));
     });
 
     b.command("photo", async (ctx) => {
       await ctx.reply("📸 capturing…");
-      const photos = await this.controller.photoNow();
-      if (!photos.length) return ctx.reply("No cameras responded.");
-      for (const p of photos) await ctx.replyWithPhoto(new InputFile(p));
+      const units = await this.controller.photoUnits();
+      if (!units.length) return ctx.reply("No cameras responded.");
+      const labelled = units.length > 1;
+      for (const u of units) {
+        await ctx.replyWithPhoto(new InputFile(u.path), labelled ? { caption: u.label } : {});
+      }
     });
 
     b.command("water", (ctx) => {
@@ -151,9 +167,13 @@ export class GardenBot {
     b.command("report", (ctx) => ctx.reply(this.controller.reportText()));
 
     b.command("analyze", async (ctx) => {
-      await ctx.reply("🔎 running an AI check…");
-      const v = await this.controller.analyzeNow();
-      return ctx.reply(v ? fmtVerdict(v) : "Analysis failed or no photos.");
+      const unit = ctx.match.trim() || undefined;
+      await ctx.reply(unit ? `🔎 running an AI check on ${unit}…` : "🔎 running an AI check…");
+      const results = await this.controller.analyzeNow(unit);
+      if (!results.length) return ctx.reply("Analysis failed or no photos.");
+      if (results.length === 1) return ctx.reply(fmtVerdict(results[0]!.verdict));
+      const text = results.map((r) => `${r.label}:\n${fmtVerdict(r.verdict)}`).join("\n\n");
+      return ctx.reply(text);
     });
 
     b.command("timelapse", async (ctx) => {
@@ -341,6 +361,31 @@ export class GardenBot {
       );
     } catch (e) {
       console.error(`[bot] failed to push water reminder: ${e}`);
+    }
+  }
+
+  // Multi-unit gardens: one combined per-cycle summary with compact per-unit
+  // lines plus each unit's photo, instead of N separate alert/reminder messages.
+  private async pushCycleSummary(p: CycleSummaryPayload): Promise<void> {
+    const alerting = new Set(p.alerting);
+    const reminderMl = new Map(p.reminders.map((r) => [r.label, r] as const));
+    const lines: string[] = [`🌿 Cycle summary (${p.units.length} units)`];
+    for (const u of p.units) {
+      const v = u.verdict;
+      const tags: string[] = [];
+      if (alerting.has(u.label)) tags.push(`⚠️ ${v.alertReason ?? "alert"}`);
+      const rem = reminderMl.get(u.label);
+      if (rem) tags.push(`🪣 add ~${Math.round(rem.ml)} ml${rem.repeat ? " (still)" : ""}`);
+      lines.push(`• ${u.label}: health ${v.healthScore}/10 — ${v.summary}${tags.length ? ` [${tags.join("; ")}]` : ""}`);
+    }
+    if (p.reminders.length) lines.push("", "Tap the amount into /water once you've topped up a unit by hand.");
+    try {
+      await this.bot.api.sendMessage(this.chatId, lines.join("\n"));
+      for (const u of p.units) {
+        if (u.photo) await this.bot.api.sendPhoto(this.chatId, new InputFile(u.photo), { caption: u.label }).catch(() => {});
+      }
+    } catch (e) {
+      console.error(`[bot] failed to push cycle summary: ${e}`);
     }
   }
 

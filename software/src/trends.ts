@@ -16,7 +16,7 @@ export function sparkline(values: number[]): string {
   const min = Math.min(...values);
   const max = Math.max(...values);
   const span = max - min;
-  const mid = BARS[BARS.length >> 1] ?? "▄";
+  const mid = BARS[BARS.length >> 1] ?? "▅";
   return values
     .map((v) => {
       if (span === 0) return mid;

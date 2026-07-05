@@ -10,6 +10,7 @@
 import type { Config } from "./config.ts";
 import type { Hardware } from "./hardware.ts";
 import type { Db } from "./state.ts";
+import { DEFAULT_UNIT } from "./state.ts";
 import type { Brain, Verdict, DeepReview, DeepRecommendation } from "./brain.ts";
 import { dailyBuckets, describeDelta, lightOnHoursByDay, sparkline, weekOverWeek } from "./trends.ts";
 import {
@@ -56,6 +57,19 @@ export interface AlertPayload {
   verdict: Verdict;
   photos: string[];
 }
+// One garden unit's analysis in a cycle: its label, verdict, and photo.
+export interface UnitAnalysis {
+  label: string;
+  verdict: Verdict;
+  photo?: string;
+}
+// A combined per-cycle summary for a multi-unit garden — one Telegram message
+// with compact per-unit lines instead of N separate alerts/reminders.
+export interface CycleSummaryPayload {
+  units: UnitAnalysis[]; // every unit analysed this cycle
+  alerting: string[]; // labels of units that raised an alert
+  reminders: { label: string; ml: number; repeat: boolean }[]; // manual top-up asks (non-pump units)
+}
 export interface ReportPayload {
   text: string;
   photo?: string;
@@ -81,6 +95,8 @@ export interface ControllerCallbacks {
   onDeepReview?: (p: DeepReviewPayload) => void;
   onPumpAlert?: (p: PumpAlertPayload) => void;
   onWaterReminder?: (p: WaterReminderPayload) => void;
+  // Multi-unit gardens: one combined summary per analysis cycle.
+  onCycleSummary?: (p: CycleSummaryPayload) => void;
 }
 
 // Human-readable "add roughly X ml (about Y)" reminder for manual watering.
@@ -120,10 +136,10 @@ export class Controller {
   private analyzing = false;
   private reviewing = false;
   private firstTick = true;
-  // Manual watering mode: the ml of an outstanding, still-unacknowledged reminder
-  // (0 = none). Used to escalate ("still needs water") on the next cycle and to
-  // answer /water with the current recommendation.
-  private pendingManualWaterMl = 0;
+  // Outstanding, still-unacknowledged manual-water reminders, keyed by unit
+  // label (ml per unit). Used to escalate ("still needs water") on the next
+  // cycle and to answer /water with the current recommendation.
+  private pendingManualWaterMl = new Map<string, number>();
 
   constructor(
     private readonly cfg: Config,
@@ -231,23 +247,56 @@ export class Controller {
 
   // --- analysis + actions --------------------------------------------------
 
-  async runAnalysis(): Promise<Verdict | null> {
-    if (this.analyzing) return null;
+  // The garden unit the pump waters (config pump.unit, else the first camera's
+  // label). Only this unit's verdict drives the pump; other units' water needs
+  // become manual top-up reminders.
+  pumpUnit(): string {
+    return this.cfg.pump.unit ?? this.cfg.cameras.devices[0]?.label ?? DEFAULT_UNIT;
+  }
+
+  // Run one analysis cycle. Each camera is its own garden unit and gets its OWN
+  // Claude call, verdict, and stored analysis tagged with the unit label. A
+  // single-unit garden behaves exactly as before (one alert / one reminder); a
+  // multi-unit garden emits one combined summary instead of N messages.
+  async runAnalysis(only?: string): Promise<UnitAnalysis[]> {
+    if (this.analyzing) return [];
     this.analyzing = true;
     try {
-      const { captureAll } = await import("./camera.ts");
-      const photos = await captureAll(this.cfg);
-      if (photos.length === 0) {
-        this.log("no photos captured; skipping analysis");
-        return null;
-      }
-      const { verdict, raw } = await this.brain.analyze(photos, {
-        hoursSinceLastTopUp: this.db.hoursSinceLastTopUp(),
-        pumpBudgetUsedSeconds: this.hw.pump?.budgetUsedSeconds ?? 0,
-        pumpBudgetTotalSeconds: this.hw.pump?.budgetTotalSeconds ?? 0,
-        lightOn: this.hw.light.isOn,
-        recentEvents: this.db.recentEvents(10).map((e) => ({ ts: e.ts, kind: e.kind })),
-      });
+      return await this.analyzeUnits(only);
+    } catch (e) {
+      this.log(`analysis error: ${e}`);
+      this.db.logEvent("error", { where: "analysis", message: String(e) });
+      return [];
+    } finally {
+      this.analyzing = false;
+    }
+  }
+
+  private async analyzeUnits(only?: string): Promise<UnitAnalysis[]> {
+    const { captureUnits } = await import("./camera.ts");
+    let captures = await captureUnits(this.cfg);
+    if (only) captures = captures.filter((c) => c.label === only);
+    if (captures.length === 0) {
+      this.log(only ? `no photo for unit ${only}; skipping analysis` : "no photos captured; skipping analysis");
+      return [];
+    }
+
+    const ctx = {
+      hoursSinceLastTopUp: this.db.hoursSinceLastTopUp(),
+      pumpBudgetUsedSeconds: this.hw.pump?.budgetUsedSeconds ?? 0,
+      pumpBudgetTotalSeconds: this.hw.pump?.budgetTotalSeconds ?? 0,
+      lightOn: this.hw.light.isOn,
+      recentEvents: this.db.recentEvents(10).map((e) => ({ ts: e.ts, kind: e.kind })),
+    };
+
+    const combined = captures.length > 1;
+    const pumpUnit = this.pumpUnit();
+    const analyses: UnitAnalysis[] = [];
+    const alerting: string[] = [];
+    const reminders: { label: string; ml: number; repeat: boolean }[] = [];
+
+    for (const cap of captures) {
+      const { verdict, raw } = await this.brain.analyze([cap.path], ctx);
       // A low reservoir sight-gauge reading is itself alert-worthy and pump-health
       // context — fold it into the alert.
       if (verdict.reservoirLevel === "low" && !verdict.alert) {
@@ -255,33 +304,49 @@ export class Controller {
         verdict.alertReason = `${verdict.alertReason ? verdict.alertReason + "; " : ""}reservoir level low`;
       }
 
-      this.db.saveAnalysis({ photoPaths: photos, model: this.cfg.brain.model, verdict, raw });
-      this.db.logEvent("analysis", { healthScore: verdict.healthScore, alert: verdict.alert, reservoir: verdict.reservoirLevel });
-      this.log(`analysis: health ${verdict.healthScore}/10 — ${verdict.summary}`);
+      this.db.saveAnalysis({ unit: cap.label, photoPaths: [cap.path], model: this.cfg.brain.model, verdict, raw });
+      this.db.logEvent("analysis", {
+        unit: cap.label,
+        healthScore: verdict.healthScore,
+        alert: verdict.alert,
+        reservoir: verdict.reservoirLevel,
+      });
+      this.log(`analysis [${cap.label}]: health ${verdict.healthScore}/10 — ${verdict.summary}`);
 
+      // Watering: only the pump's own unit drives the pump; every other unit's
+      // water need (including all units in manual mode) becomes a reminder.
       const pump = this.hw.pump;
-      if (!pump) {
-        if (verdict.waterTopUpMl > 0 || verdict.reservoirLevel === "low") {
-          this.remindManualWater(verdict.waterTopUpMl);
+      if (pump && cap.label === pumpUnit) {
+        if (verdict.waterTopUpMl > 0) {
+          const ml = await pump.waterMl(verdict.waterTopUpMl);
+          if (ml > 0) this.db.logEvent("water", { unit: cap.label, requestedMl: verdict.waterTopUpMl, actualMl: ml, source: "brain" });
+          this.evalPumpHealth("brain");
         }
-      } else if (verdict.waterTopUpMl > 0) {
-        const ml = await pump.waterMl(verdict.waterTopUpMl);
-        if (ml > 0) this.db.logEvent("water", { requestedMl: verdict.waterTopUpMl, actualMl: ml, source: "brain" });
-        this.evalPumpHealth("brain");
+      } else if (verdict.waterTopUpMl > 0 || verdict.reservoirLevel === "low") {
+        const repeat = this.recordReminder(cap.label, verdict.waterTopUpMl);
+        reminders.push({ label: cap.label, ml: verdict.waterTopUpMl, repeat });
+        if (!combined) {
+          this.callbacks.onWaterReminder?.({ ml: verdict.waterTopUpMl, text: formatWaterReminder(verdict.waterTopUpMl), repeat });
+        }
       }
 
       if (verdict.alert) {
-        this.db.logEvent("alert", { reason: verdict.alertReason });
-        this.callbacks.onAlert?.({ verdict, photos });
+        this.db.logEvent("alert", { unit: cap.label, reason: verdict.alertReason });
+        alerting.push(cap.label);
       }
-      return verdict;
-    } catch (e) {
-      this.log(`analysis error: ${e}`);
-      this.db.logEvent("error", { where: "analysis", message: String(e) });
-      return null;
-    } finally {
-      this.analyzing = false;
+      analyses.push({ label: cap.label, verdict, photo: cap.path });
     }
+
+    // Notify: a lone unit keeps today's per-unit alert; a multi-unit garden gets
+    // one combined summary instead of N separate messages.
+    if (!combined) {
+      const a = analyses[0]!;
+      if (a.verdict.alert) this.callbacks.onAlert?.({ verdict: a.verdict, photos: a.photo ? [a.photo] : [] });
+    } else if (alerting.length > 0 || reminders.length > 0) {
+      this.callbacks.onCycleSummary?.({ units: analyses, alerting, reminders });
+    }
+
+    return analyses;
   }
 
   // --- pump health ---------------------------------------------------------
@@ -320,28 +385,33 @@ export class Controller {
 
   // --- manual watering mode ------------------------------------------------
 
-  // Emit a manual-watering reminder (no pump). Records the outstanding amount so
-  // the next cycle can escalate and /water can echo the current recommendation.
-  private remindManualWater(ml: number): void {
-    const repeat = this.pendingManualWaterMl > 0;
-    this.pendingManualWaterMl = ml;
-    this.db.logEvent("waterReminder", { ml, repeat });
-    this.callbacks.onWaterReminder?.({ ml, text: formatWaterReminder(ml), repeat });
-    this.log(`manual watering reminder: ~${ml} ml${repeat ? " (repeat)" : ""}`);
+  // Record an outstanding manual-watering reminder for a unit so the next cycle
+  // can escalate and /water can echo the current recommendation. Returns whether
+  // this unit already had an unacknowledged reminder (i.e. a repeat). Does not
+  // fire the callback — the caller decides per-unit vs. combined delivery.
+  private recordReminder(label: string, ml: number): boolean {
+    const repeat = (this.pendingManualWaterMl.get(label) ?? 0) > 0;
+    this.pendingManualWaterMl.set(label, ml);
+    this.db.logEvent("waterReminder", { unit: label, ml, repeat });
+    this.log(`manual watering reminder [${label}]: ~${ml} ml${repeat ? " (repeat)" : ""}`);
+    return repeat;
   }
 
   // The ml the owner is currently being asked to add by hand (0 = none pending).
+  // Across a multi-unit garden this is the total outstanding across units.
   manualWaterRecommendation(): number {
-    return this.pendingManualWaterMl || (this.lastAnalysis()?.waterTopUpMl ?? 0);
+    let pending = 0;
+    for (const ml of this.pendingManualWaterMl.values()) pending += ml;
+    return pending || (this.lastAnalysis()?.waterTopUpMl ?? 0);
   }
 
   // Owner acknowledged they watered by hand (tapped [Done ✓] or /water in manual
   // mode). Log it as a water event so trends keep tracking usage, and clear the
-  // outstanding reminder.
+  // outstanding reminders.
   logManualWatering(ml: number): number {
     const actualMl = ml > 0 ? ml : this.manualWaterRecommendation();
     this.db.logEvent("water", { requestedMl: actualMl, actualMl, source: "manual" });
-    this.pendingManualWaterMl = 0;
+    this.pendingManualWaterMl.clear();
     this.log(`manual watering logged: ${actualMl} ml`);
     return actualMl;
   }
@@ -364,30 +434,51 @@ export class Controller {
     const watts = this.db.wattsSeries(days).map((w) => ({ ts: w.ts, value: w.watts }));
     const lines = [
       `Health ${sparkline(healthDaily)} — ${describeDelta("health", weekOverWeek(health, "avg"))}`,
+    ];
+    // Per-unit health sparklines when the garden has more than one unit.
+    const units = this.db.unitLabels(days);
+    if (units.length > 1) {
+      for (const u of units) {
+        const hs = this.db.healthSeries(days, u).map((h) => ({ ts: h.ts, value: h.score }));
+        lines.push(`  ${u.padEnd(8)} ${sparkline(dailyBuckets(hs, days, "avg"))}`);
+      }
+    }
+    lines.push(
       `Water  ${sparkline(waterDaily)} — ${describeDelta("water", weekOverWeek(water, "sum"), { unit: "ml", digits: 0 })}`,
       `Light  ${sparkline(lightHours)} (hours/day)`,
-    ];
+    );
     if (watts.length) lines.push(`Pump W ${sparkline(dailyBuckets(watts, days, "avg"))} (draw per run)`);
     return lines.join("\n");
   }
 
   private buildReportText(): string {
-    const rows = this.db.recentAnalyses(10);
-    if (rows.length === 0) return "No analyses recorded yet.";
-    const latest = rows[0]!;
-    const pots = this.plantsLine(latest.verdict);
-    const lines = [
-      `🌿 Daily report`,
-      `Health: ${latest.verdict.healthScore}/10`,
-      latest.verdict.summary,
-      latest.verdict.issues.length ? `Issues: ${latest.verdict.issues.join("; ")}` : "No issues noted.",
-      ...(pots ? [pots] : []),
+    const perUnit = this.db.latestPerUnit();
+    if (perUnit.length === 0) return "No analyses recorded yet.";
+    const lines = [`🌿 Daily report`];
+    if (perUnit.length > 1) {
+      // Multi-unit: a health line per garden unit, newest first.
+      lines.push("Units:");
+      for (const r of perUnit) {
+        lines.push(`• ${r.unit}: health ${r.verdict.healthScore}/10 — ${r.verdict.summary}`);
+        if (r.verdict.issues.length) lines.push(`  issues: ${r.verdict.issues.join("; ")}`);
+      }
+    } else {
+      const v = perUnit[0]!.verdict;
+      const pots = this.plantsLine(v);
+      lines.push(
+        `Health: ${v.healthScore}/10`,
+        v.summary,
+        v.issues.length ? `Issues: ${v.issues.join("; ")}` : "No issues noted.",
+        ...(pots ? [pots] : []),
+      );
+    }
+    lines.push(
       "",
       this.trendSummary(14),
       this.hw.pump
         ? `Pump budget today: ${this.hw.pump.budgetUsedSeconds}s / ${this.hw.pump.budgetTotalSeconds}s`
         : "Watering: manual (add water when reminded)",
-    ];
+    );
     return lines.join("\n");
   }
 
@@ -417,11 +508,16 @@ export class Controller {
     };
   }
 
+  // Capture every camera now, tagged with its unit label (for labelled captions).
+  async photoUnits(): Promise<{ label: string; path: string }[]> {
+    const { captureUnits } = await import("./camera.ts");
+    const units = await captureUnits(this.cfg);
+    this.db.logEvent("photo", { count: units.length });
+    return units;
+  }
+
   async photoNow(): Promise<string[]> {
-    const { captureAll } = await import("./camera.ts");
-    const photos = await captureAll(this.cfg);
-    this.db.logEvent("photo", { count: photos.length });
-    return photos;
+    return (await this.photoUnits()).map((u) => u.path);
   }
 
   // Manual watering. `override` bypasses a pump lockout (explicit owner intent);
@@ -449,13 +545,18 @@ export class Controller {
     await this.applyLight(desired);
   }
 
-  async analyzeNow(): Promise<Verdict | null> {
+  async analyzeNow(unit?: string): Promise<UnitAnalysis[]> {
     this.lastAnalysisMs = Date.now();
-    return this.runAnalysis();
+    return this.runAnalysis(unit);
   }
 
   lastAnalysis(): Verdict | null {
     return this.db.lastAnalysis()?.verdict ?? null;
+  }
+
+  // The most recent verdict for each garden unit (newest unit first).
+  unitSummaries(): { label: string; ts: string; verdict: Verdict }[] {
+    return this.db.latestPerUnit().map((r) => ({ label: r.unit, ts: r.ts, verdict: r.verdict }));
   }
 
   reportText(): string {
@@ -473,15 +574,29 @@ export class Controller {
         const pots = v.plants
           .map((p) => `#${p.pot} ${p.species ?? "?"} ${p.stage} ${p.health}/10${p.note ? ` (${p.note})` : ""}`)
           .join("; ");
-        return `${r.ts}: health ${v.healthScore}/10 — ${v.summary}${pots ? ` | ${pots}` : ""}`;
+        return `${r.ts} [${r.unit}]: health ${v.healthScore}/10 — ${v.summary}${pots ? ` | ${pots}` : ""}`;
       })
       .join("\n");
-    return [
+    const parts = [
       `Weekly deep review. ${j.length} analyses in the last 7 days.`,
       this.trendSummary(14),
       `Current settings: ${SETTABLE_KEYS.map((k) => `${k}=${effectiveValue(this.cfg, k)}`).join(", ")}`,
       `Recent per-analysis notes:\n${notes || "(none)"}`,
-    ].join("\n\n");
+    ];
+    // A/B: when the garden has more than one unit, spell out each unit's health
+    // series and ask for a direct comparison.
+    const units = this.db.unitLabels(14);
+    if (units.length > 1) {
+      const series = units
+        .map((u) => `${u}: ${sparkline(this.db.healthSeries(14, u).map((h) => h.score))}`)
+        .join("\n");
+      parts.push(
+        `This garden has ${units.length} units (${units.join(", ")}). Per-unit 14-day health:\n${series}\n` +
+          `Compare the units directly: which is doing better or worse, and why (species, stage, light, water). ` +
+          `Finish with a short A/B verdict paragraph.`,
+      );
+    }
+    return parts.join("\n\n");
   }
 
   async runDeepReview(): Promise<DeepReview | null> {
@@ -489,7 +604,13 @@ export class Controller {
     this.reviewing = true;
     try {
       const { listCameraFrames, sampleFrames } = await import("./timelapse.ts");
-      const frames = sampleFrames(await listCameraFrames(this.cfg, 0, 7), 10);
+      // Sample a few frames from EACH unit's camera so the review sees them all.
+      const devices = this.cfg.cameras.devices;
+      const perUnit = devices.length > 1 ? Math.max(3, Math.floor(10 / devices.length)) : 10;
+      const frames: string[] = [];
+      for (let i = 0; i < devices.length; i++) {
+        frames.push(...sampleFrames(await listCameraFrames(this.cfg, i, 7), perUnit));
+      }
       const review = await this.brain.deepReview(frames, this.buildDeepContext());
       this.db.logEvent("deepReview", { recommendations: review.recommendations.length });
       this.log(`deep review: ${review.recommendations.length} recommendation(s)`);
@@ -539,13 +660,19 @@ export class Controller {
         : `Pump budget: ${s.pumpBudgetUsedSeconds}s / ${s.pumpBudgetTotalSeconds}s today`,
       ...(s.pumpLocked ? [`⚠️ Pump LOCKED: ${s.pumpLockReason}`] : []),
       `Uptime: ${s.uptimeSeconds}s`,
-      s.lastVerdict
-        ? `Last check (${s.lastAnalysisTs}): health ${s.lastVerdict.healthScore}/10 — ${s.lastVerdict.summary}`
-        : "No analysis yet.",
     ];
-    if (s.lastVerdict) {
+    const units = this.unitSummaries();
+    if (units.length > 1) {
+      lines.push(`Units (${units.length}) — pump waters ${this.pumpUnit()}:`);
+      for (const u of units) {
+        lines.push(`• ${u.label}: health ${u.verdict.healthScore}/10 — ${u.verdict.summary}`);
+      }
+    } else if (s.lastVerdict) {
+      lines.push(`Last check (${s.lastAnalysisTs}): health ${s.lastVerdict.healthScore}/10 — ${s.lastVerdict.summary}`);
       const p = this.plantsLine(s.lastVerdict);
       if (p) lines.push(p);
+    } else {
+      lines.push("No analysis yet.");
     }
     return lines.join("\n");
   }

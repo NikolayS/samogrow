@@ -10,12 +10,13 @@
     "maxSecondsPerRun": 30,
     "maxSecondsPerDay": 180,
     "mlPerSecond": 15,
-    "minWatts": 2
+    "minWatts": 2,
+    "unit": "diy"
   },
   "cameras": {
     "devices": [
-      "rtsp://user:pass@192.168.1.50:554/stream1",
-      "http://user:pass@192.168.1.51/snapshot.jpg"
+      { "url": "rtsp://user:pass@192.168.1.50:554/stream1", "label": "diy" },
+      { "url": "http://user:pass@192.168.1.51/snapshot.jpg", "label": "auk" }
     ],
     "width": 1920,
     "height": 1080

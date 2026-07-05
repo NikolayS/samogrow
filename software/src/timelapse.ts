@@ -26,9 +26,9 @@ export function sampleFrames<T>(frames: T[], max: number): T[] {
 
 // All archived JPEGs for a camera within the last `days` days, chronological.
 export async function listCameraFrames(cfg: Config, cameraIndex: number, days: number): Promise<string[]> {
-  const url = cfg.cameras.devices[cameraIndex];
-  if (!url) return [];
-  const suffix = `_${sourceId(url)}.jpg`;
+  const device = cfg.cameras.devices[cameraIndex];
+  if (!device) return [];
+  const suffix = `_${sourceId(device.url)}.jpg`;
   const cutoff = Date.now() - days * 86_400_000;
   let names: string[];
   try {
