@@ -1,7 +1,7 @@
 <meta charset="utf-8">
 <title>samogrow (nombox) — DIY AI herb garden</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="samogrow (nombox) — an open, AI-run indoor herb garden you build from commodity parts (~$266 all-in, no soldering). A camera checks the plants, smart plugs control light and water, and Telegram tells you what happened. No vendor subscription and no proprietary pods; the only recurring cost is ~$3–7/mo in Claude API calls.">
+<meta name="description" content="samogrow (nombox) — an open-source (MIT), AI-run indoor herb garden you build from commodity parts. Starts at ~$220 (manual), ~$266 automated core, to ~$320 with add-ons. A camera checks the plants, smart plugs control light and water, and Telegram reports. No vendor subscription and no proprietary pods; recurring cost is $3–7/mo in Claude API calls plus ~$35/yr in commodity consumables. Runs on a machine you already keep on; try it in mock mode with zero hardware.">
 <style>
   :root {
     --paper:      #f2ede0;
@@ -199,6 +199,21 @@
   .safety-note { max-width: 64ch; margin: 20px auto 0; text-align: center; font-family: var(--font-serif); font-size: .98rem; line-height: 1.5; color: var(--ink-soft); }
   .safety-tag { font-family: var(--font-mono); font-size: .62rem; letter-spacing: .18em; text-transform: uppercase; color: var(--leaf); border: 1px solid var(--leaf); padding: 2px 8px; margin-right: 10px; white-space: nowrap; }
 
+  /* one-wink meme interstitial */
+  .meme-strip { border-top: 1px solid var(--line); background: var(--paper-2); }
+  .meme-strip .col { padding-top: 17px; padding-bottom: 17px; }
+  .meme-line { font-family: var(--font-mono); font-size: .82rem; letter-spacing: .04em; color: var(--ink-soft); text-align: center; margin: 0; }
+  .meme-line b { color: var(--leaf); font-weight: 600; }
+  .meme-cite { font-family: var(--font-mono); font-size: .61rem; letter-spacing: .01em; color: var(--ink-faint); text-align: center; margin: 9px 0 0; line-height: 1.5; }
+  .meme-cite a { color: var(--ink-faint); text-decoration-color: var(--line); }
+  .meme-cite a:hover { color: var(--leaf); }
+
+  /* inline code + JSON schema chip */
+  code, .code { font-family: var(--font-mono); font-size: .84em; background: color-mix(in srgb, var(--leaf) 10%, transparent); border: 1px solid var(--line); border-radius: 4px; padding: .08em .4em; color: var(--ink); }
+  .schema { font-family: var(--font-mono); font-size: .74rem; line-height: 1.5; color: var(--ink-soft); margin: 13px 0 0; padding: 10px 13px; background: var(--card); border: 1px solid var(--line); border-radius: 6px; overflow-x: auto; white-space: nowrap; }
+  .schema .k { color: var(--leaf); }
+  .fine { font-family: var(--font-mono); font-size: .69rem; letter-spacing: .02em; color: var(--ink-faint); line-height: 1.5; }
+
   /* ---------- features ---------- */
   .feat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); }
   @media (max-width: 700px) { .feat-grid { grid-template-columns: 1fr; } }
@@ -334,12 +349,12 @@
   <header class="hero">
     <div class="col hero-grid">
       <div class="hero-lead">
-        <div class="eyebrow fade d1">DIY · AI-controlled · indoor herb garden</div>
+        <div class="eyebrow fade d1">A service you can read · open source · it feeds you</div>
         <h1 class="fade d2">samo<span class="sprout">grow</span> <span style="font-size:.32em;letter-spacing:0;font-style:italic;color:var(--ink-faint);">(nombox)</span></h1>
         <p class="lede fade d3">
-          An open, <b>AI-run herb garden</b> you build from commodity parts. A camera
-          checks the plants, smart plugs control light and water, and Telegram tells you
-          what happened.
+          You already keep a machine on 24/7. Give it one more job. samogrow runs a
+          <b>herb garden</b> from a camera, two smart plugs, and a Claude API key —
+          open source (MIT), no pods, no subscription.
         </p>
         <div class="cta-row fade d4">
           <a class="btn btn-solid" href="https://github.com/NikolayS/samogrow/blob/main/spec/SPEC.md">Read the spec →</a>
@@ -361,12 +376,27 @@
           <div class="spec-row"><span>Grow side</span><span>$192–198</span></div>
           <div class="spec-row"><span>Consumables</span><span>~$35 / yr</span></div>
           <div class="spec-row"><span>Claude API</span><span>$3–7 / mo</span></div>
+          <div class="spec-row"><span>Source</span><span class="hi">MIT · tests + CI</span></div>
+          <div class="spec-row"><span>Dry run</span><span class="hi">mock mode, 0 hardware</span></div>
           <div class="spec-row"><span>Vendor subscription</span><span class="hi">none</span></div>
           <div class="spec-row"><span>Soldering</span><span class="hi">none</span></div>
         </aside>
       </div>
     </div>
   </header>
+
+  <!-- one-wink meme strip -->
+  <div class="meme-strip">
+    <div class="col">
+      <p class="meme-line">junior → senior → staff engineer → <b>farmer</b>&nbsp;&nbsp;//&nbsp;&nbsp;a good head start.</p>
+      <p class="meme-cite">
+        A real genre — see the Microsoft engineer whose title became "goose farmer"
+        (<a href="https://www.threads.com/@nixcraft/post/C6Zvz6cyg9I" target="_blank" rel="noopener">@nixcraft</a>),
+        and <a href="https://engineerdog.com/2023/05/29/why-do-so-many-programmers-want-to-be-farmers-how-to-build-a-corrugated-steel-garden-box/" target="_blank" rel="noopener">EngineerDog</a>
+        on why: gardening is "the exact opposite of coding."
+      </p>
+    </div>
+  </div>
 
   <!-- HOW IT WORKS -->
   <section id="how">
@@ -376,11 +406,13 @@
         <h2>How it works</h2>
       </div>
       <p class="sec-sub">
-        The garden itself is just three off-the-shelf Wi-Fi gadgets — two smart plugs and a
-        camera — with nothing to maintain. All the smarts live in a small program running on a
-        laptop or spare machine you already leave on: it grabs a camera photo, asks Claude what
-        to do, flips the plugs for the light and pump, and reports on Telegram. Because it is
-        plain software, you can read it and change it — no proprietary black box.
+        The garden is three off-the-shelf Wi-Fi gadgets — two smart plugs and a camera — with
+        nothing to maintain. The brain is <b>nombox</b>, a small TypeScript/Bun service
+        (<code>@anthropic-ai/sdk</code> for vision, <code>grammY</code> for Telegram, everything
+        in one <code>config.json</code>) that runs on a machine you already leave on: it pulls a
+        photo, asks Claude what to do, switches the light and pump plugs, and reports on Telegram.
+        Plain software you can read and fork — no black box. The name is literal: nombox is the
+        daemon in your process list, and yes, the <code>*box</code> suffix is the wink.
       </p>
 
       <div class="arch">
@@ -394,7 +426,7 @@
           <div class="node cloud-node">
             <span class="eyebrow" style="color:var(--soil)">Cloud</span>
             <h3>Claude &amp; Telegram</h3>
-            <p>Claude reads each photo and returns a structured verdict; Telegram carries the daily digest, alerts, and your commands back and forth.</p>
+            <p>Claude reads each photo and returns a structured verdict; Telegram carries the daily digest, alerts, and your commands. Only the still image leaves your network — the camera is local RTSP, no cloud camera account.</p>
           </div>
         </div>
 
@@ -431,7 +463,7 @@
       </p>
       <p class="safety-note">
         <span class="safety-tag">Safety</span>
-        Pump run-time caps, a bounded top-up jug (worst-case spill is just the jug's volume), and an optional float/leak sensor.
+        The AI can request water; it cannot override the cap. Per-run and per-day pump caps, a bounded top-up jug (worst-case spill is just the jug's volume), and an optional float/leak sensor.
       </p>
 
       <figure class="shot schematic">
@@ -451,10 +483,10 @@
         <h2>What it costs</h2>
       </div>
       <p class="sec-sub">
-        About <b>~$266 of ordinary parts</b>, and the seeds cost pennies — no proprietary
-        pods to keep buying. That is the same one-time bracket as the <em>no-AI</em>
-        countertop units, while delivering the camera + AI capability that otherwise only
-        exists on a $899 Gardyn with a ~$408/yr subscription.
+        One price frame: <b>~$220</b> for the manual build to start, <b>~$266</b> for the
+        automated core, up to <b>~$320</b> with the water-safety add-ons. That is the same
+        one-time bracket as the <em>no-AI</em> countertop units, while delivering the camera +
+        AI capability that otherwise only ships on a $899 Gardyn with a ~$408/yr subscription.
       </p>
 
       <div class="cost-grid">
@@ -498,9 +530,11 @@
             </table>
           </div>
           <p class="cmp-note">
-            <b>The pop:</b> ~$456 all-in over two years — roughly <b>$1,260 cheaper than Gardyn</b>,
-            the only commercial unit with real camera + AI, and below even a Click &amp; Grow's
-            2-year cost. Open, commodity consumables mean no vendor lock-in.
+            Nothing here is a black box: commodity seeds, code you can fork, and no vendor who can
+            deprecate your garden or move the AI behind a paywall — the way <b>AeroGarden owners were
+            stranded</b> when the company wound down and the app and pods went with it. The two-year
+            math is just the receipt: ~$456 all-in, roughly $1,260 under Gardyn (the only commercial
+            unit with real camera + AI) and below even a Click &amp; Grow.
           </p>
         </div>
       </div>
@@ -510,6 +544,9 @@
         <div><span class="big">$3–7</span><small>/ month — Claude Haiku vision, ~24–48 photos a day.</small></div>
         <div><span class="big">$0</span><small>/ month — vendor subscription. No proprietary pods, ever.</small></div>
       </div>
+      <p class="fine" style="margin-top:16px">
+        The API line is arithmetic, not a guess: ~$0.0036 per analysis on Claude Haiku × 24 images/day ≈ $2.6/mo (≈ $5/mo at 48/day).
+      </p>
 
       <div style="margin-top:52px">
         <h3 class="parts-head">The parts</h3>
@@ -568,6 +605,7 @@
             <span class="cap">Herb seed collection</span>
           </a>
         </div>
+        <p class="fine" style="margin-top:16px">Prices are mid-2026 estimates, ±30% with coupons and sellers — verify at the source before ordering.</p>
       </div>
     </div>
   </section>
@@ -581,28 +619,30 @@
       </div>
       <div class="feat-grid">
         <div class="feat">
-          <span class="ico">🔍</span>
+          <span class="ico">🧪</span>
           <span class="fnum">F.01</span>
-          <h3>An AI that actually looks at your plants</h3>
-          <p>Every couple of hours during daylight, it snaps a photo through the camera and asks Claude what it sees — whether the plants need water, how they look, and what to flag — then acts on the answer.</p>
+          <h3>Run it now, before you order parts</h3>
+          <p>Mock mode runs the whole loop with zero hardware — real Claude call, real Telegram push, against a sample photo. Clone the repo and:</p>
+          <p class="schema"><span class="k">SAMOGROW_MOCK=1</span> bun run src/main.ts</p>
+        </div>
+        <div class="feat">
+          <span class="ico">🔍</span>
+          <span class="fnum">F.02</span>
+          <h3>Claude reads a photo, returns a structured verdict</h3>
+          <p>Every <code>N</code> minutes it pulls an RTSP still, sends it to Claude Haiku, and gets back typed JSON it can act on:</p>
+          <p class="schema">{ <span class="k">water</span>: bool, <span class="k">light_hours</span>: int, <span class="k">pots</span>: [{id, health}], <span class="k">confidence</span>: 0–1 }</p>
         </div>
         <div class="feat">
           <span class="ico">🚰</span>
-          <span class="fnum">F.02</span>
+          <span class="fnum">F.03</span>
           <h3>Auto top-up with hard safety caps</h3>
-          <p>The AI can request water; it cannot override the cap. Per-run and per-day pump limits are the flood backstop, backed by a bounded 1–2 gal jug.</p>
+          <p>Per-run and per-day pump caps are the flood backstop, backed by a bounded 1–2 gal jug and an optional float/leak sensor. The cap is enforced in code, not by the model.</p>
         </div>
         <div class="feat">
           <span class="ico">📨</span>
-          <span class="fnum">F.03</span>
+          <span class="fnum">F.04</span>
           <h3>Telegram control &amp; daily digest</h3>
           <p>A daily photo + health note, inline “Water now / Report” buttons, and ad-hoc questions from your phone. The bot obeys only your chat ID.</p>
-        </div>
-        <div class="feat">
-          <span class="ico">🧪</span>
-          <span class="fnum">F.04</span>
-          <h3>Try it before the parts arrive</h3>
-          <p>A built-in practice mode runs the whole system on your computer with no plugs or camera plugged in — so you can set up the AI and the Telegram texts against a sample photo while your order is still in the mail.</p>
         </div>
       </div>
     </div>

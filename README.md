@@ -1,5 +1,7 @@
 # samogrow (nombox) 🌿
 
+**Self-hosted herbs: a camera, two smart plugs, one Bun service — no subscription, no pods, no black box.**
+
 DIY AI-controlled indoor herb garden — always-fresh herbs and greens: parsley, basil, cilantro, mint, lettuce.
 
 ![Field-guide illustration of the samogrow build — T5 grow lights above a DWC tote of herbs in net cups, top-up jug with pump, Wi-Fi camera, air pump, and two smart plugs](docs/img/build-illustration.jpg)
@@ -11,6 +13,12 @@ The garden device itself is dumb and Wi-Fi-only: smart plugs switch the grow lig
 a Wi-Fi camera watches the plants. The brain — a TypeScript/Bun service calling the Claude API —
 runs on a laptop/VM elsewhere, decides watering/lighting, and reports/accepts commands via Telegram.
 No Raspberry Pi, no soldering, no GPIO (an on-device Pi controller remains as a documented variant).
+
+Open source (MIT license). The `software/` service is a small TypeScript/Bun app (`@anthropic-ai/sdk` for Claude vision, `grammY` for Telegram) with a green CI (108 tests). Try the whole loop before ordering any parts — mock mode runs it with zero hardware:
+
+```
+SAMOGROW_MOCK=1 bun run src/main.ts
+```
 
 ## How it works
 
