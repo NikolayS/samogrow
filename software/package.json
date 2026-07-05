@@ -1,0 +1,20 @@
+{
+  "name": "samogrow",
+  "version": "0.1.0",
+  "description": "AI-controlled indoor herb garden: camera + Claude brain + Telegram control",
+  "type": "module",
+  "scripts": {
+    "start": "bun run src/main.ts",
+    "dev": "SAMOGROW_MOCK=1 bun run src/main.ts",
+    "test": "bun test",
+    "typecheck": "bunx tsc --noEmit"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.56.0",
+    "grammy": "^1.36.0"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.2.0",
+    "typescript": "^5.6.0"
+  }
+}
