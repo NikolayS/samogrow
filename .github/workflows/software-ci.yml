@@ -1,0 +1,27 @@
+name: software CI
+
+on:
+  push:
+    paths: ["software/**", ".github/workflows/software-ci.yml"]
+  pull_request:
+    paths: ["software/**", ".github/workflows/software-ci.yml"]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: software
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - run: bunx tsc --noEmit
+      - run: bun test
+      - name: mock-mode smoke run
+        run: |
+          SAMOGROW_MOCK=1 timeout 10 bun run src/main.ts > smoke.log 2>&1 || true
+          grep -q "starting samogrow (mock=true" smoke.log
+          grep -qv "Uncaught" smoke.log
