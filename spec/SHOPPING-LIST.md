@@ -39,14 +39,34 @@ coupons/sellers). Full rationale is in `spec/SPEC.md` §4.
 
 **Grow-side subtotal: ~$198**
 
+## Water safety (recommended)
+
+Cheap, independent layers so the build isn't blind to the reservoir. Full rationale
+in `spec/SPEC.md` §9a; each catches a different water failure. Not in the core total —
+add this whole tier for **~$55–60**. (Pump-health monitoring is already covered by the
+energy-monitoring KP125M in the core list — it's software, $0 extra.)
+
+| # | Photo | Qty | Item | Est. price | Where / note |
+|---|---|---|---|---:|---|
+| 17 |  | 1 | **Camera-readable sight gauge** — [clear vinyl tube 3/8" ID](https://www.amazon.com/dp/B07NQSNBTG) + [rubber grommet / bulkhead fitting](https://www.amazon.com/s?k=rubber+grommet+bulkhead+fitting+3%2F8) + [bright float bead](https://www.amazon.com/s?k=bright+foam+fishing+float+beads) | $8 (est.) | tee into the tote wall, route the tube up **into the camera's view**; AI reads the level off the bead. Can reuse an offcut of item #4 tubing |
+| 18 |  | 1 | [Govee Wi-Fi Water Sensor, 3-pack (2.4 GHz, no hub)](https://www.amazon.com/Detector-Wireless-Notification-Security-Basement/dp/B07J9HZ5VN) | $35 (est.) | sits on the floor under the tote/pump; phone push + 100 dB alarm on any leak, independent of the brain |
+| 19 |  | 1 | [Plastic boot/drip tray, ~20×15 in](https://www.amazon.com/NINAMAR-Boot-Tray-Inch-Trays/dp/B07RL6BWTB) | $12 (est.) | passive containment under the whole tote; also gives the leak sensor a place to catch water |
+
+**Water-safety subtotal: ~$55–60**
+
 ---
 
-## TOTAL (no-Pi core build): **~$266**
+## TOTAL
+
+- **No-Pi core build: ~$266**
+- **+ Water safety tier (recommended): ~$55–60**
 
 Runs on a laptop/VM you already own; **no Raspberry Pi, no soldering, no wiring.**
 
 Optional day-1 add-ons (see `spec/SPEC.md` §4d): second Tapo camera (~$25), timed
-dosing pump + plug (~$25), digital pH pen (~$15). Ongoing consumables run
+dosing pump + plug (~$25), digital pH pen (~$15). The **water safety tier above
+(§9a)** is strongly recommended over these — it removes the camera-only blind spots
+(reservoir level, pump health, floor leaks) for ~$55–60. Ongoing consumables run
 **~$35/yr**; Claude API runs **~$3–7/mo**.
 
 **Order-day reminder:** start parsley seeds the moment they arrive — germination

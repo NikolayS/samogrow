@@ -1,7 +1,7 @@
 # samogrow (nombox) — Build Spec
 
-**Version:** v1.1
-**Date:** 2026-07-04
+**Version:** v1.2
+**Date:** 2026-07-05
 **Owner:** Nik (nik@postgres.ai)
 **Status:** Ready to build
 
@@ -463,6 +463,82 @@ protection. That is a real, deliberate simplification — here is the honest pic
 - **The upgrade** if you want a true interlock: add the on-device Pi controller with
   a hard-wired float switch (appendix) — the one thing the all-Wi-Fi build can't do.
 
+### 9a. Water safety & failure detection (layered)
+
+A fair critique of an all-Wi-Fi build: **the camera alone can't make good water
+decisions.** It cannot see the level inside an opaque tote, it cannot tell a running
+pump from a dead one, and it will not notice a slow siphon leak onto the floor until
+plants wilt hours later. The answer is not one clever sensor but a few cheap,
+independent layers — each catches a different failure, and we are honest about what
+each one misses. Layers 1–3 are the new **Water safety (recommended)** shopping tier
+(~$55–60, see `spec/SHOPPING-LIST.md`); layers 4–5 are already in the design.
+
+**Layer 1 — Camera-readable sight gauge (~$8, passive, no electronics).**
+A short length of clear vinyl tube (3/8" ID) is tee'd into the tote wall low down
+through a bulkhead/grommet fitting, so the tube shows the true reservoir level by
+communicating vessels. Drop a brightly colored float bead in the tube and route the
+tube up **inside the camera's field of view**. Now every photo the brain already
+takes carries the water level with it — the vision prompt reads the bead's height
+against a taped scale and reports reservoir level as a first-class field, no extra
+poll.
+- *Catches:* the big blind spot — actual reservoir level in an opaque tote, low-water
+  (failed top-up / empty jug) and over-full alike, on the existing photo cadence.
+- *Misses:* it is only sampled as often as the camera runs (every ~2 h), it depends
+  on the tube staying unclogged and in frame, and a floor leak downstream of the tote
+  doesn't move the gauge. Not a substitute for layers 2–3.
+
+**Layer 2 — Wi-Fi leak sensor under the tote (~$35, phone push).**
+A battery Wi-Fi water sensor (e.g. Govee) sits on the floor directly under the tote
+and pump. Its probe closes on the first film of water and pushes a phone alert (and a
+loud local alarm) within seconds — independent of the brain, the camera, and even the
+samogrow service being up.
+- *Catches:* real escaped water — a cracked tote, a popped tubing joint, a siphon
+  onto the floor, an overflow that clears the rim. The fastest, most direct "water is
+  where it shouldn't be" signal.
+- *Misses:* it only fires **after** water reaches the floor (it is a last line, not
+  prevention), it needs its own Wi-Fi/battery kept alive, and it says nothing about
+  reservoir level or pump health.
+
+**Layer 3 — Passive boot/drip tray under the whole tote (~$12, no electronics).**
+A shallow boot tray under the tote and jug physically contains the first liters of any
+spill or condensation and channels it to one place — which is also exactly where the
+layer-2 sensor sits, so the two compound.
+- *Catches:* small drips, condensation, and the leading edge of a spill — buys time
+  and protects the surface with zero dependence on power, network, or software.
+- *Misses:* finite capacity (a full-jug dump can exceed a shallow tray), and being
+  passive it never *notifies* anyone — it only holds water for layer 2 to detect.
+
+**Layer 4 — Pump-health via the KP125M energy-monitoring plug ($0, already in BOM).**
+The pump plug is an energy-monitoring KP125M, so every top-up run is also a
+measurement. The brain samples power draw during the run and compares it to the
+pump's known-good wattage:
+- **~zero draw** while the plug is on ⇒ dead pump, unplugged pump, or a dry jug the
+  pump can't prime ⇒ the requested water never moved. Alert.
+- **anomalous draw** (stalled/clogged impeller, seized motor) ⇒ Alert.
+- On any anomaly the brain **locks the pump out** and refuses further runs until Nik
+  acknowledges in Telegram — so a misbehaving pump can't be re-triggered every cycle.
+This is a software feature being implemented against the existing plug; it confirms
+the *actuator* worked, which the camera and the leak sensor cannot.
+- *Catches:* the silent "top-up did nothing" failure and the "pump is straining"
+  failure — closing the loop between "brain asked for water" and "water actually
+  moved."
+- *Misses:* it proves the pump drew power, not that water reached the tote (a blown-off
+  tube still draws normal watts) — which is why layer 1 (did the level actually rise?)
+  and layers 2–3 (did it end up on the floor?) still matter.
+
+**Layer 5 — Hard caps + bounded jug (already in design, see above).**
+The per-run and per-day timer caps (`pump.maxSecondsPerRun` /
+`pump.maxSecondsPerDay`) and the 1–2 gal top-up jug bound the **worst case** no matter
+what any sensor does: the AI cannot pump longer than the cap, and it cannot move more
+water than the jug holds. Max credible spill = jug volume, into a tote sized with the
+headroom to hold it.
+
+**Net:** level (1), escaped-water alarm (2), passive containment (3), actuator
+confirmation (4), and a bounded worst case (5) each cover a failure the others don't.
+None is a hard interlock — that remains the Pi + float-switch upgrade (§12) — but
+together they turn "camera-only, and blind to the reservoir" into a defensible
+multi-layer water story for a no-microcontroller build.
+
 ---
 
 ## 10. Team of veteran experts
@@ -476,7 +552,12 @@ protection. That is a real, deliberate simplification — here is the honest pic
   left to get wrong is the mains switching — so both loads must be UL-listed smart
   plugs, never a bare relay."* → Exactly the design; nothing is hand-wired.
   *"Then your only remaining failure mode is over-watering."* → Addressed head-on in
-  §9 (bounded jug + timer caps + energy signal).
+  §9 (bounded jug + timer caps + energy signal). *"And a camera can't see the water
+  level in an opaque tote, can't tell a dead pump from a live one, and won't catch a
+  siphon leak on the floor."* → **Now addressed in §9a** with a layered water-safety
+  story: a camera-readable sight gauge (level), a Wi-Fi leak sensor + boot tray
+  (escaped water), and KP125M energy-monitoring with pump lockout (actuator health) —
+  on top of the existing hard caps and bounded jug.
 - **The SRE:** *"Your reliability story is now one always-on machine and three Wi-Fi
   devices. Reserve their IPs, keep the machine awake, restart the service on crash,
   and don't put secrets in the repo."* → DHCP reservations, launchd/systemd
@@ -526,6 +607,16 @@ removes. Take it only for the float-switch interlock or the CSI camera.
 
 ## 13. Changelog
 
+- **v1.2 (2026-07-05)** — Added §9a **Water safety & failure detection (layered)**,
+  answering the "camera can't see reservoir level / pump health / floor leaks"
+  critique: a camera-readable clear-tube sight gauge with a float bead (level, ~$8),
+  a Wi-Fi leak sensor (escaped-water push alert, ~$35) and a boot/drip tray (passive
+  containment, ~$12), plus a documented pump-health feature using the existing KP125M
+  energy-monitoring plug (zero/anomalous draw ⇒ alert + pump lockout until
+  acknowledged in Telegram), layered over the existing hard caps + bounded jug. Added
+  a matching **Water safety (recommended)** tier to `SHOPPING-LIST.md` (~$55–60,
+  itemized separately from the core total). Updated the electronics-safety-engineer
+  panel note to mark the critique addressed.
 - **v1.1 (2026-07-04)** — Architecture pivot: **removed the Raspberry Pi.** Brain
   now runs on any always-on machine (laptop/mini-PC/VM). Garden device is
   Wi-Fi-only: two Kasa smart plugs (light + timed pump) and a Tapo RTSP camera.
