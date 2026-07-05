@@ -5,10 +5,12 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-User=pi
-WorkingDirectory=/home/pi/samogrow/software
-EnvironmentFile=/home/pi/samogrow/.env
-ExecStart=/home/pi/.bun/bin/bun run src/main.ts
+# Runs on any always-on Linux machine / VM on the same LAN as the garden's
+# Wi-Fi plugs and cameras. Adjust User and paths to your install.
+User=samogrow
+WorkingDirectory=/opt/samogrow/software
+EnvironmentFile=/opt/samogrow/.env
+ExecStart=/usr/local/bin/bun run src/main.ts
 Restart=always
 RestartSec=5
 

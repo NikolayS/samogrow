@@ -4,22 +4,29 @@ import { existsSync, mkdirSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 
+// Smart-plug type. v1 speaks the Kasa local protocol directly; Tapo is
+// documented as out-of-scope for v1 (see hardware.ts / README).
+export type PlugType = "kasa" | "tapo";
+
 export interface LightConfig {
   onHour: number; // local time, 24h
   offHour: number; // 16h photoperiod suits leafy herbs
-  gpioPin: number; // relay IN1
-  kasaHost?: string; // if set, use a Kasa smart plug instead of GPIO relay
+  plugHost: string; // LAN IP / hostname of the light's smart plug
+  plugType?: PlugType; // default "kasa"
 }
 
 export interface PumpConfig {
-  gpioPin: number; // relay IN2 (or MOSFET gate)
+  plugHost: string; // LAN IP / hostname of the pump's smart plug
+  plugType?: PlugType; // default "kasa"
   maxSecondsPerRun: number;
-  maxSecondsPerDay: number; // hard safety cap: never flood the counter
+  maxSecondsPerDay: number; // hard safety cap: never flood the reservoir
   mlPerSecond: number; // calibrate with a measuring cup
 }
 
 export interface CameraConfig {
-  // Each entry: "picamera:0", "picamera:1", or a USB device like "/dev/video0"
+  // Each entry is a camera source URL:
+  //   rtsp://user:pass@host:554/stream1   (snapshotted via ffmpeg)
+  //   http(s)://host/snapshot.jpg          (single-frame HTTP snapshot)
   devices: string[];
   width: number;
   height: number;
@@ -47,14 +54,19 @@ export interface Config {
 }
 
 const DEFAULTS = {
-  light: { onHour: 7, offHour: 23, gpioPin: 17 } as LightConfig,
+  light: { onHour: 7, offHour: 23, plugHost: "", plugType: "kasa" } as LightConfig,
   pump: {
-    gpioPin: 27,
+    plugHost: "",
+    plugType: "kasa",
     maxSecondsPerRun: 30,
     maxSecondsPerDay: 180,
     mlPerSecond: 15,
   } as PumpConfig,
-  cameras: { devices: ["picamera:0"], width: 1920, height: 1080 } as CameraConfig,
+  cameras: {
+    devices: ["rtsp://user:pass@192.168.1.50:554/stream1"],
+    width: 1920,
+    height: 1080,
+  } as CameraConfig,
   brain: {
     model: "claude-haiku-4-5-20251001",
     analysisIntervalMinutes: 120,

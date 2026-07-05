@@ -28,7 +28,7 @@ describe("loadConfig", () => {
     const cfg = loadConfig(path);
     expect(cfg.light.onHour).toBe(20); // overridden
     expect(cfg.light.offHour).toBe(8); // overridden
-    expect(cfg.light.gpioPin).toBe(17); // default preserved
+    expect(cfg.light.plugType).toBe("kasa"); // default preserved
     expect(cfg.pump.mlPerSecond).toBe(15); // untouched section keeps defaults
   });
 

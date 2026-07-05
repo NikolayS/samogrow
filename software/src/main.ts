@@ -17,6 +17,9 @@ async function main(): Promise<void> {
   log(`starting samogrow (mock=${cfg.mockHardware}, model=${cfg.brain.model})`);
 
   const hw = new Hardware(cfg);
+  // Safety: force the pump plug OFF on startup in case a previous run crashed
+  // mid-watering and left it on.
+  await hw.pump.ensureOff();
   const db = new Db(cfg);
   const brain = new Brain(cfg);
   const controller = new Controller(cfg, hw, db, brain);
@@ -38,12 +41,8 @@ async function main(): Promise<void> {
     shuttingDown = true;
     log(`received ${sig}, shutting down`);
     controller.stop();
-    try {
-      // Safety: ensure the pump is off. Light is left as-is.
-      await hw.pump.timedPumpRun(0);
-    } catch {
-      /* ignore */
-    }
+    // Safety: force the pump plug OFF (twice). Light is left as-is.
+    await hw.pump.ensureOff().catch(() => {});
     if (bot) await bot.stop().catch(() => {});
     db.logEvent("shutdown", {});
     db.close();

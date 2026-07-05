@@ -1,18 +1,20 @@
-// Hardware control: light + pump switches with pump safety caps.
+// Hardware control: light + pump, both driven by LAN Wi-Fi smart plugs.
 //
-// GPIO on Raspberry Pi is driven by shelling out to `pinctrl` (Pi 5 friendly),
-// falling back to `gpioset` (libgpiod) if pinctrl is missing. Outputs are
-// active-high. The light can alternatively be a TP-Link Kasa smart plug spoken
-// to over the local network (TCP 9999, trivial XOR-autokey cipher).
+// The garden device has no compute of its own — this service runs on any
+// always-on machine (laptop / VM) and talks to smart plugs over the local
+// network. v1 speaks the TP-Link Kasa local protocol directly (TCP 9999,
+// trivial XOR-autokey cipher). Tapo plugs use an encrypted KLAP handshake that
+// is out of scope for v1 (see below).
 //
-// In mock mode (macOS / no hardware) every switch is log-only.
+// Watering = pump plug ON for N seconds, then OFF. The pump safety caps are the
+// ONLY flood/dry-run protection, so OFF is sent defensively: always in a
+// finally, always re-sent, and forced OFF on startup and shutdown in case a
+// previous run crashed mid-watering.
+//
+// In mock mode (no hardware) every switch is log-only.
 
-import { execFile } from "node:child_process";
 import { connect } from "node:net";
-import { promisify } from "node:util";
-import type { Config } from "./config.ts";
-
-const exec = promisify(execFile);
+import type { Config, PlugType } from "./config.ts";
 
 function log(msg: string): void {
   console.log(`[${new Date().toISOString()}] [hw] ${msg}`);
@@ -22,63 +24,6 @@ export interface Switch {
   readonly isOn: boolean;
   on(): Promise<void>;
   off(): Promise<void>;
-}
-
-// ---------------------------------------------------------------------------
-// GPIO backend detection (done once, lazily).
-
-type GpioTool = "pinctrl" | "gpioset";
-let gpioToolPromise: Promise<GpioTool> | null = null;
-
-async function has(cmd: string): Promise<boolean> {
-  try {
-    await exec("sh", ["-c", `command -v ${cmd}`]);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-async function detectGpioTool(): Promise<GpioTool> {
-  if (!gpioToolPromise) {
-    gpioToolPromise = (async () => {
-      if (await has("pinctrl")) return "pinctrl";
-      if (await has("gpioset")) return "gpioset";
-      // Nothing found — default to pinctrl and let the write error surface.
-      log("neither pinctrl nor gpioset found; defaulting to pinctrl");
-      return "pinctrl";
-    })();
-  }
-  return gpioToolPromise;
-}
-
-async function gpioWrite(pin: number, value: boolean): Promise<void> {
-  const tool = await detectGpioTool();
-  if (tool === "pinctrl") {
-    // `pinctrl set <pin> op dh|dl` — set as output, drive high/low.
-    await exec("pinctrl", ["set", String(pin), "op", value ? "dh" : "dl"]);
-  } else {
-    // libgpiod. `-c` selects the chip on v2; harmless-ish elsewhere.
-    await exec("gpioset", ["gpiochip0", `${pin}=${value ? 1 : 0}`]);
-  }
-}
-
-class GpioSwitch implements Switch {
-  isOn = false;
-  constructor(
-    private readonly pin: number,
-    private readonly name: string,
-  ) {}
-  async on(): Promise<void> {
-    await gpioWrite(this.pin, true);
-    this.isOn = true;
-    log(`${this.name} ON (gpio ${this.pin})`);
-  }
-  async off(): Promise<void> {
-    await gpioWrite(this.pin, false);
-    this.isOn = false;
-    log(`${this.name} OFF (gpio ${this.pin})`);
-  }
 }
 
 class MockSwitch implements Switch {
@@ -156,20 +101,37 @@ function kasaSend(host: string, payload: object, timeoutMs = 5000): Promise<unkn
 
 class KasaSwitch implements Switch {
   isOn = false;
-  constructor(private readonly host: string) {}
+  constructor(
+    private readonly host: string,
+    private readonly name: string,
+  ) {}
   private async setRelay(state: 0 | 1): Promise<void> {
     await kasaSend(this.host, { system: { set_relay_state: { state } } });
   }
   async on(): Promise<void> {
     await this.setRelay(1);
     this.isOn = true;
-    log(`light (kasa ${this.host}) ON`);
+    log(`${this.name} (kasa ${this.host}) ON`);
   }
   async off(): Promise<void> {
     await this.setRelay(0);
     this.isOn = false;
-    log(`light (kasa ${this.host}) OFF`);
+    log(`${this.name} (kasa ${this.host}) OFF`);
   }
+}
+
+// Build a plug switch for the given type. Tapo is intentionally unsupported in
+// v1: its local API uses an encrypted KLAP/passthrough handshake that needs
+// account credentials and is far more involved than Kasa's. Use a Kasa-class
+// plug (KP115 / EP10 / HS103) for v1, or drive the Tapo plug via an external CLI.
+function makePlugSwitch(type: PlugType | undefined, host: string, name: string): Switch {
+  if ((type ?? "kasa") === "tapo") {
+    throw new Error(
+      `${name}: Tapo plugs are not supported in v1. Use a Kasa-class plug ` +
+        `(KP115/EP10/HS103) with plugType "kasa", or drive the Tapo plug via an external CLI.`,
+    );
+  }
+  return new KasaSwitch(host, name);
 }
 
 // ---------------------------------------------------------------------------
@@ -219,8 +181,21 @@ export class Pump {
     return this.maxSecondsPerDay;
   }
 
-  // Run the pump for a clamped number of seconds; always turns off in finally.
-  // Returns the number of seconds actually run.
+  // Belt-and-suspenders OFF: send it, then send it again. Safe to call any time
+  // (startup, shutdown, after a crash) — turning an already-off plug off is a
+  // no-op on the device but guarantees the pump can never be left running.
+  async ensureOff(): Promise<void> {
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        await this.sw.off();
+      } catch (e) {
+        log(`pump ensureOff attempt ${attempt + 1} failed: ${e}`);
+      }
+    }
+  }
+
+  // Run the pump for a clamped number of seconds; always turns off (twice) in
+  // finally. Returns the number of seconds actually run.
   async timedPumpRun(seconds: number): Promise<number> {
     this.rollDay();
     if (this.running) {
@@ -241,7 +216,7 @@ export class Pump {
       await this.sw.on();
       await sleep(secs * 1000);
     } finally {
-      await this.sw.off();
+      await this.ensureOff();
       this.running = false;
       this.usedToday += secs;
     }
@@ -263,19 +238,19 @@ export class Hardware {
   readonly pump: Pump;
 
   constructor(cfg: Config) {
-    const mock = cfg.mockHardware;
-    if (mock) {
+    if (cfg.mockHardware) {
       this.light = new MockSwitch("light");
-    } else if (cfg.light.kasaHost) {
-      this.light = new KasaSwitch(cfg.light.kasaHost);
-    } else {
-      this.light = new GpioSwitch(cfg.light.gpioPin, "light");
+      this.pump = new Pump(
+        new MockSwitch("pump"),
+        cfg.pump.maxSecondsPerRun,
+        cfg.pump.maxSecondsPerDay,
+        cfg.pump.mlPerSecond,
+      );
+      return;
     }
-    const pumpSwitch: Switch = mock
-      ? new MockSwitch("pump")
-      : new GpioSwitch(cfg.pump.gpioPin, "pump");
+    this.light = makePlugSwitch(cfg.light.plugType, cfg.light.plugHost, "light");
     this.pump = new Pump(
-      pumpSwitch,
+      makePlugSwitch(cfg.pump.plugType, cfg.pump.plugHost, "pump"),
       cfg.pump.maxSecondsPerRun,
       cfg.pump.maxSecondsPerDay,
       cfg.pump.mlPerSecond,

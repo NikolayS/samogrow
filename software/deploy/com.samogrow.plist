@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  macOS launchd agent for samogrow. Keep the service running on an always-on Mac.
+
+  Install:
+    1. Edit the paths below (bun path from `which bun`, and the repo path).
+    2. Put your secrets in ~/samogrow/.env, or set them in EnvironmentVariables.
+    3. cp deploy/com.samogrow.plist ~/Library/LaunchAgents/
+       launchctl load ~/Library/LaunchAgents/com.samogrow.plist
+    4. Logs: tail -f /tmp/samogrow.out /tmp/samogrow.err
+-->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.samogrow</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/opt/homebrew/bin/bun</string>
+    <string>run</string>
+    <string>src/main.ts</string>
+  </array>
+  <key>WorkingDirectory</key>
+  <string>/Users/CHANGEME/samogrow/software</string>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+  </dict>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <true/>
+  <key>StandardOutPath</key>
+  <string>/tmp/samogrow.out</string>
+  <key>StandardErrorPath</key>
+  <string>/tmp/samogrow.err</string>
+</dict>
+</plist>

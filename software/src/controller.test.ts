@@ -33,13 +33,12 @@ describe("resolveLightState", () => {
   });
 
   test("active override wins over schedule", () => {
-    const future = Date.now() + 60_000;
-    expect(resolveLightState(at(3), 7, 23, { mode: "on", until: future })).toBe(true);
-    expect(resolveLightState(at(12), 7, 23, { mode: "off", until: future })).toBe(false);
+    // `until` is measured against the same clock as the passed `now`.
+    expect(resolveLightState(at(3), 7, 23, { mode: "on", until: at(3).getTime() + 60_000 })).toBe(true);
+    expect(resolveLightState(at(12), 7, 23, { mode: "off", until: at(12).getTime() + 60_000 })).toBe(false);
   });
 
   test("expired override is ignored", () => {
-    const past = Date.now() - 1000;
-    expect(resolveLightState(at(3), 7, 23, { mode: "on", until: past })).toBe(false);
+    expect(resolveLightState(at(3), 7, 23, { mode: "on", until: at(3).getTime() - 1000 })).toBe(false);
   });
 });

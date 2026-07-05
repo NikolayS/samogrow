@@ -1,40 +1,68 @@
 # samogrow software
 
 The brain for the samogrow DIY AI herb garden: a camera + Claude vision loop that
-watches the plants, controls the grow light and water pump, and reports to (and
+watches the plants, switches the grow light and water pump, and reports to (and
 takes commands from) a Telegram bot.
 
-Runtime: [Bun](https://bun.sh) + TypeScript (strict). Target device is a 64-bit
-Raspberry Pi, but everything also runs on macOS in **mock mode** with zero hardware.
+Runtime: [Bun](https://bun.sh) + TypeScript (strict).
+
+## Topology
+
+There is **no computer inside the garden**. This service runs on any always-on
+machine on the same LAN — a laptop, a small VM, a NAS — and controls the garden
+entirely over Wi-Fi:
+
+- **Grow light** → a Kasa smart plug (local protocol, no cloud).
+- **Pump** → a *second* Kasa smart plug switching a cheap submersible pump.
+  "Watering" is just: plug on for N seconds, then off.
+- **Camera(s)** → Wi-Fi camera(s) exposing an RTSP stream (snapshotted with
+  `ffmpeg`) or a plain HTTP snapshot URL.
+
+Because watering is only a timed plug switch, the pump safety caps are the sole
+flood/dry-run protection — see below.
 
 ## Architecture
 
 | Module | Responsibility |
 | --- | --- |
 | `config.ts` | Settings from `config.json`, secrets from env vars |
-| `hardware.ts` | Light + pump switches (GPIO via `pinctrl`/`gpioset`, or a Kasa smart plug); pump safety caps |
-| `camera.ts` | One timestamped JPEG per camera into the photo dir |
+| `hardware.ts` | Light + pump smart-plug switches (Kasa local protocol); pump safety caps |
+| `camera.ts` | One timestamped JPEG per camera (RTSP via ffmpeg, or HTTP snapshot) |
 | `state.ts` | `bun:sqlite` store of events + analyses |
 | `brain.ts` | Claude vision analysis → strict, clamped JSON verdict |
 | `controller.ts` | The minute loop: light schedule, periodic analysis, daily report, bot API |
 | `bot.ts` | grammY Telegram bot (owner-only) |
 | `main.ts` | Wires it together; graceful shutdown |
 
-Safety is enforced in code, not by the model: the pump clamps every run to
-`maxSecondsPerRun` and a per-day `maxSecondsPerDay` budget (reset at midnight) and
-always turns off in a `finally`; the brain's `waterTopUpMl` is validated and capped
-at 500 ml before it can act.
+### Pump safety (the only flood protection)
+
+Enforced in code, never by the model:
+
+- Every run is clamped to `maxSecondsPerRun` and a per-day `maxSecondsPerDay`
+  budget (reset at midnight).
+- The plug is always switched **off in a `finally`**, and OFF is **re-sent**
+  (belt-and-suspenders) after every run.
+- The pump plug is forced **OFF on service startup and shutdown**, so a crash
+  mid-watering can't leave it running.
+- The brain's `waterTopUpMl` is validated and capped at 500 ml before it can act.
+
+Start with conservative caps and calibrate `mlPerSecond` (below).
+
+## Requirements
+
+- Bun (`curl -fsSL https://bun.sh/install | bash`)
+- `ffmpeg` on `PATH` (only needed for RTSP cameras; not needed in mock mode)
 
 ## Run on a Mac (mock mode)
 
 ```sh
 cd software
 bun install
-SAMOGROW_MOCK=1 bun run src/main.ts   # no hardware, log-only switches, placeholder photos
+SAMOGROW_MOCK=1 bun run src/main.ts   # no hardware, log-only plugs, placeholder photos
 ```
 
 With no Telegram token set it runs headless (controller only) and logs its
-light-schedule decisions. Quality gates:
+light-schedule decision. Quality gates:
 
 ```sh
 bun install
@@ -42,18 +70,40 @@ bunx tsc --noEmit
 bun test
 ```
 
-## Run on a Raspberry Pi
+## Run for real (Mac or Linux VM)
 
-1. Clone the repo to `/home/pi/samogrow` (so the layout is `/home/pi/samogrow/software`).
-2. `cd /home/pi/samogrow/software && ./deploy/install.sh` — installs Bun, dependencies,
-   camera/GPIO tools, and the systemd unit.
-3. Create `/home/pi/samogrow/.env` from `software/.env.example`.
-4. Optionally create `config.json` from `config.example.json` and tune pins/schedule.
-5. `sudo systemctl start samogrow` and watch with `journalctl -u samogrow -f`.
+1. `cd software && bun install` (and install `ffmpeg`).
+2. Copy `.env.example` to `.env` and fill in secrets. **Bun auto-loads `.env`**
+   from the working directory, so no extra loader is needed.
+3. Copy `config.example.json` to `config.json` and set your plug IPs, camera
+   URLs, schedule, and pump caps.
+4. `bun run src/main.ts` (or install a service — see `deploy/`).
 
-GPIO output is active-high. On a Pi 5 the code uses `pinctrl`; on older images it
-falls back to `gpioset`. To drive the light via a TP-Link Kasa smart plug instead
-of a relay, set `light.kasaHost` to the plug's IP (spoken to directly over TCP 9999).
+- **Linux/systemd:** `./deploy/install.sh` installs Bun, ffmpeg, and the
+  `deploy/samogrow.service` unit (edit its `User`/paths first).
+- **macOS/launchd:** edit and load `deploy/com.samogrow.plist`.
+
+### Smart plugs
+
+v1 speaks the **Kasa** local protocol directly (TCP 9999). Use a Kasa-class plug
+— **KP115 / EP10 / HS103**. Set `light.plugHost` / `pump.plugHost` to each plug's
+LAN IP. Give the plugs **static IPs or DHCP reservations** so the addresses don't
+change. **Tapo** plugs use an encrypted KLAP handshake and are not supported in
+v1 (setting `plugType: "tapo"` throws with guidance); use a Kasa plug, or drive a
+Tapo plug from an external CLI.
+
+### Cameras
+
+Each entry in `cameras.devices` is a URL:
+
+- RTSP: `rtsp://user:pass@192.168.1.50:554/stream1` (e.g. Tapo C110 — create a
+  camera account in the Tapo app under *Advanced → Camera Account*, and use the
+  device's LAN IP). Snapshotted with `ffmpeg -rtsp_transport tcp -i <url> -frames:v 1`.
+- HTTP: `http://user:pass@192.168.1.51/snapshot.jpg` for cameras exposing a
+  single-frame endpoint (Basic auth from the URL is applied automatically).
+
+Multiple cameras are supported; one failing camera never stops the loop. Give
+cameras static IPs / DHCP reservations too.
 
 ## Telegram setup
 
@@ -81,12 +131,12 @@ an alert comes with **[Water 100 ml] [Ignore]** buttons.
 ## Calibrating the pump (`mlPerSecond`)
 
 Put the pump's outflow into a measuring cup and run it for a known time — e.g.
-`/water` a small amount, or run the pump for 10 s — then measure the volume:
+`/water` a small amount — then measure the volume:
 
 ```
 mlPerSecond = millilitres_dispensed / seconds_run
 ```
 
 Set the result in `config.json` under `pump.mlPerSecond`. Redo this if you change
-tubing, head height, or pump voltage. `maxSecondsPerRun` and `maxSecondsPerDay` bound
+tubing, head height, or pump/plug. `maxSecondsPerRun` and `maxSecondsPerDay` bound
 the worst case, so start conservative.

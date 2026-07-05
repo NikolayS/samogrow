@@ -72,6 +72,7 @@ export class Controller {
   private readonly startedAt = Date.now();
   private callbacks: ControllerCallbacks = {};
   private analyzing = false;
+  private firstTick = true;
 
   constructor(
     private readonly cfg: Config,
@@ -108,6 +109,13 @@ export class Controller {
       }
 
       const desired = resolveLightState(now, this.cfg.light.onHour, this.cfg.light.offHour, this.override);
+      if (this.firstTick) {
+        this.log(
+          `light schedule decision: ${desired ? "ON" : "OFF"} (hour ${now.getHours()}, ` +
+            `window ${this.cfg.light.onHour}:00–${this.cfg.light.offHour}:00)`,
+        );
+        this.firstTick = false;
+      }
       if (desired !== this.hw.light.isOn) {
         this.log(`light schedule -> ${desired ? "ON" : "OFF"} (hour ${now.getHours()})`);
         desired ? await this.hw.light.on() : await this.hw.light.off();

@@ -2,17 +2,21 @@
   "light": {
     "onHour": 7,
     "offHour": 23,
-    "gpioPin": 17,
-    "kasaHost": ""
+    "plugHost": "192.168.1.40",
+    "plugType": "kasa"
   },
   "pump": {
-    "gpioPin": 27,
+    "plugHost": "192.168.1.41",
+    "plugType": "kasa",
     "maxSecondsPerRun": 30,
     "maxSecondsPerDay": 180,
     "mlPerSecond": 15
   },
   "cameras": {
-    "devices": ["picamera:0"],
+    "devices": [
+      "rtsp://user:pass@192.168.1.50:554/stream1",
+      "http://user:pass@192.168.1.51/snapshot.jpg"
+    ],
     "width": 1920,
     "height": 1080
   },
