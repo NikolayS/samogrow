@@ -13,13 +13,34 @@ machine on the same LAN — a laptop, a small VM, a NAS — and controls the gar
 entirely over Wi-Fi:
 
 - **Grow light** → a Kasa smart plug (local protocol, no cloud).
-- **Pump** → a *second* Kasa smart plug switching a cheap submersible pump.
-  "Watering" is just: plug on for N seconds, then off.
+- **Pump** → *optional*: a *second* Kasa smart plug switching a cheap submersible
+  pump. "Watering" is just: plug on for N seconds, then off. Leave `pump.plugHost`
+  empty and there's no pump at all — the garden runs in **manual watering mode**
+  (below).
 - **Camera(s)** → Wi-Fi camera(s) exposing an RTSP stream (snapshotted with
   `ffmpeg`) or a plain HTTP snapshot URL.
 
 Because watering is only a timed plug switch, the pump safety caps are the sole
 flood/dry-run protection — see below.
+
+### Watering: start manual, upgrade to automatic
+
+Watering comes in two tiers, chosen by whether `pump.plugHost` is set:
+
+- **Manual mode (Tier A, the default).** Leave `pump.plugHost` empty (as shipped
+  in `config.example.json`) to start **without a pump** — ideal for a Kratky-style
+  passive setup. No pump plug is built, nothing is forced off on startup, and
+  pump-health monitoring is off. When the AI decides the reservoir needs a top-up
+  (or reads the sight tube as low), it doesn't pump — it sends a Telegram
+  **reminder**: `🪣 Time to water: add roughly X ml (about Y cups/liters)…` with a
+  **[Done ✓]** button. Tapping it (or `/water`) logs the top-up so the water-usage
+  trend keeps working. If you don't acknowledge, it reminds again on the next
+  analysis cycle (at most once per cycle). `/status` shows `Watering: manual
+  (AI reminds you)`.
+- **Automatic mode (Tier B).** Set `pump.plugHost` to your pump plug's LAN IP to
+  **upgrade to automatic top-up** — the AI runs the pump within the safety caps.
+  No other changes needed; everything else (caps, calibration, health lockout)
+  applies as described below.
 
 ## Architecture
 
@@ -95,8 +116,11 @@ bun test
 1. `cd software && bun install` (and install `ffmpeg`).
 2. Copy `.env.example` to `.env` and fill in secrets. **Bun auto-loads `.env`**
    from the working directory, so no extra loader is needed.
-3. Copy `config.example.json` to `config.json` and set your plug IPs, camera
-   URLs, schedule, and pump caps.
+3. Copy `config.example.json` to `config.json` and set your light plug IP, camera
+   URLs, and schedule. It ships with `pump.plugHost` empty — **manual watering
+   mode** (the AI reminds you to top up by hand). Add your pump plug's IP to
+   `pump.plugHost` whenever you want to upgrade to automatic top-up; nothing else
+   changes.
 4. `bun run src/main.ts` (or install a service — see `deploy/`).
 
 - **Linux/systemd:** `./deploy/install.sh` installs Bun, ffmpeg, and the

@@ -46,6 +46,8 @@ function makeController(overrides: Partial<ConvController> = {}) {
     historyText: (d) => `HIST ${d}`,
     configText: () => "CFG",
     photoNow: async () => ["/tmp/p1.jpg"],
+    isManual: false,
+    manualWaterRecommendation: () => 0,
     waterNow: async (ml) => {
       calls.watered.push(ml);
       return ml;
@@ -98,6 +100,16 @@ describe("runConversation", () => {
     const client = new FakeClient([toolMsg("set_config", { key: "light.onHour", value: 6 }), textMsg("Done.")]);
     await runConversation(client, cfg, controller, [], "lights on at 6");
     expect(calls.set).toEqual([["light.onHour", 6]]);
+  });
+
+  test("water in manual mode explains instead of dispensing", async () => {
+    const { controller, calls } = makeController({ isManual: true, manualWaterRecommendation: () => 150 });
+    const client = new FakeClient([toolMsg("water", { ml: 120 }), textMsg("Add ~120 ml by hand.")]);
+    const res = await runConversation(client, cfg, controller, [], "water it");
+    expect(calls.watered).toEqual([]); // NOT dispensed
+    expect(res.confirmWaterMl).toBeUndefined();
+    // the model saw a manual-mode explanation (it relays that in its reply)
+    expect(res.reply).toContain("120");
   });
 
   test("carries prior history forward", async () => {

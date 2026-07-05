@@ -573,26 +573,36 @@ export class Pump {
 
 export class Hardware {
   readonly light: Switch;
-  readonly pump: Pump;
+  // Null in manual watering mode (no pump.plugHost configured): there is no pump
+  // plug to switch, so no pump is built, nothing is forced off on startup, and
+  // pump-health monitoring is disabled. The controller reminds the owner to water
+  // by hand instead. Add pump.plugHost to upgrade to automatic top-up.
+  readonly pump: Pump | null;
+  readonly isManual: boolean;
 
   constructor(cfg: Config) {
+    this.isManual = !cfg.pump.plugHost.trim();
     if (cfg.mockHardware) {
       this.light = new MockSwitch("light");
-      this.pump = new Pump(
-        new MockSwitch("pump"),
-        cfg.pump.maxSecondsPerRun,
-        cfg.pump.maxSecondsPerDay,
-        cfg.pump.mlPerSecond,
-      );
+      this.pump = this.isManual
+        ? null
+        : new Pump(
+            new MockSwitch("pump"),
+            cfg.pump.maxSecondsPerRun,
+            cfg.pump.maxSecondsPerDay,
+            cfg.pump.mlPerSecond,
+          );
       return;
     }
     const creds: TplinkCreds = { email: cfg.tplinkEmail, password: cfg.tplinkPassword };
     this.light = makePlugSwitch(cfg.light.plugType, cfg.light.plugHost, "light", creds);
-    this.pump = new Pump(
-      makePlugSwitch(cfg.pump.plugType, cfg.pump.plugHost, "pump", creds),
-      cfg.pump.maxSecondsPerRun,
-      cfg.pump.maxSecondsPerDay,
-      cfg.pump.mlPerSecond,
-    );
+    this.pump = this.isManual
+      ? null
+      : new Pump(
+          makePlugSwitch(cfg.pump.plugType, cfg.pump.plugHost, "pump", creds),
+          cfg.pump.maxSecondsPerRun,
+          cfg.pump.maxSecondsPerDay,
+          cfg.pump.mlPerSecond,
+        );
   }
 }

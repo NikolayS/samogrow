@@ -27,8 +27,9 @@ async function main(): Promise<void> {
 
   const hw = new Hardware(cfg);
   // Safety: force the pump plug OFF on startup in case a previous run crashed
-  // mid-watering and left it on.
-  await hw.pump.ensureOff();
+  // mid-watering and left it on. In manual mode there is no pump to switch.
+  if (hw.pump) await hw.pump.ensureOff();
+  else log("manual watering mode (no pump.plugHost) — the AI will remind you to water by hand");
   const db = new Db(cfg);
   const brain = new Brain(cfg);
   const controller = new Controller(cfg, hw, db, brain, baseCaps, overrides);
@@ -51,7 +52,7 @@ async function main(): Promise<void> {
     log(`received ${sig}, shutting down`);
     controller.stop();
     // Safety: force the pump plug OFF (twice). Light is left as-is.
-    await hw.pump.ensureOff().catch(() => {});
+    if (hw.pump) await hw.pump.ensureOff().catch(() => {});
     if (bot) await bot.stop().catch(() => {});
     db.logEvent("shutdown", {});
     db.close();

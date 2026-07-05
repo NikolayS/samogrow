@@ -7,7 +7,7 @@ import { Bot, InlineKeyboard, InputFile } from "grammy";
 import Anthropic from "@anthropic-ai/sdk";
 import { join } from "node:path";
 import type { Config } from "./config.ts";
-import type { Controller, DeepReviewPayload } from "./controller.ts";
+import type { Controller, DeepReviewPayload, WaterReminderPayload } from "./controller.ts";
 import type { Verdict, DeepRecommendation } from "./brain.ts";
 import { runConversation } from "./conversation.ts";
 import { buildTimelapse } from "./timelapse.ts";
@@ -65,6 +65,7 @@ export class GardenBot {
       onReport: (p) => void this.pushReport(p.text, p.photo),
       onDeepReview: (p) => void this.pushReview(p),
       onPumpAlert: (p) => void this.pushPumpAlert(p.reason),
+      onWaterReminder: (p) => void this.pushWaterReminder(p),
     });
   }
 
@@ -78,7 +79,7 @@ export class GardenBot {
         [
           "/status – light, last analysis (per-pot), pump budget, uptime",
           "/photo – capture and send photos now",
-          "/water <ml> – water now (default 100, asks to confirm)",
+          "/water <ml> – water now (default 100, asks to confirm; in manual mode, logs a hand top-up)",
           "/light on|off|auto [minutes] – override the light",
           "/report – send the daily digest now (with trend sparklines)",
           "/analyze – run an AI check now",
@@ -98,8 +99,12 @@ export class GardenBot {
       const s = this.controller.status();
       const lines = [
         `Light: ${s.lightOn ? "ON" : "OFF"}${s.override ? ` (override ${s.override.mode})` : ""}`,
-        `Pump budget: ${s.pumpBudgetUsedSeconds}s / ${s.pumpBudgetTotalSeconds}s today`,
-        s.pumpLocked ? `⚠️ Pump LOCKED: ${s.pumpLockReason}` : "Pump: healthy",
+        ...(s.manual
+          ? ["Watering: manual (AI reminds you)"]
+          : [
+              `Pump budget: ${s.pumpBudgetUsedSeconds}s / ${s.pumpBudgetTotalSeconds}s today`,
+              s.pumpLocked ? `⚠️ Pump LOCKED: ${s.pumpLockReason}` : "Pump: healthy",
+            ]),
         `Uptime: ${fmtUptime(s.uptimeSeconds)}`,
         s.lastVerdict
           ? `Last check (${s.lastAnalysisTs}): health ${s.lastVerdict.healthScore}/10 — ${s.lastVerdict.summary}`
@@ -119,6 +124,11 @@ export class GardenBot {
 
     b.command("water", (ctx) => {
       const arg = ctx.match.trim();
+      if (this.controller.status().manual) {
+        const ml = arg ? Number(arg) : 0;
+        if (arg && (!Number.isFinite(ml) || ml <= 0)) return ctx.reply("Usage: /water <ml>");
+        return ctx.reply(...this.manualWaterReply(ml));
+      }
       const ml = arg ? Number(arg) : 100;
       if (!Number.isFinite(ml) || ml <= 0) return ctx.reply("Usage: /water <ml>");
       return ctx.reply(...this.waterConfirm(ml));
@@ -211,6 +221,21 @@ export class GardenBot {
     return [`Confirm watering ${ml} ml?`, { reply_markup: kb }];
   }
 
+  // Manual watering mode: no pump to run, so echo the current recommendation and
+  // offer a [Done ✓] button that logs the top-up (keeping the water trend alive).
+  // `ml` is the owner's requested amount (0 => use the AI's recommendation).
+  private manualWaterReply(ml: number): [string, { reply_markup: InlineKeyboard }] {
+    const rec = this.controller.manualWaterRecommendation();
+    const amount = ml > 0 ? ml : rec > 0 ? rec : 100;
+    const recLine = rec > 0 ? `Current recommendation: ~${rec} ml.` : "No top-up recommended right now.";
+    const kb = new InlineKeyboard().text(`Done ✓ (log ${Math.round(amount)} ml)`, `mwater:${amount}`);
+    return [
+      `🪣 Manual watering mode — there's no pump, so add water by hand.\n${recLine}\n` +
+        `Once you've topped up, tap Done and I'll log it for the trends.`,
+      { reply_markup: kb },
+    ];
+  }
+
   private registerCallbacks(): void {
     this.bot.callbackQuery(/^water:(\d+(?:\.\d+)?)$/, async (ctx) => {
       const ml = Number(ctx.match![1]);
@@ -227,6 +252,14 @@ export class GardenBot {
       await ctx.editMessageText(
         actual > 0 ? `💧 Override: watered ${actual.toFixed(0)} ml (pump stays locked).` : "Watering skipped (budget reached).",
       );
+    });
+
+    // Manual watering mode: owner tapped [Done ✓] — log the top-up so trends track it.
+    this.bot.callbackQuery(/^mwater:(\d+(?:\.\d+)?)$/, async (ctx) => {
+      const ml = Number(ctx.match![1]);
+      await ctx.answerCallbackQuery();
+      const logged = this.controller.logManualWatering(ml);
+      await ctx.editMessageText(`✅ Logged manual watering: ~${logged.toFixed(0)} ml. Trends updated.`);
     });
 
     // Acknowledge a pump fix and re-enable automatic watering.
@@ -294,6 +327,20 @@ export class GardenBot {
       );
     } catch (e) {
       console.error(`[bot] failed to push pump alert: ${e}`);
+    }
+  }
+
+  private async pushWaterReminder(p: WaterReminderPayload): Promise<void> {
+    const kb = new InlineKeyboard().text("Done ✓", `mwater:${p.ml}`);
+    const prefix = p.repeat ? "Still needs water — " : "";
+    try {
+      await this.bot.api.sendMessage(
+        this.chatId,
+        `${prefix}${p.text}\nTap Done once you've watered and I'll log it for the trends.`,
+        { reply_markup: kb },
+      );
+    } catch (e) {
+      console.error(`[bot] failed to push water reminder: ${e}`);
     }
   }
 

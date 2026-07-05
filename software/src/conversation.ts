@@ -23,6 +23,9 @@ export interface ConvController {
   historyText(days: number): string;
   configText(): string;
   photoNow(): Promise<string[]>;
+  // Manual watering mode (no pump): water() explains rather than pumps.
+  readonly isManual: boolean;
+  manualWaterRecommendation(): number;
   waterNow(ml: number): Promise<number>;
   lightOverride(mode: "on" | "off" | "auto", minutes: number): Promise<void>;
   setSetting(
@@ -128,6 +131,15 @@ async function dispatch(
     case "water": {
       const ml = Number(input.ml);
       if (!Number.isFinite(ml) || ml <= 0) return "Invalid amount.";
+      if (controller.isManual) {
+        const rec = controller.manualWaterRecommendation();
+        return (
+          `This garden is in manual watering mode — there is no pump, so I can't dispense water automatically. ` +
+          `Please add roughly ${Math.round(ml)} ml to the reservoir by hand` +
+          (rec > 0 ? ` (the current recommendation is about ${rec} ml)` : "") +
+          `. Once you've topped up, tap Done on the reminder or send /water and I'll log it so the water trend stays accurate.`
+        );
+      }
       if (ml > WATER_CONFIRM_THRESHOLD) {
         sink.confirmWaterMl = ml;
         return `Watering ${ml} ml exceeds the ${WATER_CONFIRM_THRESHOLD} ml auto-limit; a confirmation button has been shown to the owner. Ask them to tap it to proceed.`;

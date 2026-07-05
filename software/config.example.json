@@ -6,8 +6,7 @@
     "plugType": "kasa"
   },
   "pump": {
-    "plugHost": "192.168.1.41",
-    "plugType": "kasa",
+    "plugHost": "",
     "maxSecondsPerRun": 30,
     "maxSecondsPerDay": 180,
     "mlPerSecond": 15,

@@ -68,16 +68,34 @@ export interface DeepReviewPayload {
 export interface PumpAlertPayload {
   reason: string;
 }
+// Manual watering mode (no pump): the brain wants water, so ask the owner to add
+// it by hand. `repeat` is true when a previous reminder is still unacknowledged.
+export interface WaterReminderPayload {
+  ml: number;
+  text: string;
+  repeat: boolean;
+}
 export interface ControllerCallbacks {
   onAlert?: (p: AlertPayload) => void;
   onReport?: (p: ReportPayload) => void;
   onDeepReview?: (p: DeepReviewPayload) => void;
   onPumpAlert?: (p: PumpAlertPayload) => void;
+  onWaterReminder?: (p: WaterReminderPayload) => void;
+}
+
+// Human-readable "add roughly X ml (about Y)" reminder for manual watering.
+// Under ~1 L we quote cups (240 ml), at/above 1 L we quote litres.
+export function formatWaterReminder(ml: number): string {
+  if (!(ml > 0)) return "🪣 Time to water: top up the reservoir";
+  const approx =
+    ml >= 1000 ? `${(ml / 1000).toFixed(1)} liters` : `${Math.max(0.25, Math.round((ml / 240) * 4) / 4)} cups`;
+  return `🪣 Time to water: add roughly ${Math.round(ml)} ml (about ${approx}) to the reservoir`;
 }
 
 export interface Status {
   lightOn: boolean;
   override: LightOverride | null;
+  manual: boolean; // manual watering mode (no pump) — the AI reminds the owner
   pumpBudgetUsedSeconds: number;
   pumpBudgetTotalSeconds: number;
   pumpLocked: boolean;
@@ -102,6 +120,10 @@ export class Controller {
   private analyzing = false;
   private reviewing = false;
   private firstTick = true;
+  // Manual watering mode: the ml of an outstanding, still-unacknowledged reminder
+  // (0 = none). Used to escalate ("still needs water") on the next cycle and to
+  // answer /water with the current recommendation.
+  private pendingManualWaterMl = 0;
 
   constructor(
     private readonly cfg: Config,
@@ -118,6 +140,12 @@ export class Controller {
     this.callbacks = cb;
   }
 
+  // Manual watering mode: no pump plug is configured, so watering is a Telegram
+  // reminder to the owner rather than an automatic pump run.
+  get isManual(): boolean {
+    return this.hw.pump === null;
+  }
+
   start(): void {
     this.restoreLockout();
     void this.tick();
@@ -126,6 +154,7 @@ export class Controller {
 
   // Re-apply a persisted pump lockout after a restart (safety survives crashes).
   restoreLockout(): void {
+    if (!this.hw.pump) return; // manual mode: no pump to lock
     const lk = this.db.getPumpLock();
     if (lk?.locked && !this.hw.pump.isLocked) {
       this.hw.pump.lock(lk.reason);
@@ -214,8 +243,8 @@ export class Controller {
       }
       const { verdict, raw } = await this.brain.analyze(photos, {
         hoursSinceLastTopUp: this.db.hoursSinceLastTopUp(),
-        pumpBudgetUsedSeconds: this.hw.pump.budgetUsedSeconds,
-        pumpBudgetTotalSeconds: this.hw.pump.budgetTotalSeconds,
+        pumpBudgetUsedSeconds: this.hw.pump?.budgetUsedSeconds ?? 0,
+        pumpBudgetTotalSeconds: this.hw.pump?.budgetTotalSeconds ?? 0,
         lightOn: this.hw.light.isOn,
         recentEvents: this.db.recentEvents(10).map((e) => ({ ts: e.ts, kind: e.kind })),
       });
@@ -230,8 +259,13 @@ export class Controller {
       this.db.logEvent("analysis", { healthScore: verdict.healthScore, alert: verdict.alert, reservoir: verdict.reservoirLevel });
       this.log(`analysis: health ${verdict.healthScore}/10 — ${verdict.summary}`);
 
-      if (verdict.waterTopUpMl > 0) {
-        const ml = await this.hw.pump.waterMl(verdict.waterTopUpMl);
+      const pump = this.hw.pump;
+      if (!pump) {
+        if (verdict.waterTopUpMl > 0 || verdict.reservoirLevel === "low") {
+          this.remindManualWater(verdict.waterTopUpMl);
+        }
+      } else if (verdict.waterTopUpMl > 0) {
+        const ml = await pump.waterMl(verdict.waterTopUpMl);
         if (ml > 0) this.db.logEvent("water", { requestedMl: verdict.waterTopUpMl, actualMl: ml, source: "brain" });
         this.evalPumpHealth("brain");
       }
@@ -256,6 +290,7 @@ export class Controller {
   // and, if the draw is below the health floor (dead / unplugged / running dry),
   // locks the pump against automatic runs and alerts the owner.
   private evalPumpHealth(source: string): void {
+    if (!this.hw.pump) return; // manual mode: no pump to monitor
     const watts = this.hw.pump.lastRunWatts;
     const secs = this.hw.pump.lastRunSeconds;
     if (watts === null || secs < PUMP_HEALTH_MIN_SECONDS) return; // unmeasured / too short to trust
@@ -272,6 +307,7 @@ export class Controller {
 
   // Clear a pump lockout (owner acknowledged the fix).
   enablePump(): void {
+    if (!this.hw.pump) return; // manual mode: nothing to unlock
     this.hw.pump.unlock();
     this.db.setPumpLock(false, "");
     this.db.logEvent("pumpUnlock", {});
@@ -279,7 +315,35 @@ export class Controller {
   }
 
   pumpLocked(): boolean {
-    return this.hw.pump.isLocked;
+    return this.hw.pump?.isLocked ?? false;
+  }
+
+  // --- manual watering mode ------------------------------------------------
+
+  // Emit a manual-watering reminder (no pump). Records the outstanding amount so
+  // the next cycle can escalate and /water can echo the current recommendation.
+  private remindManualWater(ml: number): void {
+    const repeat = this.pendingManualWaterMl > 0;
+    this.pendingManualWaterMl = ml;
+    this.db.logEvent("waterReminder", { ml, repeat });
+    this.callbacks.onWaterReminder?.({ ml, text: formatWaterReminder(ml), repeat });
+    this.log(`manual watering reminder: ~${ml} ml${repeat ? " (repeat)" : ""}`);
+  }
+
+  // The ml the owner is currently being asked to add by hand (0 = none pending).
+  manualWaterRecommendation(): number {
+    return this.pendingManualWaterMl || (this.lastAnalysis()?.waterTopUpMl ?? 0);
+  }
+
+  // Owner acknowledged they watered by hand (tapped [Done ✓] or /water in manual
+  // mode). Log it as a water event so trends keep tracking usage, and clear the
+  // outstanding reminder.
+  logManualWatering(ml: number): number {
+    const actualMl = ml > 0 ? ml : this.manualWaterRecommendation();
+    this.db.logEvent("water", { requestedMl: actualMl, actualMl, source: "manual" });
+    this.pendingManualWaterMl = 0;
+    this.log(`manual watering logged: ${actualMl} ml`);
+    return actualMl;
   }
 
   // Per-pot one-liner from a verdict, e.g. "Pots: #1 basil vegetative 8/10 | ...".
@@ -320,7 +384,9 @@ export class Controller {
       ...(pots ? [pots] : []),
       "",
       this.trendSummary(14),
-      `Pump budget today: ${this.hw.pump.budgetUsedSeconds}s / ${this.hw.pump.budgetTotalSeconds}s`,
+      this.hw.pump
+        ? `Pump budget today: ${this.hw.pump.budgetUsedSeconds}s / ${this.hw.pump.budgetTotalSeconds}s`
+        : "Watering: manual (add water when reminded)",
     ];
     return lines.join("\n");
   }
@@ -340,10 +406,11 @@ export class Controller {
     return {
       lightOn: this.hw.light.isOn,
       override: this.override,
-      pumpBudgetUsedSeconds: this.hw.pump.budgetUsedSeconds,
-      pumpBudgetTotalSeconds: this.hw.pump.budgetTotalSeconds,
-      pumpLocked: this.hw.pump.isLocked,
-      pumpLockReason: this.hw.pump.isLocked ? this.hw.pump.lockoutReason : null,
+      manual: this.isManual,
+      pumpBudgetUsedSeconds: this.hw.pump?.budgetUsedSeconds ?? 0,
+      pumpBudgetTotalSeconds: this.hw.pump?.budgetTotalSeconds ?? 0,
+      pumpLocked: this.hw.pump?.isLocked ?? false,
+      pumpLockReason: this.hw.pump?.isLocked ? this.hw.pump.lockoutReason : null,
       uptimeSeconds: Math.floor((Date.now() - this.startedAt) / 1000),
       lastVerdict: last?.verdict ?? null,
       lastAnalysisTs: last?.ts ?? null,
@@ -360,6 +427,9 @@ export class Controller {
   // Manual watering. `override` bypasses a pump lockout (explicit owner intent);
   // the per-run/per-day caps still apply.
   async waterNow(ml: number, opts: { override?: boolean } = {}): Promise<number> {
+    // Manual mode: there is no pump, so "watering" is logging that the owner
+    // topped up by hand — keeps the water-usage trend intact.
+    if (!this.hw.pump) return this.logManualWatering(ml);
     const actual = await this.hw.pump.waterMl(ml, opts.override ?? false);
     this.db.logEvent("water", { requestedMl: ml, actualMl: actual, source: opts.override ? "manual-override" : "manual" });
     if (actual > 0) this.evalPumpHealth(opts.override ? "manual-override" : "manual");
@@ -448,7 +518,7 @@ export class Controller {
     this.overrides[res.key] = res.value;
     saveOverrides(this.cfg.dataDir, this.overrides);
     applyOverrides(this.cfg, this.overrides, this.baseCaps);
-    this.hw.pump.setCaps(this.cfg.pump.maxSecondsPerRun, this.cfg.pump.maxSecondsPerDay);
+    this.hw.pump?.setCaps(this.cfg.pump.maxSecondsPerRun, this.cfg.pump.maxSecondsPerDay);
     this.db.logEvent("set", { key: res.key, value: res.value });
     this.log(`set ${res.key} = ${res.value}`);
     return res;
@@ -464,7 +534,9 @@ export class Controller {
     const s = this.status();
     const lines = [
       `Light: ${s.lightOn ? "ON" : "OFF"}${s.override ? ` (override ${s.override.mode})` : ""}`,
-      `Pump budget: ${s.pumpBudgetUsedSeconds}s / ${s.pumpBudgetTotalSeconds}s today`,
+      s.manual
+        ? "Watering: manual (AI reminds you)"
+        : `Pump budget: ${s.pumpBudgetUsedSeconds}s / ${s.pumpBudgetTotalSeconds}s today`,
       ...(s.pumpLocked ? [`⚠️ Pump LOCKED: ${s.pumpLockReason}`] : []),
       `Uptime: ${s.uptimeSeconds}s`,
       s.lastVerdict
