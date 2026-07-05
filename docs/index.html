@@ -173,8 +173,7 @@
   }
   .node .eyebrow { font-size: .66rem; }
   .node h3 { font-family: var(--font-serif); font-weight: 400; font-size: 1.3rem; margin: 8px 0 8px; }
-  .node ul { margin: 0; padding: 0; list-style: none; font-family: var(--font-mono); font-size: .76rem; line-height: 1.9; color: var(--ink-soft); }
-  .node ul li::before { content: "› "; color: var(--leaf); }
+  .node p { margin: 0; font-family: var(--font-serif); font-size: .95rem; line-height: 1.5; color: var(--ink-soft); }
 
   .brain-node { border-left: 3px solid var(--leaf); }
   .cloud-node { border-top: 3px dashed var(--soil); margin-top: 18px; }
@@ -193,7 +192,7 @@
     .link-rail .bar { width: 1px; height: 30px; background: repeating-linear-gradient(0deg, var(--leaf) 0 6px, transparent 6px 12px); }
     .cloud-node { margin-top: 14px; }
   }
-  .arrow { font-family: var(--font-mono); font-size: .82rem; color: var(--ink-soft); text-align: center; margin-top: 26px; padding-top: 20px; border-top: 1px dotted var(--line); }
+  .arrow { font-family: var(--font-serif); font-style: italic; font-size: 1rem; color: var(--ink-soft); text-align: center; max-width: 62ch; margin: 26px auto 0; padding-top: 20px; border-top: 1px dotted var(--line); }
   .arrow-flow b { color: var(--leaf); }
 
   /* ---------- features ---------- */
@@ -380,20 +379,12 @@
           <div class="node brain-node">
             <span class="eyebrow">The brain — your laptop / VM</span>
             <h3>samogrow service</h3>
-            <ul>
-              <li>Bun + TypeScript</li>
-              <li>Claude vision → JSON verdict</li>
-              <li>Toggles light &amp; pump plugs</li>
-              <li>grammY Telegram bot</li>
-            </ul>
+            <p>A small program that sends each photo to Claude, reads back the verdict, switches the light and pump plugs, and runs the Telegram bot. It is the only thing you maintain.</p>
           </div>
           <div class="node cloud-node">
             <span class="eyebrow" style="color:var(--soil)">Cloud</span>
-            <h3>Claude API · Telegram</h3>
-            <ul>
-              <li>Haiku vision, structured JSON</li>
-              <li>Commands, alerts, daily digest</li>
-            </ul>
+            <h3>Claude &amp; Telegram</h3>
+            <p>Claude reads each photo and returns a structured verdict; Telegram carries the daily digest, alerts, and your commands back and forth.</p>
           </div>
         </div>
 
@@ -424,8 +415,9 @@
           </div>
         </div>
       </div>
-      <p class="arrow-flow arrow mono">
-        snapshot → <b>Claude</b> → JSON verdict → <b>toggle plugs</b> (within safety caps) → Telegram
+      <p class="arrow-flow arrow">
+        Each cycle: the brain grabs a snapshot, <b>Claude</b> returns a verdict, the brain
+        <b>switches the plugs</b> within fixed safety caps, and the result lands in Telegram.
       </p>
 
       <figure class="shot schematic">
