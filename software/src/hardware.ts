@@ -2,9 +2,12 @@
 //
 // The garden device has no compute of its own — this service runs on any
 // always-on machine (laptop / VM) and talks to smart plugs over the local
-// network. v1 speaks the TP-Link Kasa local protocol directly (TCP 9999,
-// trivial XOR-autokey cipher). Tapo plugs use an encrypted KLAP handshake that
-// is out of scope for v1 (see below).
+// network. Two transports are supported, both local-only:
+//   - "kasa":  legacy TP-Link local protocol (TCP 9999, XOR-autokey cipher).
+//   - "klap":  the encrypted KLAP handshake newer Kasa firmware (KP125M and
+//              other 2023+ devices) requires; HTTP on port 80, AES-128-CBC.
+// When plugType is omitted the transport is auto-detected: probe legacy 9999
+// first (short timeout), fall back to KLAP, and remember what worked.
 //
 // Watering = pump plug ON for N seconds, then OFF. The pump safety caps are the
 // ONLY flood/dry-run protection, so OFF is sent defensively: always in a
@@ -14,6 +17,7 @@
 // In mock mode (no hardware) every switch is log-only.
 
 import { connect } from "node:net";
+import { createCipheriv, createDecipheriv, createHash, randomBytes } from "node:crypto";
 import type { Config, PlugType } from "./config.ts";
 
 function log(msg: string): void {
@@ -120,18 +124,263 @@ class KasaSwitch implements Switch {
   }
 }
 
-// Build a plug switch for the given type. Tapo is intentionally unsupported in
-// v1: its local API uses an encrypted KLAP/passthrough handshake that needs
-// account credentials and is far more involved than Kasa's. Use a Kasa-class
-// plug (KP115 / EP10 / HS103) for v1, or drive the Tapo plug via an external CLI.
-function makePlugSwitch(type: PlugType | undefined, host: string, name: string): Switch {
-  if ((type ?? "kasa") === "tapo") {
+// ---------------------------------------------------------------------------
+// KLAP protocol (newer Kasa firmware, e.g. KP125M — no longer speaks port 9999).
+//
+// Reference: python-kasa's KlapTransportV2 (kasa/transports/klaptransport.py).
+// HTTP on port 80. Handshake authenticates with the TP-Link cloud account the
+// plug was provisioned with (email + password) — no cloud round-trip; the auth
+// hash is exchanged locally. python-kasa also tries "default" credentials
+// (blank / Kasa-setup) as a fallback; we implement cloud-credential auth only.
+//
+//   handshake1: POST /app/handshake1, body = 16-byte random local_seed.
+//               response = remote_seed(16) + server_hash(32); the device sets a
+//               TP_SESSIONID cookie. Verify server_hash equals
+//               sha256(local_seed + remote_seed + auth_hash).
+//   handshake2: POST /app/handshake2, body = sha256(remote_seed + local_seed +
+//               auth_hash), carrying the session cookie. HTTP 200 = success.
+//   session keys (all sha256 over local_seed + remote_seed + auth_hash):
+//               key = sha256("lsk" + ...)[:16]           (AES-128 key)
+//               fulliv = sha256("iv"  + ...); iv = fulliv[:12];
+//               seq = signed int32 from fulliv[-4:]      (initial sequence)
+//               sig = sha256("ldk" + ...)[:28]           (signature prefix)
+//   request:    seq += 1; iv_full = iv + int32be(seq);
+//               ciphertext = AES-128-CBC(key, iv_full, PKCS7(json));
+//               body = sha256(sig + int32be(seq) + ciphertext) + ciphertext;
+//               POST /app/request?seq=<seq>, carrying the cookie.
+//               response body = signature(32) + ciphertext, decrypted with the
+//               same key/iv_full.
+//
+// auth_hash = sha256(sha1(email) + sha1(password)).
+
+const sha256 = (b: Buffer): Buffer => createHash("sha256").update(b).digest();
+const sha1 = (b: Buffer): Buffer => createHash("sha1").update(b).digest();
+const int32be = (n: number): Buffer => {
+  const b = Buffer.alloc(4);
+  b.writeInt32BE(n | 0, 0);
+  return b;
+};
+
+export function klapAuthHash(email: string, password: string): Buffer {
+  return sha256(Buffer.concat([sha1(Buffer.from(email, "utf8")), sha1(Buffer.from(password, "utf8"))]));
+}
+
+// The hash the device returns in handshake1; recomputed locally to authenticate
+// the device (and confirm our credentials match) before deriving session keys.
+export function klapServerHash(localSeed: Buffer, remoteSeed: Buffer, authHash: Buffer): Buffer {
+  return sha256(Buffer.concat([localSeed, remoteSeed, authHash]));
+}
+
+// The body we send in handshake2 (note the reversed seed order vs. handshake1).
+export function klapHandshake2Payload(localSeed: Buffer, remoteSeed: Buffer, authHash: Buffer): Buffer {
+  return sha256(Buffer.concat([remoteSeed, localSeed, authHash]));
+}
+
+export interface KlapKeys {
+  key: Buffer; // AES-128 key (16 bytes)
+  iv: Buffer; // IV prefix (12 bytes); full IV = iv + int32be(seq)
+  sig: Buffer; // signature prefix (28 bytes)
+  seq: number; // sequence counter; incremented before each request
+}
+
+export function deriveKlapKeys(localSeed: Buffer, remoteSeed: Buffer, authHash: Buffer): KlapKeys {
+  const seeds = Buffer.concat([localSeed, remoteSeed, authHash]);
+  const fulliv = sha256(Buffer.concat([Buffer.from("iv"), seeds]));
+  return {
+    key: sha256(Buffer.concat([Buffer.from("lsk"), seeds])).subarray(0, 16),
+    iv: fulliv.subarray(0, 12),
+    sig: sha256(Buffer.concat([Buffer.from("ldk"), seeds])).subarray(0, 28),
+    seq: fulliv.readInt32BE(28),
+  };
+}
+
+// Encrypt one request at the given sequence number. Returns signature(32) +
+// ciphertext, the exact body POSTed to /app/request?seq=<seq>.
+export function klapEncrypt(k: KlapKeys, seq: number, msg: string): Buffer {
+  const seqBuf = int32be(seq);
+  const cipher = createCipheriv("aes-128-cbc", k.key, Buffer.concat([k.iv, seqBuf]));
+  const ct = Buffer.concat([cipher.update(Buffer.from(msg, "utf8")), cipher.final()]);
+  const signature = sha256(Buffer.concat([k.sig, seqBuf, ct]));
+  return Buffer.concat([signature, ct]);
+}
+
+// Decrypt a response body (signature(32) + ciphertext) at the same seq used for
+// the request that produced it.
+export function klapDecrypt(k: KlapKeys, seq: number, body: Buffer): string {
+  const decipher = createDecipheriv("aes-128-cbc", k.key, Buffer.concat([k.iv, int32be(seq)]));
+  const pt = Buffer.concat([decipher.update(body.subarray(32)), decipher.final()]);
+  return pt.toString("utf8");
+}
+
+// Pull the TP_SESSIONID cookie out of a Set-Cookie header, returned as a
+// ready-to-send "TP_SESSIONID=..." Cookie value (or null if absent).
+function parseSessionCookie(setCookie: string | null): string | null {
+  const m = setCookie?.match(/TP_SESSIONID=[^;]+/);
+  return m ? m[0] : null;
+}
+
+// A single KLAP session to one plug: handshakes lazily, carries the session
+// cookie, and re-handshakes once if a request fails (session expiry).
+class KlapConnection {
+  private keys: KlapKeys | null = null;
+  private cookie: string | null = null;
+  constructor(
+    private readonly host: string,
+    private readonly authHash: Buffer,
+    private readonly timeoutMs = 5000,
+  ) {}
+
+  private async post(
+    path: string,
+    body: Buffer,
+    withCookie: boolean,
+  ): Promise<{ status: number; body: Buffer; cookie: string | null }> {
+    const headers: Record<string, string> = { "Content-Type": "application/octet-stream" };
+    if (withCookie && this.cookie) headers["Cookie"] = this.cookie;
+    const res = await fetch(`http://${this.host}${path}`, {
+      method: "POST",
+      headers,
+      body: new Uint8Array(body),
+      signal: AbortSignal.timeout(this.timeoutMs),
+    });
+    return {
+      status: res.status,
+      body: Buffer.from(await res.arrayBuffer()),
+      cookie: parseSessionCookie(res.headers.get("set-cookie")),
+    };
+  }
+
+  private async handshake(): Promise<void> {
+    const localSeed = randomBytes(16);
+    const r1 = await this.post("/app/handshake1", localSeed, false);
+    if (r1.status !== 200 || r1.body.length < 48) {
+      throw new Error(`KLAP handshake1 to ${this.host} failed (HTTP ${r1.status}, ${r1.body.length} bytes)`);
+    }
+    const remoteSeed = r1.body.subarray(0, 16);
+    const serverHash = r1.body.subarray(16, 48);
+    if (r1.cookie) this.cookie = r1.cookie;
+    if (!klapServerHash(localSeed, remoteSeed, this.authHash).equals(serverHash)) {
+      throw new Error(
+        `KLAP auth to ${this.host} failed — check SAMOGROW_TPLINK_EMAIL / SAMOGROW_TPLINK_PASSWORD`,
+      );
+    }
+    const r2 = await this.post("/app/handshake2", klapHandshake2Payload(localSeed, remoteSeed, this.authHash), true);
+    if (r2.status !== 200) throw new Error(`KLAP handshake2 to ${this.host} failed (HTTP ${r2.status})`);
+    this.keys = deriveKlapKeys(localSeed, remoteSeed, this.authHash);
+  }
+
+  private async send(payload: object): Promise<unknown> {
+    const k = this.keys!;
+    k.seq += 1;
+    const body = klapEncrypt(k, k.seq, JSON.stringify(payload));
+    const r = await this.post(`/app/request?seq=${k.seq}`, body, true);
+    if (r.status !== 200) throw new Error(`KLAP request to ${this.host} failed (HTTP ${r.status})`);
+    return JSON.parse(klapDecrypt(k, k.seq, r.body));
+  }
+
+  async request(payload: object): Promise<unknown> {
+    if (!this.keys) await this.handshake();
+    try {
+      return await this.send(payload);
+    } catch {
+      // Session likely expired or dropped — re-handshake once and retry.
+      this.keys = null;
+      await this.handshake();
+      return await this.send(payload);
+    }
+  }
+}
+
+class KlapSwitch implements Switch {
+  isOn = false;
+  private readonly conn: KlapConnection;
+  constructor(
+    private readonly host: string,
+    private readonly name: string,
+    authHash: Buffer,
+  ) {
+    this.conn = new KlapConnection(host, authHash);
+  }
+  private async setRelay(state: 0 | 1): Promise<void> {
+    await this.conn.request({ system: { set_relay_state: { state } } });
+  }
+  async on(): Promise<void> {
+    await this.setRelay(1);
+    this.isOn = true;
+    log(`${this.name} (klap ${this.host}) ON`);
+  }
+  async off(): Promise<void> {
+    await this.setRelay(0);
+    this.isOn = false;
+    log(`${this.name} (klap ${this.host}) OFF`);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Plug transport selection.
+
+export interface TplinkCreds {
+  email: string;
+  password: string;
+}
+
+function requireKlapAuth(name: string, creds: TplinkCreds): Buffer {
+  if (!creds.email || !creds.password) {
     throw new Error(
-      `${name}: Tapo plugs are not supported in v1. Use a Kasa-class plug ` +
-        `(KP115/EP10/HS103) with plugType "kasa", or drive the Tapo plug via an external CLI.`,
+      `${name}: KLAP plug needs TP-Link cloud credentials — set ` +
+        `SAMOGROW_TPLINK_EMAIL and SAMOGROW_TPLINK_PASSWORD.`,
     );
   }
-  return new KasaSwitch(host, name);
+  return klapAuthHash(creds.email, creds.password);
+}
+
+// Auto-detecting switch: on first use, probe the legacy Kasa protocol (short
+// timeout); if it answers, use it, otherwise fall back to KLAP. The chosen
+// transport is cached for the process lifetime.
+class AutoDetectSwitch implements Switch {
+  private inner: Switch | null = null;
+  private resolving: Promise<Switch> | null = null;
+  constructor(
+    private readonly host: string,
+    private readonly name: string,
+    private readonly creds: TplinkCreds,
+  ) {}
+
+  get isOn(): boolean {
+    return this.inner?.isOn ?? false;
+  }
+
+  private resolve(): Promise<Switch> {
+    if (this.inner) return Promise.resolve(this.inner);
+    if (this.resolving) return this.resolving;
+    this.resolving = (async () => {
+      try {
+        await kasaSend(this.host, { system: { get_sysinfo: {} } }, 1500);
+        log(`${this.name}: detected legacy Kasa protocol at ${this.host}`);
+        this.inner = new KasaSwitch(this.host, this.name);
+      } catch {
+        log(`${this.name}: legacy Kasa silent, using KLAP at ${this.host}`);
+        this.inner = new KlapSwitch(this.host, this.name, requireKlapAuth(this.name, this.creds));
+      }
+      return this.inner;
+    })();
+    return this.resolving;
+  }
+
+  async on(): Promise<void> {
+    await (await this.resolve()).on();
+  }
+  async off(): Promise<void> {
+    await (await this.resolve()).off();
+  }
+}
+
+// Build a plug switch for the given transport. Omitted plugType auto-detects
+// (legacy 9999, then KLAP). KLAP requires TP-Link cloud credentials in env.
+function makePlugSwitch(type: PlugType | undefined, host: string, name: string, creds: TplinkCreds): Switch {
+  if (type === "kasa") return new KasaSwitch(host, name);
+  if (type === "klap") return new KlapSwitch(host, name, requireKlapAuth(name, creds));
+  return new AutoDetectSwitch(host, name, creds);
 }
 
 // ---------------------------------------------------------------------------
@@ -248,9 +497,10 @@ export class Hardware {
       );
       return;
     }
-    this.light = makePlugSwitch(cfg.light.plugType, cfg.light.plugHost, "light");
+    const creds: TplinkCreds = { email: cfg.tplinkEmail, password: cfg.tplinkPassword };
+    this.light = makePlugSwitch(cfg.light.plugType, cfg.light.plugHost, "light", creds);
     this.pump = new Pump(
-      makePlugSwitch(cfg.pump.plugType, cfg.pump.plugHost, "pump"),
+      makePlugSwitch(cfg.pump.plugType, cfg.pump.plugHost, "pump", creds),
       cfg.pump.maxSecondsPerRun,
       cfg.pump.maxSecondsPerDay,
       cfg.pump.mlPerSecond,

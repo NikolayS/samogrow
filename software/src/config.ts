@@ -4,20 +4,22 @@ import { existsSync, mkdirSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 
-// Smart-plug type. v1 speaks the Kasa local protocol directly; Tapo is
-// documented as out-of-scope for v1 (see hardware.ts / README).
-export type PlugType = "kasa" | "tapo";
+// Smart-plug protocol. "kasa" is the legacy TP-Link local protocol (TCP 9999,
+// XOR cipher). "klap" is the encrypted KLAP handshake newer Kasa firmware
+// (KP125M and other 2023+ devices) requires. When omitted, the transport is
+// auto-detected: probe legacy 9999 first, fall back to KLAP. See hardware.ts.
+export type PlugType = "kasa" | "klap";
 
 export interface LightConfig {
   onHour: number; // local time, 24h
   offHour: number; // 16h photoperiod suits leafy herbs
   plugHost: string; // LAN IP / hostname of the light's smart plug
-  plugType?: PlugType; // default "kasa"
+  plugType?: PlugType; // omitted => auto-detect (legacy 9999, then KLAP)
 }
 
 export interface PumpConfig {
   plugHost: string; // LAN IP / hostname of the pump's smart plug
-  plugType?: PlugType; // default "kasa"
+  plugType?: PlugType; // omitted => auto-detect (legacy 9999, then KLAP)
   maxSecondsPerRun: number;
   maxSecondsPerDay: number; // hard safety cap: never flood the reservoir
   mlPerSecond: number; // calibrate with a measuring cup
@@ -51,13 +53,16 @@ export interface Config {
   telegramToken: string;
   telegramChatId: string; // your user id; bot only obeys this chat
   anthropicApiKey: string;
+  // TP-Link cloud account, required only for KLAP plugs (see hardware.ts).
+  tplinkEmail: string;
+  tplinkPassword: string;
 }
 
 const DEFAULTS = {
-  light: { onHour: 7, offHour: 23, plugHost: "", plugType: "kasa" } as LightConfig,
+  // plugType is intentionally omitted so it stays undefined => auto-detect.
+  light: { onHour: 7, offHour: 23, plugHost: "" } as LightConfig,
   pump: {
     plugHost: "",
-    plugType: "kasa",
     maxSecondsPerRun: 30,
     maxSecondsPerDay: 180,
     mlPerSecond: 15,
@@ -98,6 +103,8 @@ export function loadConfig(path = "config.json"): Config {
     telegramToken: process.env.SAMOGROW_TELEGRAM_TOKEN ?? "",
     telegramChatId: process.env.SAMOGROW_TELEGRAM_CHAT_ID ?? "",
     anthropicApiKey: process.env.ANTHROPIC_API_KEY ?? "",
+    tplinkEmail: process.env.SAMOGROW_TPLINK_EMAIL ?? "",
+    tplinkPassword: process.env.SAMOGROW_TPLINK_PASSWORD ?? "",
   };
   return cfg;
 }

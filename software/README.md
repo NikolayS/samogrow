@@ -26,7 +26,7 @@ flood/dry-run protection — see below.
 | Module | Responsibility |
 | --- | --- |
 | `config.ts` | Settings from `config.json`, secrets from env vars |
-| `hardware.ts` | Light + pump smart-plug switches (Kasa local protocol); pump safety caps |
+| `hardware.ts` | Light + pump smart-plug switches (Kasa 9999 + KLAP transports, auto-detected); pump safety caps |
 | `camera.ts` | One timestamped JPEG per camera (RTSP via ffmpeg, or HTTP snapshot) |
 | `state.ts` | `bun:sqlite` store of events + analyses |
 | `brain.ts` | Claude vision analysis → strict, clamped JSON verdict |
@@ -85,12 +85,36 @@ bun test
 
 ### Smart plugs
 
-v1 speaks the **Kasa** local protocol directly (TCP 9999). Use a Kasa-class plug
-— **KP115 / EP10 / HS103**. Set `light.plugHost` / `pump.plugHost` to each plug's
-LAN IP. Give the plugs **static IPs or DHCP reservations** so the addresses don't
-change. **Tapo** plugs use an encrypted KLAP handshake and are not supported in
-v1 (setting `plugType: "tapo"` throws with guidance); use a Kasa plug, or drive a
-Tapo plug from an external CLI.
+Two local (no-cloud) transports are supported, selected per plug via `plugType`:
+
+- **`kasa`** — the legacy TP-Link local protocol (TCP 9999, XOR cipher). Older
+  Kasa-class plugs: **KP115 / EP10 / HS103**.
+- **`klap`** — the encrypted KLAP handshake newer Kasa firmware requires
+  (**KP125M** and other 2023+ devices, which no longer answer on port 9999).
+  HTTP on port 80, AES-128-CBC. Needs your TP-Link cloud credentials (below).
+- **omit `plugType`** — **auto-detect**: probe legacy 9999 with a short timeout,
+  fall back to KLAP, and remember which worked for the rest of the run. This is
+  the friendliest default and works for both plug generations.
+
+Set `light.plugHost` / `pump.plugHost` to each plug's LAN IP, and give the plugs
+**static IPs or DHCP reservations** so the addresses don't change.
+
+**KLAP credentials.** KLAP plugs authenticate locally against the TP-Link cloud
+account the plug was provisioned with — set them in env (never in `config.json`):
+
+```
+SAMOGROW_TPLINK_EMAIL=you@example.com      # your case-sensitive Kasa app email
+SAMOGROW_TPLINK_PASSWORD=your-kasa-password
+```
+
+The handshake stays on the LAN (no cloud round-trip); the credentials just derive
+the session keys. Legacy `kasa` plugs ignore these.
+
+**Troubleshooting.** If a plug doesn't respond on either protocol, check that the
+`plugHost` IP is correct and that the plug is on the **same LAN/VLAN** as this
+service (KLAP and Kasa are local-only — a plug on a separate IoT VLAN is
+unreachable). For KLAP specifically, an auth failure almost always means the
+email/password don't match the account that set the plug up.
 
 ### Cameras
 

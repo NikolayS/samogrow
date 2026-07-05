@@ -1,5 +1,17 @@
 import { expect, test, describe } from "bun:test";
-import { clampPumpSeconds, kasaEncrypt, kasaDecrypt, Pump, type Switch } from "./hardware.ts";
+import {
+  clampPumpSeconds,
+  kasaEncrypt,
+  kasaDecrypt,
+  klapAuthHash,
+  klapServerHash,
+  klapHandshake2Payload,
+  deriveKlapKeys,
+  klapEncrypt,
+  klapDecrypt,
+  Pump,
+  type Switch,
+} from "./hardware.ts";
 
 // A stand-in for a smart-plug switch that records calls, so we can assert the
 // pump's safety behaviour over the plug-based path without any hardware.
@@ -58,6 +70,75 @@ describe("kasa cipher", () => {
   test("first ciphertext byte is key XOR first plaintext byte", () => {
     const framed = kasaEncrypt("{");
     expect(framed[4]).toBe(0xab ^ "{".charCodeAt(0));
+  });
+});
+
+describe("klap crypto", () => {
+  // Fixed inputs => reproducible known-answer vectors. The expected hex strings
+  // were computed independently (node:crypto) from these seeds and credentials,
+  // matching python-kasa's KlapTransportV2 derivation.
+  const email = "grower@example.com";
+  const password = "hunter2pw";
+  const local = Buffer.alloc(16, 0x11);
+  const remote = Buffer.alloc(16, 0x22);
+  const auth = klapAuthHash(email, password);
+
+  test("auth_hash = sha256(sha1(email) + sha1(password))", () => {
+    expect(auth.toString("hex")).toBe(
+      "3b05b5e564fe61b6d90eed5a158109ce024a425ccf50b0f62b6fdf77dc960883",
+    );
+  });
+
+  test("handshake1 server hash = sha256(local + remote + auth)", () => {
+    expect(klapServerHash(local, remote, auth).toString("hex")).toBe(
+      "4fe8e3dc7651836bebeeadadb770a90318ba28d9e488338bb7f6b879038deaaa",
+    );
+  });
+
+  test("handshake2 payload = sha256(remote + local + auth), differs from server hash", () => {
+    expect(klapHandshake2Payload(local, remote, auth).toString("hex")).toBe(
+      "210ef698b473427a2794fd4e2d22b6d91383ce7641c1b5c7acc86030d1f70f13",
+    );
+    expect(klapHandshake2Payload(local, remote, auth).equals(klapServerHash(local, remote, auth))).toBe(false);
+  });
+
+  test("derives 16-byte key, 12-byte iv, 28-byte sig, and initial seq", () => {
+    const k = deriveKlapKeys(local, remote, auth);
+    expect(k.key.length).toBe(16);
+    expect(k.iv.length).toBe(12);
+    expect(k.sig.length).toBe(28);
+    expect(k.key.toString("hex")).toBe("471f7ca9beb85b010d32989338afaae4");
+    expect(k.iv.toString("hex")).toBe("7a7a1a18674b857048733f13");
+    expect(k.sig.toString("hex")).toBe("df80739103488eabc07a256f2d1b94a012590b733e8fedef0faaddb2");
+    expect(k.seq).toBe(723754578);
+  });
+
+  test("encrypt produces the known signature(32) + ciphertext for a fixed seq", () => {
+    const k = deriveKlapKeys(local, remote, auth);
+    const msg = JSON.stringify({ system: { set_relay_state: { state: 1 } } });
+    // First request increments seq before use.
+    const seq = k.seq + 1;
+    const body = klapEncrypt(k, seq, msg);
+    expect(seq).toBe(723754579);
+    expect(body.toString("hex")).toBe(
+      "d385bfaa51a029b5fa3233ffe4f2259ec5f650d1d75fd58e2651d344c663ca66" +
+        "adb7061b22d4bac97ea2773edc9699e2e5139db576f6705e5e6eac034cc9c499" +
+        "0a902b321784b4cd97550c329fb36ed2",
+    );
+  });
+
+  test("encrypt/decrypt round-trips at the same seq", () => {
+    const k = deriveKlapKeys(local, remote, auth);
+    const msg = JSON.stringify({ system: { set_relay_state: { state: 0 } } });
+    const seq = k.seq + 1;
+    const body = klapEncrypt(k, seq, msg);
+    expect(klapDecrypt(k, seq, body)).toBe(msg);
+  });
+
+  test("verifying handshake1 rejects a wrong-credential server hash", () => {
+    const good = klapServerHash(local, remote, auth);
+    const wrong = klapServerHash(local, remote, klapAuthHash(email, "wrong-password"));
+    expect(good.equals(wrong)).toBe(false);
   });
 });
 
