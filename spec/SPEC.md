@@ -1,4 +1,4 @@
-# samogrow (nombox) — Build Spec
+# samogrow by Nombox — Build Spec
 
 **Version:** v1.4.1
 **Date:** 2026-07-05

@@ -1,4 +1,4 @@
-# samogrow (nombox) 🌿
+# samogrow by Nombox 🌿
 
 **Self-hosted herbs: a camera, two smart plugs, one Bun service — no subscription, no pods, no black box.**
 

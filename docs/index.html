@@ -98,8 +98,8 @@
     border-bottom: 1px solid var(--line);
   }
   .topbar .col { display: flex; align-items: baseline; justify-content: space-between; height: 54px; }
-  .brand { font-family: var(--font-mono); font-weight: 600; letter-spacing: .04em; font-size: .95rem; }
-  .brand b { color: var(--leaf); }
+  .brand { font-family: var(--font-serif); font-weight: 400; letter-spacing: 0; font-size: 1.15rem; }
+  .brand b { color: var(--leaf); font-weight: 700; }
   .topnav { display: flex; gap: 22px; font-family: var(--font-mono); font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; }
   .topnav a { text-decoration: none; color: var(--ink-soft); }
   .topnav a:hover { color: var(--leaf); }
@@ -121,12 +121,13 @@
   .hero h1 {
     font-family: var(--font-serif);
     font-weight: 400;
-    font-size: clamp(3.2rem, 11vw, 7rem);
-    line-height: .9;
+    font-size: clamp(2.5rem, 9vw, 6rem);
+    line-height: .95;
     letter-spacing: -.02em;
     margin: .28em 0 .18em;
   }
-  .hero h1 .sprout { color: var(--leaf); font-style: italic; }
+  .hero h1 .sprout { color: var(--leaf); font-weight: 700; }
+  .hero h1 .leaf { font-style: normal; font-size: .5em; vertical-align: .06em; margin-left: .08em; }
   .hero .lede {
     font-size: clamp(1.15rem, 2.4vw, 1.5rem);
     line-height: 1.4; color: var(--ink-soft); max-width: 34ch; margin: 0;
@@ -352,7 +353,7 @@
     <div class="col hero-grid">
       <div class="hero-lead">
         <div class="eyebrow fade d1">A service you can read · open source · it feeds you</div>
-        <h1 class="fade d2">samo<span class="sprout">grow</span> <span style="font-size:.32em;letter-spacing:0;font-style:italic;color:var(--ink-faint);">(nombox)</span></h1>
+        <h1 class="fade d2">samo<span class="sprout">grow</span><span class="leaf">🌿</span> <span style="font-size:.32em;letter-spacing:0;font-style:italic;color:var(--ink-faint);">(nombox)</span></h1>
         <p class="lede fade d3">
           You already keep a machine on 24/7. Give it one more job. samogrow runs a
           <b>herb garden</b> from a camera, two smart plugs, and a Claude API key —
