@@ -1,0 +1,16 @@
+[Unit]
+Description=samogrow AI herb garden controller
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/samogrow/software
+EnvironmentFile=/home/pi/samogrow/.env
+ExecStart=/home/pi/.bun/bin/bun run src/main.ts
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

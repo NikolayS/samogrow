@@ -1,0 +1,27 @@
+{
+  "light": {
+    "onHour": 7,
+    "offHour": 23,
+    "gpioPin": 17,
+    "kasaHost": ""
+  },
+  "pump": {
+    "gpioPin": 27,
+    "maxSecondsPerRun": 30,
+    "maxSecondsPerDay": 180,
+    "mlPerSecond": 15
+  },
+  "cameras": {
+    "devices": ["picamera:0"],
+    "width": 1920,
+    "height": 1080
+  },
+  "brain": {
+    "model": "claude-haiku-4-5-20251001",
+    "analysisIntervalMinutes": 120,
+    "dailyReportHour": 9,
+    "maxTokens": 1024
+  },
+  "mockHardware": false,
+  "dataDir": "~/.samogrow"
+}
