@@ -300,7 +300,11 @@ they arrive, before building anything.
    into **Kasa plug #1**.
 2. Plug the top-up pump into **Kasa plug #2**. Plug the air pump into a normal,
    always-on outlet (never a switched plug — DWC needs oxygen 24/7).
-3. Mount the Tapo camera to frame all six cups from short range.
+3. Mount the Tapo camera HIGH — clamped to the light-frame upright at or just
+   below the light bar, tilted ~30–45° down at the canopy — so every net cup
+   (and the sight-gauge tube, if installed) is in frame. A counter-level,
+   sideways view hides the far pots behind the near ones and can't see into
+   the cups; the overhead angle is what the AI's per-pot analysis needs.
 4. Onboard all three Wi-Fi devices in their apps (Kasa app for the plugs, Tapo app
    for the camera). In the Tapo app, **create an RTSP camera account** (username +
    password) and note the RTSP URL. Set **DHCP reservations** on your router so the
