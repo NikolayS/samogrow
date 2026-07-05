@@ -1,0 +1,197 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 560" width="720" height="560" role="img" aria-label="samogrow system schematic: an always-on machine running the Bun brain talks to Claude API and Telegram over the internet, and over home Wi-Fi commands two Kasa smart plugs (light and pump), a jug pump feeding the DWC tote, an always-on air pump, and a Tapo RTSP camera watching the plants.">
+  <defs>
+    <style>
+      .h  { font-family: Georgia, "Times New Roman", serif; }
+      .m  { font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; }
+      .node { fill: #fbf7ec; stroke: #3a4a2c; stroke-width: 1.6; }
+      .wPow { stroke: #a8632a; stroke-width: 2.4; fill: none; stroke-linejoin: round; }
+      .wNet { stroke: #35722f; stroke-width: 2.4; fill: none; stroke-linejoin: round; }
+      .wTube{ stroke: #6f8465; stroke-width: 2.2; fill: none; stroke-dasharray: 5 4; stroke-linecap: round; }
+      .wView{ stroke: #4a9640; stroke-width: 2;   fill: none; stroke-dasharray: 1.5 5; stroke-linecap: round; }
+    </style>
+    <marker id="aNet" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#35722f"/>
+    </marker>
+    <marker id="aPow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#a8632a"/>
+    </marker>
+    <marker id="aView" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#4a9640"/>
+    </marker>
+  </defs>
+
+  <!-- cream card backdrop (keeps it legible in both light and dark contexts) -->
+  <rect x="8" y="8" width="704" height="544" rx="16" fill="#f4efe2" stroke="#cdc4ac" stroke-width="1.5"/>
+
+  <!-- title -->
+  <text class="h" x="30" y="36" font-size="21" font-weight="700" fill="#35722f">samogrow</text>
+  <text class="m" x="168" y="36" font-size="11" letter-spacing="2.5" fill="#7c8470">SYSTEM  SCHEMATIC</text>
+  <line x1="30" y1="44" x2="690" y2="44" stroke="#ddd5bf" stroke-width="1"/>
+
+  <!-- ============ BRAIN ============ -->
+  <rect class="node" x="28" y="56" width="300" height="126" rx="10"/>
+  <text class="m" x="46" y="80" font-size="9" letter-spacing="1.8" fill="#35722f">ALWAYS-ON MACHINE — laptop / mini-PC / VM</text>
+  <text class="h" x="44" y="104" font-size="17" font-weight="700" fill="#1c2216">samogrow brain</text>
+  <text class="m" x="46" y="126" font-size="10.5" fill="#4a5340">Bun service · TypeScript</text>
+  <text class="m" x="46" y="143" font-size="10.5" fill="#4a5340">Claude vision → JSON verdict</text>
+  <text class="m" x="46" y="160" font-size="10.5" fill="#4a5340">toggles 2 Kasa plugs · pulls RTSP</text>
+  <text class="m" x="46" y="177" font-size="10.5" fill="#4a5340">grammY Telegram bot</text>
+
+  <!-- ============ CLOUD ============ -->
+  <g>
+    <!-- Claude API pill -->
+    <rect class="node" x="520" y="60" width="170" height="48" rx="24"/>
+    <path d="M545,90 a10,10 0 0 1 4,-19 a13,13 0 0 1 24,3 a9,9 0 0 1 -2,16 z" fill="#eef3e6" stroke="#3a4a2c" stroke-width="1.3"/>
+    <text class="h" x="588" y="82" font-size="13" font-weight="700" fill="#1c2216">Claude API</text>
+    <text class="m" x="588" y="97" font-size="8.5" fill="#7c8470">Haiku vision · JSON</text>
+    <!-- Telegram pill -->
+    <rect class="node" x="520" y="126" width="170" height="48" rx="24"/>
+    <path d="M545,156 a10,10 0 0 1 4,-19 a13,13 0 0 1 24,3 a9,9 0 0 1 -2,16 z" fill="#eef3e6" stroke="#3a4a2c" stroke-width="1.3"/>
+    <text class="h" x="588" y="148" font-size="13" font-weight="700" fill="#1c2216">Telegram</text>
+    <text class="m" x="588" y="163" font-size="8.5" fill="#7c8470">daily photo · commands</text>
+  </g>
+
+  <!-- brain <-> cloud (internet) -->
+  <path class="wNet" d="M328,116 H462" marker-end="url(#aNet)" marker-start="url(#aNet)"/>
+  <path class="wNet" d="M462,84 V150"/>
+  <path class="wNet" d="M462,84 H520" marker-end="url(#aNet)"/>
+  <path class="wNet" d="M462,150 H520" marker-end="url(#aNet)"/>
+  <rect x="366" y="106" width="58" height="16" rx="3" fill="#f4efe2"/>
+  <text class="m" x="395" y="118" font-size="9" fill="#7c8470" text-anchor="middle">internet</text>
+
+  <!-- ============ ROUTER ============ -->
+  <rect class="node" x="316" y="224" width="94" height="40" rx="8"/>
+  <g stroke="#35722f" stroke-width="1.6" fill="none">
+    <path d="M356,240 a7,7 0 0 1 12,0"/>
+    <path d="M352,244 a12,12 0 0 1 20,0"/>
+  </g>
+  <circle cx="362" cy="244" r="1.7" fill="#35722f"/>
+  <text class="m" x="336" y="258" font-size="9.5" fill="#4a5340">Wi-Fi router</text>
+
+  <!-- brain -> router trunk (home LAN) -->
+  <path class="wNet" d="M178,182 V202 H362 V224" marker-end="url(#aNet)"/>
+  <rect x="228" y="194" width="118" height="16" rx="3" fill="#f4efe2"/>
+  <text class="m" x="287" y="206" font-size="9" fill="#35722f" text-anchor="middle">home Wi-Fi / LAN</text>
+
+  <!-- ============ LEGEND ============ -->
+  <g>
+    <rect x="470" y="196" width="220" height="86" rx="8" fill="#f7f3e8" stroke="#ddd5bf" stroke-width="1"/>
+    <text class="m" x="484" y="213" font-size="8.5" letter-spacing="1.5" fill="#7c8470">LEGEND</text>
+    <line class="wPow"  x1="484" y1="228" x2="512" y2="228"/>
+    <text class="m" x="520" y="231" font-size="9.5" fill="#4a5340">mains power (smart plug)</text>
+    <line class="wNet"  x1="484" y1="245" x2="512" y2="245"/>
+    <text class="m" x="520" y="248" font-size="9.5" fill="#4a5340">Wi-Fi / LAN control + data</text>
+    <line class="wTube" x1="484" y1="262" x2="512" y2="262"/>
+    <text class="m" x="520" y="265" font-size="9.5" fill="#4a5340">water tubing / airline</text>
+    <line class="wView" x1="484" y1="277" x2="512" y2="277"/>
+    <text class="m" x="520" y="280" font-size="9.5" fill="#4a5340">camera field of view</text>
+  </g>
+
+  <!-- ============ GARDEN PANEL ============ -->
+  <rect x="28" y="296" width="664" height="248" rx="12" fill="#eef2e4" stroke="#4a9640" stroke-width="1.4" stroke-dasharray="7 5"/>
+  <text class="m" x="44" y="318" font-size="9.5" letter-spacing="1.5" fill="#35722f">GARDEN DEVICE — Wi-Fi appliances on the home LAN</text>
+
+  <!-- LAN bus from router down into the panel -->
+  <path class="wNet" d="M362,264 V284"/>
+  <path class="wNet" d="M150,284 H560"/>
+  <circle cx="362" cy="284" r="2.4" fill="#35722f"/>
+
+  <!-- net drops to the three endpoints -->
+  <path class="wNet" d="M152,284 V340" marker-end="url(#aNet)"/>
+  <path class="wNet" d="M306,284 V340" marker-end="url(#aNet)"/>
+  <path class="wNet" d="M560,284 V340" marker-end="url(#aNet)"/>
+  <circle cx="152" cy="284" r="2.4" fill="#35722f"/>
+  <circle cx="306" cy="284" r="2.4" fill="#35722f"/>
+  <circle cx="560" cy="284" r="2.4" fill="#35722f"/>
+
+  <!-- PUMP smart plug -->
+  <rect class="node" x="96" y="340" width="112" height="42" rx="6"/>
+  <rect x="106" y="352" width="14" height="18" rx="2" fill="none" stroke="#a8632a" stroke-width="1.6"/>
+  <line x1="110" y1="352" x2="110" y2="347" stroke="#a8632a" stroke-width="1.6"/>
+  <line x1="116" y1="352" x2="116" y2="347" stroke="#a8632a" stroke-width="1.6"/>
+  <text class="m" x="128" y="359" font-size="9.5" fill="#4a5340">Kasa plug</text>
+  <text class="m" x="128" y="373" font-size="10.5" font-weight="700" fill="#a8632a">PUMP</text>
+
+  <!-- LIGHT smart plug -->
+  <rect class="node" x="250" y="340" width="112" height="42" rx="6"/>
+  <rect x="260" y="352" width="14" height="18" rx="2" fill="none" stroke="#a8632a" stroke-width="1.6"/>
+  <line x1="264" y1="352" x2="264" y2="347" stroke="#a8632a" stroke-width="1.6"/>
+  <line x1="270" y1="352" x2="270" y2="347" stroke="#a8632a" stroke-width="1.6"/>
+  <text class="m" x="282" y="359" font-size="9.5" fill="#4a5340">Kasa plug</text>
+  <text class="m" x="282" y="373" font-size="10.5" font-weight="700" fill="#a8632a">LIGHT</text>
+
+  <!-- CAMERA -->
+  <rect class="node" x="520" y="340" width="140" height="48" rx="6"/>
+  <rect x="532" y="352" width="24" height="24" rx="4" fill="#eef3e6" stroke="#3a4a2c" stroke-width="1.3"/>
+  <circle cx="544" cy="364" r="6" fill="none" stroke="#35722f" stroke-width="1.6"/>
+  <circle cx="544" cy="364" r="2.2" fill="#35722f"/>
+  <text class="m" x="566" y="360" font-size="10" font-weight="700" fill="#1c2216">Tapo camera</text>
+  <text class="m" x="566" y="374" font-size="8.5" fill="#7c8470">RTSP snapshot</text>
+
+  <!-- GROW LIGHT strip over canopy -->
+  <rect x="326" y="404" width="180" height="14" rx="4" fill="#fbf7ec" stroke="#3a4a2c" stroke-width="1.4"/>
+  <line x1="342" y1="411" x2="490" y2="411" stroke="#a8632a" stroke-width="1.6" stroke-dasharray="3 5"/>
+  <text class="m" x="416" y="399" font-size="9" fill="#4a5340" text-anchor="middle">LED grow light — over canopy</text>
+  <!-- light rays onto canopy -->
+  <g stroke="#c98a3c" stroke-width="1.3" opacity="0.8">
+    <line x1="352" y1="420" x2="352" y2="434"/>
+    <line x1="384" y1="420" x2="384" y2="434"/>
+    <line x1="416" y1="420" x2="416" y2="434"/>
+    <line x1="448" y1="420" x2="448" y2="434"/>
+    <line x1="480" y1="420" x2="480" y2="434"/>
+  </g>
+  <!-- light plug -> grow light (power) -->
+  <path class="wPow" d="M306,382 V393 H326 V404" marker-end="url(#aPow)"/>
+
+  <!-- DWC TOTE -->
+  <rect x="326" y="436" width="180" height="96" rx="8" fill="#dfe6d2" stroke="#3a4a2c" stroke-width="1.6"/>
+  <rect x="326" y="436" width="180" height="16" rx="4" fill="#cdd6bd" stroke="#3a4a2c" stroke-width="1.4"/>
+  <!-- net pots with pebbles + sprouts -->
+  <g>
+    <circle cx="350" cy="444" r="7" fill="#b3742f"/><circle cx="386" cy="444" r="7" fill="#b3742f"/>
+    <circle cx="422" cy="444" r="7" fill="#b3742f"/><circle cx="458" cy="444" r="7" fill="#b3742f"/>
+    <circle cx="484" cy="444" r="7" fill="#b3742f"/>
+    <g stroke="#35722f" stroke-width="1.6" fill="none">
+      <path d="M350,444 q-4,-8 -8,-9 M350,444 q4,-8 8,-9"/>
+      <path d="M386,444 q-3,-9 -7,-10 M386,444 q3,-9 7,-10"/>
+      <path d="M422,444 q-4,-8 -8,-9 M422,444 q4,-8 8,-9"/>
+      <path d="M458,444 q-3,-9 -7,-10 M458,444 q3,-9 7,-10"/>
+      <path d="M484,444 q-4,-8 -8,-9 M484,444 q4,-8 8,-9"/>
+    </g>
+  </g>
+  <!-- water + air stone -->
+  <path d="M334,500 q12,-6 24,0 t24,0 t24,0 t24,0 t24,0" fill="none" stroke="#6f8465" stroke-width="1.4" opacity="0.7"/>
+  <rect x="404" y="516" width="24" height="8" rx="3" fill="#5b6a52"/>
+  <g fill="none" stroke="#6f8465" stroke-width="1.2" opacity="0.8">
+    <circle cx="410" cy="510" r="1.6"/><circle cx="418" cy="506" r="1.4"/><circle cx="424" cy="512" r="1.5"/>
+  </g>
+  <text class="m" x="416" y="530" font-size="8.5" fill="#4a5340" text-anchor="middle">opaque DWC tote · 6 net cups</text>
+
+  <!-- JUG + submersible top-up pump -->
+  <path d="M120,452 v-14 h6 v-5 h14 v5 h6 v14 a6,6 0 0 1 6,6 v58 a6,6 0 0 1 -6,6 h-26 a6,6 0 0 1 -6,-6 v-58 a6,6 0 0 1 6,-6 z"
+        fill="#e9edea" stroke="#3a4a2c" stroke-width="1.5"/>
+  <path d="M116,486 h44 v34 a4,4 0 0 1 -4,4 h-36 a4,4 0 0 1 -4,-4 z" fill="#cfe0e6" opacity="0.6"/>
+  <rect x="128" y="500" width="18" height="16" rx="2" fill="#5b6a52"/>
+  <text class="m" x="137" y="538" font-size="8.5" fill="#4a5340" text-anchor="middle">top-up jug</text>
+  <!-- pump plug -> jug pump (power) -->
+  <path class="wPow" d="M137,504 V382" marker-end="url(#aPow)"/>
+  <!-- tubing jug -> tote -->
+  <path class="wTube" d="M156,470 C 220,448 270,452 330,466" marker-end="url(#aView)" opacity="0"/>
+  <path class="wTube" d="M156,470 C 216,444 276,450 328,466"/>
+  <text class="m" x="238" y="446" font-size="8.5" fill="#6f8465" text-anchor="middle">tubing</text>
+
+  <!-- AIR PUMP (always on, not switched) -->
+  <rect class="node" x="520" y="470" width="120" height="46" rx="6"/>
+  <text class="m" x="532" y="489" font-size="10" font-weight="700" fill="#1c2216">air pump</text>
+  <text class="m" x="532" y="502" font-size="8" fill="#7c8470">24/7 · always-on outlet</text>
+  <text class="m" x="532" y="512" font-size="8" fill="#7c8470">(never switched)</text>
+  <!-- always-on power stub to a dumb outlet -->
+  <path class="wPow" d="M628,470 V456 H648" />
+  <rect x="648" y="450" width="14" height="12" rx="2" fill="none" stroke="#a8632a" stroke-width="1.4"/>
+  <circle cx="652" cy="456" r="1" fill="#a8632a"/><circle cx="658" cy="456" r="1" fill="#a8632a"/>
+  <!-- airline air pump -> air stone -->
+  <path class="wTube" d="M520,500 C 470,514 445,520 428,520"/>
+
+  <!-- CAMERA field of view onto the canopy -->
+  <path class="wView" d="M556,388 C 520,410 490,424 468,440" marker-end="url(#aView)"/>
+</svg>
