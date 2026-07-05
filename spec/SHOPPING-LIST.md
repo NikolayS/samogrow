@@ -20,7 +20,23 @@ research files — verify at the source before buying (expect ±30% from coupons
 
 ---
 
-## V1 — Manual start (Kratky-style) · the default cart · ~$220
+## Tools you'll need (one-time, NOT counted in any total below)
+
+Assembly tools — the first few most people already own; the two in **bold** are the
+likely buys. None of these are in the variant totals.
+
+| Tool | Est. price | Note |
+|---|---:|---|
+| Power drill | owned / ~$40 | cuts the lid holes; any cordless drill works |
+| **3" (76 mm) hole saw** | ~$13 if not owned | [Acekit 3"/76 mm bi-metal](https://www.amazon.com/dp/B07JJ65D25) — sizes the net-cup holes exactly (a step bit can't reach 3") |
+| Scissors / utility knife | owned | cut tubing, open packaging |
+| Measuring cup | owned | pump calibration (SPEC §8) + mixing nutrient solution |
+| **Small digital gram scale (0.1 g)** | ~$11 if not owned | [AWS-600, 600 g × 0.1 g](https://www.amazon.com/dp/B002SC3LLS) — weigh the MasterBlend / CaNO₃ / Epsom parts; kitchen scales don't resolve grams |
+| Step drill bit (optional) | ~$12 | only if you drill the tote wall for a push-fit sight-gauge grommet (§9a); the zero-drill gauge needs none |
+
+---
+
+## V1 — Manual start (Kratky-style) · the default cart · ~$240
 
 *(= Tier A in the SPEC BOM tables.)* The AI reads the camera (and the sight gauge, if you
 add V3) and **tells you** on Telegram when and roughly how much to pour. No pump, no
@@ -30,7 +46,7 @@ vacation autonomy — away >1 week needs a human.
 
 | # | Photo | Qty | Item | Est. price | Where / note |
 |---|---|---|---|---:|---|
-| 1 | <img src="../docs/img/components/kasa-smart-plug.jpg" width="80"> | 1 | [Kasa smart plug — one, for the light](https://www.amazon.com/dp/B0BYGRLRS1) | $8 (est.) | UL-listed, local LAN control; a basic single plug (EP10 class) is enough — the light needs no energy monitoring. Or grab the [KP125M 2-pack](https://www.amazon.com/dp/B0BYGRLRS1) (~$25) now if you know you'll add the Tier B pump |
+| 1 | <img src="../docs/img/components/kasa-smart-plug.jpg" width="80"> | 1 | [Kasa smart plug — one, for the light (EP10 single)](https://www.amazon.com/dp/B091699Z3W) | $8 (est.) | UL-listed, local LAN control; a basic single plug (EP10 class) is enough — the light needs no energy monitoring. Or grab the [KP125M energy-monitoring 2-pack](https://www.amazon.com/dp/B0BYGRLRS1) (~$25) now if you know you'll add the Tier B pump |
 | 2 | <img src="../docs/img/components/tapo-camera.jpg" width="80"> | 1 | [TP-Link Tapo C120 Wi-Fi camera (RTSP)](https://www.amazon.com/dp/B0CH45HPZT) | $25 (est.) | supports local RTSP snapshots; [tp-link.com](https://www.tp-link.com/us/home-networking/cloud-camera/tapo-c120/) |
 
 **Appliance subtotal: ~$33**
@@ -49,31 +65,43 @@ vacation autonomy — away >1 week needs a human.
 | 10 | <img src="../docs/img/components/masterblend-nutrients.jpg" width="80"> | 1 | [MasterBlend 4-18-38 Combo Kit, 2.5 lb](https://www.amazon.com/dp/B071L15G5Y) | $28 (est.) | makes ~180 gal; mix all 3 parts |
 | 11 | <img src="../docs/img/components/ph-control-kit.jpg" width="80"> | 1 | [GH pH Control Kit (Up/Down + indicator)](https://www.amazon.com/dp/B000BNKWZY) | $22 (est.) | target pH 5.5–6.5 |
 | 12 | <img src="../docs/img/components/barrina-light-strips.jpg" width="80"> | 1 | [Barrina T5 2 ft full-spectrum strips, 4-pack](https://www.amazon.com/dp/B0BKPF8D8G) | $40 (est.) | ~20 W/strip, linkable, adjustable height |
-| 13 | <img src="../docs/img/components/seed-packets.jpg" width="80"> | 1 | [Seed packets: Sow Right 5-herb collection (parsley, basil, cilantro + dill, chives)](https://www.amazon.com/dp/B07CTMVKT9) | $15 (est.) | add a [loose-leaf lettuce packet](https://www.amazon.com/dp/B0BJZ9L9B3) and a live mint cutting |
+| 13 | <img src="../docs/img/components/seed-packets.jpg" width="80"> | 1 | [Seed packets: Sow Right 5-herb collection (parsley, basil, cilantro + dill, chives)](https://www.amazon.com/dp/B07CTMVKT9) | $15 (est.) | add a [loose-leaf lettuce packet](https://www.amazon.com/dp/B0BJZ9L9B3). **Mint is not seeded here** — root a live cutting from a grocery-store bunch or a potted plant (free / ~$3); it won't come true from seed |
+| 14 |  | 1 | [EC/TDS meter (HM Digital TDS-3 class)](https://www.amazon.com/dp/B000VTQM70) | $13 (est.) | **required** — the spec sets an EC target (1.0–1.6 mS/cm ≈ 700–1100 ppm); you can't hit it without a meter. Any basic TDS-3-class pen works |
 
-**Grow-side subtotal: ~$192** (−~$30 for pure-Kratky lettuce-only → ~$162)
+**Grow-side subtotal: ~$205** (−~$30 for pure-Kratky lettuce-only → ~$175)
 
-### V1 total: **~$220** (pure-Kratky lettuce-only: **~$190**)
+### V1 total: **~$240** (appliance ~$33 + grow ~$205 = $238; pure-Kratky lettuce-only: **~$210**)
+
+### Mounting & power (small accessories, ~$15–25, NOT in the totals above)
+
+The Barrina strips **daisy-chain and ship with hanging clips + link cables**, so the
+light needs no separate fixture — hang the strips from their clips under a wire
+shelf/rack you likely already have, or from two spring-tension rods (~$10). For the
+camera, add a [small clamp mount with a ¼" screw](https://www.amazon.com/dp/B07FLRYXQM)
+(~$8) so the Tapo perches high over the canopy (SPEC §5). One [basic 6-outlet power
+strip](https://www.amazon.com/dp/B00TP1C4XU) (~$10) feeds the light plug, the air pump,
+and (at Tier B) the pump plug. A $20–25 adjustable grow-light stand is the tidier
+alternative to the improvised shelf.
 
 ---
 
-## + V2 adds — Auto top-up · +~$45 → ~$266
+## + V2 adds — Auto top-up · +~$45 → ~$285
 
 *(= Tier B.)* Adds the pump so the software waters for you within hard timer caps.
 Software switch is one config line (set `pump.plugHost`). This is the full "core" build.
 
 | # | Photo | Qty | Item | Est. price | Where / note |
 |---|---|---|---|---:|---|
-| 14 | <img src="../docs/img/components/kasa-smart-plug.jpg" width="80"> | 1 | [2nd Kasa smart plug — energy-monitoring KP125M, for the pump](https://www.amazon.com/dp/B0BYGRLRS1) | $21 (est.) | the other half of the [2-pack](https://www.amazon.com/dp/B0BYGRLRS1) (~$25 for two); energy read = pump-health signal (SPEC §9a). Also at [kasasmart.com](https://www.kasasmart.com/us/products/smart-plugs/kasa-smart-plug-slim-energy-monitoring-kp125m) |
-| 15 | <img src="../docs/img/components/submersible-pump.jpg" width="80"> | 1 | [Small 120 V submersible fountain pump (DOMICA 90 GPH)](https://www.amazon.com/dp/B0892DKNR3) | $12 (est.) | switched by the pump plug; timed top-up |
-| 16 |  | 1 | [Vinyl tubing for the pump feed (3/8" ID, 10 ft)](https://www.amazon.com/dp/B07NQSNBTG) | $6 (est.) | jug → reservoir |
-| 17 |  | 1 | [1–2 gal jug (plain-water top-up feed)](https://www.amazon.com/1-gallon-water-jug-spigot/s?k=1+gallon+water+jug+with+spigot) | $6 (est.) | bounds the worst-case flood (SPEC §9) |
+| 15 | <img src="../docs/img/components/kasa-smart-plug.jpg" width="80"> | 1 | [2nd Kasa plug — energy-monitoring, for the pump](https://www.amazon.com/dp/B0BYGRLRS1) | $21 (est.) | energy read = pump-health signal (SPEC §9a). KP125M is sold only as a [2-pack](https://www.amazon.com/dp/B0BYGRLRS1) (~$25 for two) — buy it at V1 and this line is ~$0; the single-buy alternative is the [KP115 energy-monitoring single](https://www.amazon.com/dp/B08LN3C7WK) (~$15). Also at [kasasmart.com](https://www.kasasmart.com/us/products/smart-plugs/kasa-smart-plug-slim-energy-monitoring-kp125m) |
+| 16 | <img src="../docs/img/components/submersible-pump.jpg" width="80"> | 1 | [Small 120 V submersible fountain pump (DOMICA 90 GPH)](https://www.amazon.com/dp/B0892DKNR3) | $12 (est.) | switched by the pump plug; timed top-up |
+| 17 |  | 1 | [Vinyl tubing for the pump feed (3/8" ID, 10 ft)](https://www.amazon.com/dp/B07NQSNBTG) | $6 (est.) | jug → reservoir |
+| 18 |  | 1 | [1–2 gal jug (plain-water top-up feed)](https://www.amazon.com/1-gallon-water-jug-spigot/s?k=1+gallon+water+jug+with+spigot) | $6 (est.) | bounds the worst-case flood (SPEC §9) |
 
-**V2 adds: ~$45 → running total ~$266**
+**V2 adds: ~$45 → running total ~$285** (exact: $238 + $39 appliance + $6 jug = $283)
 
 ---
 
-## + V3 adds — Water safety pack · +~$55–60 → ~$321
+## + V3 adds — Water safety pack · +~$55 → ~$340
 
 *(= Tier C.)* Cheap, independent layers so the build isn't blind to the reservoir (full
 rationale in `spec/SPEC.md` §9a); each catches a different water failure. Applies mainly
@@ -83,11 +111,11 @@ energy-monitoring KP125M in V2 — it's software, $0 extra.)
 
 | # | Photo | Qty | Item | Est. price | Where / note |
 |---|---|---|---|---:|---|
-| 18 |  | 1 | **Camera-readable sight gauge** — [clear vinyl tube 3/8" ID](https://www.amazon.com/dp/B07NQSNBTG) + [rubber grommet / bulkhead fitting](https://www.amazon.com/s?k=rubber+grommet+bulkhead+fitting+3%2F8) + [bright float bead](https://www.amazon.com/s?k=bright+foam+fishing+float+beads) | $8 (est.) | tee into the tote wall, route the tube up **into the camera's view**; AI reads the level off the bead. Can reuse an offcut of the Tier B tubing |
-| 19 |  | 1 | [Govee Wi-Fi Water Sensor, 3-pack (2.4 GHz, no hub)](https://www.amazon.com/Detector-Wireless-Notification-Security-Basement/dp/B07J9HZ5VN) | $35 (est.) | sits on the floor under the tote/pump; phone push + 100 dB alarm on any leak, independent of the brain |
-| 20 |  | 1 | [Plastic boot/drip tray, ~20×15 in](https://www.amazon.com/NINAMAR-Boot-Tray-Inch-Trays/dp/B07RL6BWTB) | $12 (est.) | passive containment under the whole tote; also gives the leak sensor a place to catch water |
+| 19 |  | 1 | **Camera-readable sight gauge** — [clear vinyl tube 3/8" ID](https://www.amazon.com/dp/B07NQSNBTG) + [rubber grommet / bulkhead fitting](https://www.amazon.com/s?k=rubber+grommet+bulkhead+fitting+3%2F8) + [bright float bead](https://www.amazon.com/s?k=bright+foam+fishing+float+beads) | $8 (est.) | route the tube up **into the camera's view**; AI reads the level off the bead. Zero-drill install in SPEC §9a. Can reuse an offcut of the Tier B tubing |
+| 20 |  | 1 | [Govee Wi-Fi Water Sensor, 3-pack (2.4 GHz, no hub)](https://www.amazon.com/Detector-Wireless-Notification-Security-Basement/dp/B07J9HZ5VN) | $35 (est.) | sits on the floor under the tote/pump; phone push + 100 dB alarm on any leak, independent of the brain |
+| 21 |  | 1 | [Plastic boot/drip tray, ~20×15 in](https://www.amazon.com/NINAMAR-Boot-Tray-Inch-Trays/dp/B07RL6BWTB) | $12 (est.) | passive containment under the whole tote; also gives the leak sensor a place to catch water |
 
-**V3 adds: ~$55–60 → running total ~$321**
+**V3 adds: ~$55 → running total ~$340** (exact: $283 + $55 = $338)
 
 ---
 
@@ -105,7 +133,7 @@ refills), and no upgrade path. Two flavors:
 |---|---|---|---:|---|
 | V4a-1 | 1 | [iDOO ID-IG301 12-pod kit](https://www.amazon.com/iDOO-Hydroponics-Germination-Adjustable-ID-IG301/dp/B08DLMRKHM) | $60 (est.) | integrated LED, fan, pump, knob timer; $50–70 for this class ([LetPot LPH-Lite](https://www.amazon.com/LPH-Lite-Hydroponics-Growing-Controlled-Automatic/dp/B0F8RCYF6W) ~$120 is a Wi-Fi step-up) |
 | V4a-2 | 1 | [TP-Link Tapo C120 camera (RTSP)](https://www.amazon.com/dp/B0CH45HPZT) | $25 (est.) | clip it to view the pods |
-| V4a-3 | 1 | [Kasa smart plug (optional)](https://www.amazon.com/dp/B0BYGRLRS1) | $13 (est.) | crude on/off of the *whole* kit only |
+| V4a-3 | 1 | [Kasa smart plug, EP10 single (optional)](https://www.amazon.com/dp/B091699Z3W) | $8 (est.) | crude on/off of the *whole* kit only |
 
 **V4a total: ~$85–100** (own seeds reused from the V1 packets).
 
@@ -120,7 +148,7 @@ seeds in coco-fibre (open consumables, like the DIY unit); only limit is its 4-p
 |---|---|---|---:|---|
 | V4b-1 | 1 | [Auk Mini 2](https://www.auk.com/products/auk-mini-2) | $199 | on sale from $229, free shipping; 4 coco-fibre pots, 24 W LED, app lighting + holiday mode |
 | V4b-2 | 1 | [TP-Link Tapo C120 camera (RTSP)](https://www.amazon.com/dp/B0CH45HPZT) | $25 (est.) | clip it to view the pots |
-| V4b-3 | 1 | [Kasa smart plug (optional)](https://www.amazon.com/dp/B0BYGRLRS1) | $13 (est.) | crude on/off of the *whole* unit only |
+| V4b-3 | 1 | [Kasa smart plug, EP10 single (optional)](https://www.amazon.com/dp/B091699Z3W) | $8 (est.) | crude on/off of the *whole* unit only |
 
 **V4b total: ~$225–240** (own seeds reused from the V1 packets).
 
@@ -150,13 +178,13 @@ to drive the pump directly instead of via the Kasa plug (+~$30).
 
 | Variant | Cost | Notes |
 |---|---:|---|
-| **V1 — Manual start** (default) | **~$220** | pure-Kratky lettuce-only: ~$190 |
-| **+ V2 — Auto top-up** | **~$266** | +$45 in place |
-| **+ V3 — Water safety** | **~$321** | +$55 in place |
+| **V1 — Manual start** (default) | **~$240** | pure-Kratky lettuce-only: ~$210 |
+| **+ V2 — Auto top-up** | **~$285** | +$45 in place |
+| **+ V3 — Water safety** | **~$340** | +$55 in place |
 | **V4a — Retrofit, budget kit** | **~$95** | independent unit; cheapest A/B control |
 | **V4b — Retrofit, premium Auk** | **~$235** | design-icon unit; 100-day money-back = risk-free A/B |
 | **+ V5 — On-device Pi** | **+~$135** | reuses V2/V3 garden minus the Tapo |
-| **SUPERSET — all five, in hand** | **~$550 / ~$690** | budget (V4a) / premium Auk (V4b); = V3 $320 + V4 + V5 $135 |
+| **SUPERSET — all five, in hand** | **~$570 / ~$710** | budget (V4a) / premium Auk (V4b); = V3 $338 + V4 + V5 $135 |
 
 Optional further add-ons (see `spec/SPEC.md` §4e): second Tapo camera (~$25), timed
 dosing pump + plug (~$25), digital pH pen (~$15). Ongoing consumables run **~$35/yr** per

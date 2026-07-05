@@ -1,6 +1,6 @@
 # samogrow (nombox) — Build Spec
 
-**Version:** v1.4
+**Version:** v1.4.1
 **Date:** 2026-07-05
 **Owner:** Nik (nik@postgres.ai)
 **Status:** Ready to build
@@ -31,13 +31,14 @@ brand monetizes proprietary pods and/or a mandatory membership:
 
 - Click & Grow: ~$150–250/yr in proprietary pods + subscription.
 - Gardyn (the only commercial unit with real camera+AI): **$899 hardware + a
-  $29–39/mo Kelby AI membership (~$408/yr)** — 3-year TCO north of $2,500.
+  $29–39/mo Kelby AI membership (~$408/yr)** — 3-year TCO **>$2,100**
+  ($899 + $408×3 = $2,123).
 - Lettuce Grow: $200–400/yr consumables.
 
 The AI-camera tier is exactly the feature people pay the most for, and only Gardyn
 ships it. A Wi-Fi camera + a laptop-side Claude Haiku vision service delivers the
 same capability (plant-health checks, watering/lighting decisions, harvest nudges)
-for **~$3–7/month in API calls and zero recurring fees**, on **open, commodity
+for **~$3–7/month in API calls and no subscription fees**, on **open, commodity
 consumables** (bulk seeds, rockwool, generic 2-part nutrient) that cost a few
 dollars per grow cycle. Open consumables are our biggest structural advantage, and
 they sidestep the vendor-lock-in / brand-stability risk that stranded AeroGarden
@@ -169,7 +170,8 @@ machine-readable); expect ±30% from coupons/sellers. Sources:
 (smart plugs, camera). Direct purchase links: see `spec/SHOPPING-LIST.md`.
 
 **The centerpiece is that the electronics side is trivial** — one or two smart plugs,
-a Wi-Fi camera, and (optionally) a pump — landing under ~$70, with the bulk of the
+a Wi-Fi camera, and (optionally) a pump — landing at ~$33 for the light plug + camera,
+or ~$72 once the pump and its energy-monitoring plug are added, with the bulk of the
 cost in the grow side (which you'd pay on any hydroponic system) and the light.
 
 ### 4.0 Choose your variant — five you can actually build
@@ -184,9 +186,9 @@ flavors, budget **V4a** and premium **V4b**) is §4g, V5 is §4h.
 
 | Variant | Est. cost | Assembly effort | AI control surface | Vacation autonomy | Flood risk | What it uniquely teaches |
 |---|---:|---|---|---|---|---|
-| **V1 — Manual / Kratky** | **~$220** | low — plumbing + 1 plug + camera | AI observes per-pot, **tells you** when/how much to pour (Telegram) | **none** — away >1 wk needs a human | ~none (no pump) | how far camera-only vision gets you; Kratky baseline |
-| **V2 — Auto top-up** | **~$266** | + drop in a pump, 2nd plug, tubing, jug | above **+ waters for you** within hard timer caps | ~2 wks (bounded jug) | low — bounded by jug + caps | closed-loop actuation over Wi-Fi; software timer-cap safety |
-| **V3 — Auto + water safety** | **~$320** | + sight gauge, leak sensor, boot tray | above + **reads reservoir level** off the gauge; escaped-water alerts | ~2 wks, monitored | low + contained + alarmed | layered sensing — making camera water-decisions trustworthy |
+| **V1 — Manual / Kratky** | **~$240** | low — plumbing + 1 plug + camera | AI observes per-pot, **tells you** when/how much to pour (Telegram) | **none** — away >1 wk needs a human | ~none (no pump) | how far camera-only vision gets you; Kratky baseline |
+| **V2 — Auto top-up** | **~$285** | + drop in a pump, 2nd plug, tubing, jug | above **+ waters for you** within hard timer caps | ~2 wks (bounded jug) | low — bounded by jug + caps | closed-loop actuation over Wi-Fi; software timer-cap safety |
+| **V3 — Auto + water safety** | **~$340** | + sight gauge, leak sensor, boot tray | above + **reads reservoir level** off the gauge; escaped-water alerts | ~2 wks, monitored | low + contained + alarmed | layered sensing — making camera water-decisions trustworthy |
 | **V4a — Retrofit, budget kit** (§4g) | **~$95** | lowest — no build; unbox a cheap kit + clip on a camera | AI observes + analyzes + **reminds only**; can't drive the kit's light/pump | none — small tank, hand refills | kit's own ~4–6 L tank | AI as an overlay on a sealed appliance; cheapest A/B control |
 | **V4b — Retrofit, premium Auk** (§4g) | **~$235** | lowest — unbox the Auk + clip on a camera | same observe-only overlay as V4a | none — 4-pot unit, hand refills | Auk's own reservoir | the design-icon unit as the A/B partner; **100-day money-back = risk-free trial** |
 | **V5 — On-device Pi controller** (§4h) | **+~$135** (reuses V2/V3 garden) | high — GPIO wiring, MOSFET, SD-card reliability | above **+ a true hard-wired float-switch interlock** and a sharper CSI camera | ~2 wks, **hardware-gated** | lowest — hardware interlock, not just timers | real embedded build: GPIO, MOSFET/flyback, float switch, on-device 24/7 |
@@ -229,12 +231,12 @@ The five variants are **not five separate purchases.** They share hardware delib
 
 | Step | Adds | Marginal cost | Cumulative |
 |---|---|---:|---:|
-| **V1** | base DIY unit, manual watering | $220 | **$220** |
-| **+ V2** | pump + 2nd plug + tubing + jug | +$45 | **$266** |
-| **+ V3** | sight gauge + leak sensor + boot tray | +$55 | **$320** |
-| **+ V4** | independent retrofit unit + camera + plug + own seeds | **+$95 (V4a)** / **+$235 (V4b Auk)** | **$415 / $555** |
-| **+ V5** | Pi 5 + CSI Camera Module 3 + float switch + wiring (relocate brain) | +$135 | **~$550 / ~$690** |
-| | **Grand total — all five, in hand** | | **~$550 (budget) / ~$690 (premium Auk)** |
+| **V1** | base DIY unit, manual watering | $240 | **$240** |
+| **+ V2** | pump + 2nd plug + tubing + jug | +$45 | **$285** |
+| **+ V3** | sight gauge + leak sensor + boot tray | +$55 | **$340** |
+| **+ V4** | independent retrofit unit + camera + plug + own seeds | **+$95 (V4a)** / **+$235 (V4b Auk)** | **$435 / $575** |
+| **+ V5** | Pi 5 + CSI Camera Module 3 + float switch + wiring (relocate brain) | +$135 | **~$570 / ~$710** |
+| | **Grand total — all five, in hand** | | **~$570 (budget) / ~$710 (premium Auk)** |
 
 Choosing the premium Auk over the budget kit for V4 adds **~$140** to the program
 (~$235 vs ~$95) — the difference between a throwaway control and a keeper you'd actually
@@ -242,8 +244,8 @@ want on the counter (offset, if the DIY wins, by the Auk's 100-day refund).
 
 **What can't be shared:** V4's integrated unit (its own light, pump, tank, timer) overlaps
 nothing with the DIY unit — you are genuinely buying a second garden. Everything else
-compounds: the grand total is the *whole* program, versus ~$455 if you skipped the
-retrofit A/B and the Pi.
+compounds: the grand total is the *whole* program, versus ~$340 — just the DIY unit at
+V3 — if you skipped both the retrofit A/B (V4) and the Pi (V5).
 
 ### 4.0b Running two units as an A/B
 
@@ -290,16 +292,17 @@ exactly one plug (the light) and one camera; the pump and its plug arrive with *
 | Nutrient | MasterBlend 4-18-38 Combo Kit, 2.5 lb | **$28** (est.) | A | makes ~180 gal — outlasts the build |
 | pH | GH pH Control Kit (Up/Down + indicator) | **$22** (est.) | A | target pH 5.5–6.5 |
 | Grow light | Barrina T5 2 ft full-spectrum strips, 4-pack | **$40** (est.) | A | ~20 W/strip, linkable, adjustable height |
-| Seeds | Parsley + basil + cilantro + lettuce packets | **$15** (est.) | A | Sow Right / Botanical Interests |
+| Seeds | Parsley + basil + cilantro + lettuce packets (+ live mint cutting) | **$15** (est.) | A | Sow Right / Botanical Interests; mint from a grocery cutting, not seed |
+| EC/TDS meter | HM Digital TDS-3 class handheld pen | **$13** (est.) | A | **required** — the EC target below can't be hit without it |
 | Top-up jug | 1–2 gal jug for plain-water feed | **$6** (est.) | **B** | feeds the pump; bounds worst-case flood (see §9) |
-| | **Tier A grow-side subtotal** | **~$192** | | |
+| | **Tier A grow-side subtotal** | **~$205** | | |
 | | **Tier B grow-side add** | **+~$6** | | top-up jug |
 
 **A\*** — the air pump / stone / airline (~$30) is **recommended** and included in the
 Tier A total: continuous-harvest herbs (basil, parsley, mint) want oxygen at the roots
 the whole time. **Pure-Kratky sub-option:** a **lettuce-only** grower can skip the air
 pump, stone, and airline entirely and let the falling water level leave an air gap —
-true passive Kratky — dropping **~$30 more** (Tier A → **~$190**). Don't do this if you
+true passive Kratky — dropping **~$30 more** (Tier A → **~$210**). Don't do this if you
 want herbs; do it only for a single crop of leafy greens.
 
 The air pump (when used) is powered continuously on its own wall plug or a dumb
@@ -310,16 +313,16 @@ plug.
 
 | Tier | What it adds | Appliance | Grow side | **Tier total** |
 |---|---|---:|---:|---:|
-| **A — Manual start** | light plug + camera; manual pour on AI's cue | ~$33 | ~$192 | **~$220** |
-| ↳ pure-Kratky (lettuce only) | drop air pump/stone/airline | ~$33 | ~$162 | **~$190** |
-| **B — + Auto top-up** | pump plug + pump + tubing + jug | +~$39 | +~$6 | **~$266** |
-| **C — + Water safety** (§4d) | sight gauge + leak sensor + boot tray | — | — | **+~$55–60** |
+| **A — Manual start** | light plug + camera; manual pour on AI's cue | ~$33 | ~$205 | **~$240** |
+| ↳ pure-Kratky (lettuce only) | drop air pump/stone/airline | ~$33 | ~$175 | **~$210** |
+| **B — + Auto top-up** | pump plug + pump + tubing + jug | +~$39 | +~$6 | **~$285** |
+| **C — + Water safety** (§4d) | sight gauge + leak sensor + boot tray | — | — | **+~$55** |
 
 These three rows are variants **V1 / V2 / V3** (§4.0). Tier B (V2) is the current full
-"core" build (~$266); Tier C added (V3) is ~$320 all-in. The two other variants are the
+"core" build (~$285); Tier C added (V3) is ~$340 all-in. The two other variants are the
 **V4 retrofit unit** (§4g — budget V4a ~$95 or premium Auk V4b ~$235) and the **V5
 on-device Pi controller** (§4h, +~$135 on V2/V3). The superset cart to run all five is in
-§4.0a (~$550 budget / ~$690 with the premium Auk).
+§4.0a (~$570 budget / ~$710 with the premium Auk).
 
 ### 4d. Tier C — Water safety pack (+~$55–60)
 
@@ -370,7 +373,7 @@ counter.
 |---|---|---:|---|
 | Countertop kit | [iDOO ID-IG301 12-pod (~$60)](https://www.amazon.com/iDOO-Hydroponics-Germination-Adjustable-ID-IG301/dp/B08DLMRKHM) | **$60** (est.) | integrated LED, fan, pump, knob timer; ~$50–70 for this class ([LetPot LPH-Lite](https://www.amazon.com/LPH-Lite-Hydroponics-Growing-Controlled-Automatic/dp/B0F8RCYF6W) ~$120 is a Wi-Fi step-up) |
 | Camera | TP-Link Tapo C110 / C120 (RTSP) | **$25** (est.) | clip it to view the pods |
-| Smart plug (optional) | 1× Kasa plug | **$13** (est.) | only crude on/off of the *whole* kit |
+| Smart plug (optional) | 1× Kasa plug (EP10 single) | **$8** (est.) | only crude on/off of the *whole* kit |
 | | **V4a total** | **~$85–100** | own seeds reused from the V1 packets |
 
 **V4b — premium Auk (~$235).** The [**Auk Mini 2**](https://www.auk.com/products/auk-mini-2)
@@ -382,7 +385,7 @@ our camera + AI turns the inspiration into the A/B partner:
 |---|---|---:|---|
 | Smart garden | [Auk Mini 2](https://www.auk.com/products/auk-mini-2) | **$199** | on sale from $229, free shipping; 4 coco-fibre pots, 24 W LED, app lighting + holiday mode |
 | Camera | TP-Link Tapo C110 / C120 (RTSP) | **$25** (est.) | clip it to view the pots |
-| Smart plug (optional) | 1× Kasa plug | **$13** (est.) | only crude on/off of the *whole* unit |
+| Smart plug (optional) | 1× Kasa plug (EP10 single) | **$8** (est.) | only crude on/off of the *whole* unit |
 | | **V4b total** | **~$225–240** | own seeds reused from the V1 packets |
 
 **Why the Auk is the risk-free A/B:** it ships with a **100-day money-back guarantee.**
@@ -456,21 +459,21 @@ after you know you want the interlock or the CSI camera.
 
 | System | Hardware | 2-yr subscription/consumables | AI? | 2-yr total |
 |---|---:|---:|:--:|---:|
-| **samogrow — V1 (manual)** | ~$220 | ~$70 consumables + ~$120 Claude API ($5/mo) | **Yes** | **~$410** |
-| **samogrow — V2 (auto)** | ~$266 | ~$70 consumables + ~$120 Claude API ($5/mo) | **Yes** | **~$456** |
+| **samogrow — V1 (manual)** | ~$240 | ~$70 consumables + ~$120 Claude API ($5/mo) | **Yes** | **~$430** |
+| **samogrow — V2 (auto)** | ~$285 | ~$70 consumables + ~$120 Claude API ($5/mo) | **Yes** | **~$475** |
 | Gardyn Home 4 | ~$899 | ~$816 (Kelby AI $34/mo) | Yes | **~$1,715** |
 | Click & Grow SG9 | ~$200 | ~$400 (pods + sub) | No | **~$600** |
 | Auk Mini 2 | ~$229 | ~$0 (bring your own seeds) | No (scheduling only) | **~$229** |
 
 **The pop:** samogrow lands in the same one-time price bracket as the *no-AI*
-countertop units (~$200–266) while delivering the camera+AI capability that
+countertop units (~$200–285) while delivering the camera+AI capability that
 otherwise **only exists on the $899 Gardyn with a ~$408/yr subscription.** Starting at
-**V1 that gap widens** — ~$410 all-in over two years, **roughly $1,300 cheaper than
+**V1 that gap widens** — ~$430 all-in over two years, **roughly $1,300 cheaper than
 Gardyn**, and *below the no-AI Click & Grow's* 2-year cost while adding AI monitoring,
 more plants, and open consumables with no lock-in. Upgrading to V2's automation adds
-just ~$46. The DIY "premium" over the cheapest timer units is small; the AI-tier savings
-are enormous. (Running the whole five-variant program is a one-time ~$550 of hardware —
-~$690 if V4 is the premium Auk, §4.0a — still under a single Gardyn.)
+just ~$45. The DIY "premium" over the cheapest timer units is small; the AI-tier savings
+are enormous. (Running the whole five-variant program is a one-time ~$570 of hardware —
+~$710 if V4 is the premium Auk, §4.0a — still under a single Gardyn.)
 
 ---
 
@@ -506,7 +509,8 @@ they arrive, before building anything.
 
 ### Day 2–4 — build the DWC reservoir
 
-1. Drill six 3" holes in the opaque tote lid for net cups.
+1. Drill six **3" (76 mm)** holes in the opaque tote lid for net cups — use a 3" hole
+   saw (the net-cup rim seats on the 3" hole; see the tools list in `spec/SHOPPING-LIST.md`).
 2. Rinse the LECA pebbles (dusty) and the rockwool.
 3. Run airline from the (always-on) air pump → check valve → air stone in the
    bottom of the tote. Keep the air pump above the water line. (Skip for the
@@ -514,9 +518,15 @@ they arrive, before building anything.
 4. **[Tier B]** Position the top-up jug **above** the reservoir; put the small pump in
    the jug and run its tubing into the tote. (Tier A: no pump — you top up by hand when
    the AI tells you to.)
-5. Mix nutrient per MasterBlend directions (all three parts, never combine
-   concentrates undiluted) to a mild solution (EC ~1.0–1.6 / ~700–1100 ppm). Adjust
-   pH to 5.5–6.5 with the GH kit.
+5. **Mix nutrient with the gram scale.** The MasterBlend 4-18-38 combo kit is 3 parts;
+   the standard full-strength recipe is **2.4 g MasterBlend + 2.4 g calcium nitrate +
+   1.2 g Epsom salt per gallon** ([masterblend.com](https://www.masterblend.com/4-18-38-tomato-formula/),
+   [PowerGrow](https://www.powergrowsystems.com/products/masterblend-4-18-38-fertilizer-master-kit-bulk)).
+   Dissolve each part **fully and separately, in order — MasterBlend, then Epsom, then
+   calcium nitrate last — never mixing the dry concentrates** (calcium reacting with the
+   sulfate/phosphate locks out nutrients). For leafy herbs and lettuce run it mild, about
+   **half strength**, and confirm with the EC/TDS meter: target **EC ~1.0–1.6 mS/cm
+   (~700–1100 ppm)**. Adjust pH to 5.5–6.5 with the GH kit.
 
 ### Day 4–5 — light + camera + plugs
 
@@ -539,10 +549,14 @@ they arrive, before building anything.
 ### Day 5 — software on the always-on machine (Mac / mini-PC / VM)
 
 1. Install Bun: `curl -fsSL https://bun.sh/install | bash`.
-2. Clone the repo, `cd software`, `bun install`.
+2. Clone the repo, `cd software`, `bun install`. Also install **ffmpeg**
+   (`brew install ffmpeg` on Mac) — it snapshots the RTSP camera; not needed in mock mode.
 3. Create `.env` with `SAMOGROW_TELEGRAM_TOKEN`, `SAMOGROW_TELEGRAM_CHAT_ID`,
-   `ANTHROPIC_API_KEY` (readable only by you). Get the bot token from **BotFather**;
-   get your chat id from the bot's first message.
+   `ANTHROPIC_API_KEY` (readable only by you). Get the bot token from **BotFather**. The
+   bot does **not** message you first — get your chat id by messaging
+   [@userinfobot](https://t.me/userinfobot), or send any message to your own bot and open
+   `https://api.telegram.org/bot<TOKEN>/getUpdates` and read `chat.id` (mirrors
+   `software/README.md`).
 4. Create `config.json` with the light plug host (`light.plugHost`), the camera RTSP
    URL(s), and light schedule. **Tier A: leave `pump.plugHost` empty** — the brain then
    runs in **manual-watering mode**, sending a Telegram reminder with a suggested amount
@@ -552,10 +566,14 @@ they arrive, before building anything.
 5. Run in **mock mode** first (`SAMOGROW_MOCK=1 bun run src/main.ts`) to validate
    the Claude call + Telegram push with no devices. Then run live.
 6. Install as a background service: **launchd** on macOS (a `LaunchAgent` plist with
-   `KeepAlive`) or **systemd** on a Linux VM (`Restart=always`). Keep the machine
-   awake (disable sleep, or use `caffeinate` on Mac).
-7. Transplant sprouted plugs into net cups (surround with LECA) once they have roots
-   and true leaves.
+   `KeepAlive`) or **systemd** on a Linux VM (`Restart=always`). Keep the machine awake
+   so the loop keeps running: on Mac, disable sleep in **System Settings → Battery /
+   Energy Saver** (or run **`caffeinate -s`**, or use the **Amphetamine** app); on a
+   Linux VM, disable suspend.
+7. **Transplant each species as it develops roots — don't wait for the whole tray.**
+   Basil is ready in ~1–2 weeks; parsley takes 10–28 days. Move each plug into a net cup
+   (surround with LECA) as soon as it has roots out of the plug and true leaves, and let
+   the slow parsley catch up on its own schedule.
 
 ---
 
@@ -715,10 +733,15 @@ each one misses. Layers 1–3 are the **Tier C — Water safety pack** (§4d, ~$
 energy-monitoring pump plug).
 
 **Layer 1 — Camera-readable sight gauge (~$8, passive, no electronics).**
-A short length of clear vinyl tube (3/8" ID) is tee'd into the tote wall low down
-through a bulkhead/grommet fitting, so the tube shows the true reservoir level by
-communicating vessels. Drop a brightly colored float bead in the tube and route the
-tube up **inside the camera's field of view**. Now every photo the brain already
+A short length of clear vinyl tube (3/8" ID) shows the true reservoir level by
+communicating vessels. **Simplest install (zero-drill, recommended):** stand the tube
+vertically *inside* the tote, clipped to the wall and open at the bottom so it fills to
+the reservoir level, and route its top up through a small notch in the lid into frame —
+nothing below the waterline to seal, so nothing to leak. (Prefer an external gauge?
+Drill one hole low in the tote wall sized to a rubber grommet, push-fit the grommet, and
+push the tube through it — the grommet alone seals it, no bulkhead fitting needed.) Drop
+a brightly colored float bead in the tube and route the tube up **inside the camera's
+field of view**. Now every photo the brain already
 takes carries the water level with it — the vision prompt reads the bead's height
 against a taped scale and reports reservoir level as a first-class field, no extra
 poll.
@@ -849,6 +872,27 @@ removes. Take it only for the float-switch interlock or the CSI camera.
 
 ## 13. Changelog
 
+- **v1.4.1 (2026-07-05)** — **QA fixes** across the spec, `SHOPPING-LIST.md`, and
+  `docs/index.html`. Added the **EC/TDS meter** ($13) to the V1 grow side — it's
+  required because the spec sets an EC target — and recomputed every affected total.
+  Corrected the down-rounded V1 base ($33 appliance + $205 grow = **$238**, not the
+  old "$220"), giving one honest cost frame everywhere: **V1 ~$240 · V2 ~$285 · V3
+  ~$340** (superset **~$570 budget / ~$710 premium Auk**). Arithmetic fixes: Gardyn
+  3-yr TCO corrected to **>$2,100** ($899 + $408×3); the §4.0a "skip V4+V5" figure
+  fixed from ~$455 to **~$340** (that's just V3); the §4 electronics claim from "under
+  ~$70" to **~$33 (light plug + camera) / ~$72 (with pump)**; "zero recurring fees" →
+  **"no subscription fees"** (the API is recurring); 2-yr TCO rows to ~$430 (V1) / ~$475
+  (V2). Fixed the **duplicate Kasa ASIN** — distinct pages for the EP10 single (light),
+  the KP125M energy-monitoring 2-pack, and the KP115 single (pump). Added a **Tools
+  you'll need** block (drill, 3"/76 mm hole saw, gram scale, etc.) and a **Mounting &
+  power** note (camera clamp, power strip, light hanging) to the shopping list, both
+  explicitly *not* in the build totals. Assembly plan: stated the **3" (76 mm)** hole-saw
+  size; added the **MasterBlend recipe** (2.4 g MasterBlend + 2.4 g calcium nitrate +
+  1.2 g Epsom per gallon, mixed separately in order) with the gram scale; fixed the
+  **chat-id** instructions (bot doesn't message first — use @userinfobot or `getUpdates`,
+  mirroring `software/README.md`); added **ffmpeg** install and an explicit **keep-awake**
+  note; reworded the transplant step to move each species as it roots; and added a
+  **zero-drill sight-gauge install** to §9a.
 - **v1.4 (2026-07-05)** — Reframed around **five concrete, buildable variants** (the
   user intends to build and try up to five). §4.0 now presents **V1 Manual/Kratky
   (~$220), V2 Auto top-up (~$266), V3 Auto + water-safety (~$320), V4 Retrofit a finished
