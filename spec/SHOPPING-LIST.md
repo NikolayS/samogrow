@@ -58,6 +58,21 @@ stock** — any ¼"-thread ball-head clamp works. And **the tote, net pots, and 
 easy in-person buys** (garden center / hardware store) — grab them locally the day you order
 instead of waiting on shipping.
 
+**Grow-side substitutions (when the listed item is slow or N/A) — safe swaps, and one trap:**
+
+- **Rockwool plugs ↔ coco-coir grow sponges** — interchangeable. Coco-coir sponges (peat/coir
+  blend, ~1.4–1.6" soaked, fit a 3" net pot) are actually easier: they're **pre-buffered so you
+  skip the pH-soak** and they aren't itchy. Either works; buy whichever ships sooner.
+- **pH kit — liquid indicator _or_ test strips** both fine. The GH kit reads with liquid drops;
+  cheaper kits use strips (a touch coarser, still fine for the 5.5–6.5 target). A ~$15 digital pH
+  pen is the optional precision upgrade.
+- **⚠️ MasterBlend TRAP — it must be the complete _3-part_ kit.** The recipe is **MasterBlend
+  4-18-38 + Calcium Nitrate 15.5-0-0 + Epsom salt (magnesium sulfate)**, all three, per gallon.
+  A bag labeled just **"4-18-38"** (even "makes 1000 gal!") is **only Part 1** — buy it alone and
+  the plants get **no calcium and no magnesium** (yellowing, deficiency, stunted growth). Always
+  confirm the listing includes **all three bags** (any brand's complete combo kit works; a smaller
+  1.25 lb combo still makes ~100 gal — over a year for one tote).
+
 ---
 
 ## Tools you'll need (one-time, NOT counted in any total below)
