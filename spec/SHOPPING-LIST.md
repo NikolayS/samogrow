@@ -7,8 +7,9 @@ retrofit-kit unit; **V5** is the on-device Pi electronics that relocate the brai
 V1–V3 brain runs on a machine you already own — **no controller, no soldering, no wiring**
 until you get to V5.
 
-**Recommendation (to try several for real):** order the **V1 cart the day you plan to
-sow** and the **V4 unit at the same time** (earlier if it's the premium Auk V4b — its
+**Recommendation (to try several for real):** order the **V1 cart when you're ready to
+start** (transplant grown herbs for a same-day garden, or sow seeds for the cheaper slower
+path) and the **V4 unit at the same time** (earlier if it's the premium Auk V4b — its
 **100-day money-back clock starts at purchase**, so order early to overlap a full grow
 cycle), so both units germinate in parallel and you get an A/B from week one. Then buy the
 **+ V2** ($25) and **+ V3** ($55) deltas as you go (each is a small parts add + a config
@@ -74,6 +75,14 @@ vacation autonomy — away >1 week needs a human.
 | 14 |  | 1 | [EC/TDS meter (HM Digital TDS-3 class)](https://www.amazon.com/dp/B000VTQM70) | $13 (est.) | **required** — the spec sets an EC target (1.0–1.6 mS/cm ≈ 700–1100 ppm); you can't hit it without a meter. Any basic TDS-3-class pen works |
 
 **Grow-side subtotal: ~$205** (−~$30 for pure-Kratky lettuce-only → ~$175)
+
+> **Fastest start (default): transplant grown herbs, skip germination.** Instead of waiting
+> ~2–4 weeks for seeds (item 13) to sprout, buy **2–4 grown herb plants — basil, parsley —
+> from a garden center (~$4–5 each)**, wash **all** the soil off the roots, and set the root
+> balls straight into the net cups: a full, working garden the same day (SPEC §5). This is a
+> **roughly price-neutral, either/or substitute for the seed packets, not an add-on** — so
+> it's not counted in the total above. Seeds (item 13) stay as the cheaper, slower option for
+> growing from scratch.
 
 ### V1 total: **~$255** (appliance ~$50 + grow ~$205 = $255). *Cheaper floor for someone who'll never automate:* swap the 2-pack for the **$8 EP10 single** → appliance ~$33, **V1 ~$238**; further drop the air pump/stone/airline for pure-Kratky lettuce-only → **~$210**.
 
@@ -195,5 +204,7 @@ Optional further add-ons (see `spec/SPEC.md` §4e): second Tapo camera (~$25), t
 dosing pump + plug (~$25), digital pH pen (~$15). Ongoing consumables run **~$35/yr** per
 unit; Claude API runs **~$3–7/mo** for one or both units.
 
-**Order-day reminder:** start parsley seeds the moment they arrive — germination
-takes 10–28 days and is the critical-path item. Soak 12–24 h before sowing.
+**Order-day reminder:** the fast start is to **transplant grown herbs** — pick up 2–4 potted
+basil/parsley plants when you order, and you have a working garden the day the parts arrive
+(wash all soil off the roots first — SPEC §5). Growing from seed instead? Start parsley the
+moment seeds arrive — germination takes 10–28 days — and soak 12–24 h before sowing.

@@ -1,6 +1,6 @@
 # samogrow by Nombox — Build Spec
 
-**Version:** v1.4.2
+**Version:** v1.4.3
 **Date:** 2026-07-05
 **Owner:** Nik (nik@postgres.ai)
 **Status:** Ready to build
@@ -63,7 +63,9 @@ residual-risk discussion).
 Nik is the user. He wants:
 
 1. **Fresh parsley and greens on tap.** Parsley, basil, cilantro, and lettuce
-   growing continuously so there's always something to cut — not a single harvest.
+   growing continuously so there's always something to cut — not a single harvest. He'd
+   rather not wait weeks for germination before it even looks like a garden, so the default
+   start is transplanting grown herbs; from seed is the cheaper, slower option for the patient.
 2. **Telegram control and reports.** A daily photo + health note pushed to
    Telegram; inline buttons to water now / get a report; the ability to ask "how do
    the plants look?" from his phone. The bot obeys only his chat ID.
@@ -196,9 +198,13 @@ flavors, budget **V4a** and premium **V4b**) is §4g, V5 is §4h.
 
 **Recommendation (for actually trying several):**
 
-1. **Start V1 the day seeds arrive.** Germination is the critical path (parsley 10–28
-   days), so you have nothing to water yet — the manual "pour when the AI says" loop
-   costs nothing and gets the camera + Claude running immediately.
+1. **Start V1 the day the parts arrive — transplant a grown herb, don't wait to germinate.**
+   Buy 2–4 healthy potted herbs (basil, parsley) from a garden center (~$4–5 each), wash
+   **all** the soil off the roots, and set each root ball into a net cup of clay pebbles —
+   a full, good-looking, working garden the **same day**. (Growing from seed is the cheaper,
+   slower alternative: ~2–4 weeks of germination first, parsley slowest at 10–28 days.)
+   Either way the manual "pour when the AI says" loop costs nothing and gets the camera +
+   Claude running immediately.
 2. **Order the V4 unit at the same time (earlier if it's the premium Auk, V4b).** Its
    plants should be germinating in parallel so you get a real A/B from week one — and the
    **Auk's 100-day money-back window starts ticking at purchase**, so order it early to
@@ -499,20 +505,42 @@ steps plus a two-line config change.
 Place your order (see `spec/SHOPPING-LIST.md`). The Kasa plug(s), the Tapo camera, and
 (for Tier B) the pump are all standard consumer Wi-Fi gear.
 
-### Day 1–2 — start germination IMMEDIATELY
+### Day 1 — get your plants: transplant (default) or germinate (from scratch)
 
-**Parsley is the bottleneck: germination takes 10–28 days.** Start seeds the moment
-they arrive, before building anything.
+**Default — transplant a grown herb, running the same day.** You don't have to wait for
+germination. Buy 2–4 healthy potted herbs (basil, parsley), build the reservoir (Day 2–4
+below), then nest each plant's root ball in a 3" net cup packed with **LECA clay pebbles**
+and lower it into the lid so the longest roots reach the solution — a full, good-looking
+garden the same day. **Three things before you drop a plant in:**
+
+1. **Wash ALL the soil off the roots** — lukewarm running water, teasing the ball apart
+   gently. This is the one step you can't skip: soil left in a DWC reservoir rots, fouls the
+   water, and clogs the pump.
+2. **Expect a few days of droop** (transplant shock) as roots adapt to water culture — lower
+   the light a bit and keep the air stone running; it recovers. Don't keep lifting the plants
+   to check them.
+3. **Buy a plant, not a bunch.** Get a potted herb *plant* from a nursery's seedling section
+   (one plant in a 3–4" pot of soil), or search "live herb plant" online (e.g. Bonnie Plants).
+   Avoid the produce-aisle "fresh/living herbs" packs sold for cooking — those are many weak
+   seedlings crammed into one plug; usable only if you pull the clump apart into a few starts
+   first.
+
+**Alternative — grow from seed (cheaper, ~2–4 weeks slower).** Skip the plant purchase and
+start seeds the moment they arrive, before building anything. Parsley is the bottleneck at
+10–28 days.
 
 1. **Soak parsley seeds** in warm water 12–24 h (change the water once) to leach out
    the coumarin germination inhibitors.
 2. Rinse/pH-condition rockwool plugs. Sow soaked parsley + basil + cilantro +
    lettuce into separate plugs.
-3. Keep plugs **~70 °F (21 °C) and constantly moist** — one dry-out kills
-   germinating parsley. Basil sprouts in 5–7 days; parsley in 10–28.
+3. Keep plugs **~70 °F (21 °C) and constantly moist** — one dry-out kills germinating
+   parsley. Basil sprouts in 5–7 days; parsley in 10–28. Transplant each sprout into a net
+   cup (surround with LECA) once it has roots out of the plug and true leaves.
 4. Use flat-leaf "Giant of Italy" parsley, Genovese basil, a slow-bolt cilantro
-   (Calypso/Santo), and a loose-leaf lettuce. For mint, use a rooted cutting in its
-   own cup at one end.
+   (Calypso/Santo), and a loose-leaf lettuce.
+
+For **mint**, either path uses a rooted cutting from a grocery bunch or a potted plant in
+its own cup at one end — mint won't come true from seed.
 
 ### Day 2–4 — build the DWC reservoir
 
@@ -577,10 +605,11 @@ they arrive, before building anything.
    so the loop keeps running: on Mac, disable sleep in **System Settings → Battery /
    Energy Saver** (or run **`caffeinate -s`**, or use the **Amphetamine** app); on a
    Linux VM, disable suspend.
-7. **Transplant each species as it develops roots — don't wait for the whole tray.**
-   Basil is ready in ~1–2 weeks; parsley takes 10–28 days. Move each plug into a net cup
-   (surround with LECA) as soon as it has roots out of the plug and true leaves, and let
-   the slow parsley catch up on its own schedule.
+7. **Add the plants.** If you transplanted grown herbs (the default), they're already in
+   their net cups — the garden is running from day one. Growing from seed instead? Move
+   each sprout into a net cup (surround with LECA) as it develops roots — don't wait for
+   the whole tray; basil is ready in ~1–2 weeks, parsley 10–28 days, and the slow ones
+   catch up on their own schedule.
 
 ---
 
@@ -840,17 +869,21 @@ multi-layer water story for a no-microcontroller build.
 
 ## 11. Sprint plan
 
-**Week 1 — order, germinate, software in mock mode.**
-Place the Day-0 order. The moment seeds arrive, start germination (parsley first —
-it's slow). In parallel, on your always-on machine: `bun install`, get the bot from
-BotFather, run the loop in `SAMOGROW_MOCK=1`, and verify the Claude vision call +
-JSON verdict + Telegram push work end-to-end against a sample plant photo.
+**Week 1 — order, get plants, software in mock mode.**
+Place the Day-0 order and pick up 2–4 grown herb plants (the default fast start). In
+parallel, on your always-on machine: `bun install`, get the bot from BotFather, run the
+loop in `SAMOGROW_MOCK=1`, and verify the Claude vision call + JSON verdict + Telegram
+push work end-to-end against a sample plant photo. (Growing from seed instead? Start
+germination the moment seeds arrive — parsley first, it's slow — and expect ~2–4 extra
+weeks before there's anything to transplant.)
 
 **Week 2 — assemble and deploy.**
 Build the DWC reservoir, mount the light and camera, onboard the two plugs and the
 camera, set DHCP reservations and the RTSP account. Wire `config.json` to the plug
 IPs and RTSP URL. Run the §8 device bring-up checklist. Install the service under
-launchd/systemd. Transplant sprouted plugs.
+launchd/systemd. **Transplant the grown herbs** — wash all soil off the roots first — and
+you have a full garden with first cuttings within days; from seed, transplant the sprouted
+plugs instead and wait weeks for first harvest.
 
 **Week 3+ — tune with real plants.**
 Calibrate `mlPerSecond`, tune the photoperiod and analysis cadence, refine the
@@ -879,6 +912,17 @@ removes. Take it only for the float-switch interlock or the CSI camera.
 
 ## 13. Changelog
 
+- **v1.4.3 (2026-07-05)** — Made **transplanting a grown herb the default day-one path** —
+  buy 2–4 potted herbs (basil, parsley), wash all soil off the roots, and set the root balls
+  into net cups for a full working garden the same day — with **growing from seed reframed
+  as the cheaper, ~2–4-week-slower alternative** (parsley slowest at 10–28 days). Updated the
+  §4.0 recommendation, the §5 assembly plan (Day 1 now leads with the transplant route and
+  keeps germination as the alternative; Day-5 step 7 rewritten), the §11 sprint plan (first
+  harvest ~days for the transplant path vs weeks for seed), and the §2 user-story framing.
+  Kept the honest caveats (soil in DWC rots/clogs — washing roots is non-negotiable; expect a
+  few days of transplant shock; garden-center pots beat crammed grocery "living herb" clumps).
+  No plug/price numbers changed — the grown plants (~$4–5 each) are a roughly price-neutral,
+  either/or substitute for the seed line, not an addition to any total.
 - **v1.4.2 (2026-07-05)** — Made the **KP125M energy-monitoring 2-pack (~$25)** the
   consistent V1 default across all three docs: one plug runs the light, the second is the
   V2 pump plug, so V2's plug is $0. V1 appliance subtotal ~$33 → **~$50** and V1 total

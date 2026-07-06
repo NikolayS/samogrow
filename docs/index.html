@@ -291,6 +291,10 @@
   .step p { margin: 0; font-size: .92rem; color: var(--ink-soft); line-height: 1.5; }
   .step.crit { border-top-color: var(--soil); }
   .step .flag { font-family: var(--font-mono); font-size: .6rem; letter-spacing: .14em; text-transform: uppercase; color: var(--soil); display: inline-block; margin-top: 12px; border: 1px solid var(--soil); padding: 3px 7px; }
+  .step .heads-up { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 8px; }
+  .step .heads-up li { font-family: var(--font-mono); font-size: .72rem; line-height: 1.45; color: var(--ink-soft); padding-left: 15px; position: relative; }
+  .step .heads-up li::before { content: "→"; position: absolute; left: 0; color: var(--leaf); }
+  .step .heads-up li b { color: var(--ink); font-weight: 600; }
 
   /* ---------- footer ---------- */
   footer { border-top: 1px solid var(--line); padding: 50px 0 70px; }
@@ -674,14 +678,19 @@
       <div class="steps">
         <div class="step">
           <span class="n">STEP 01</span>
-          <h3>Order the parts</h3>
-          <p>Place the full core-build order — two Kasa plugs, a Tapo camera, a pump, and the grow side. All standard consumer gear.</p>
+          <h3>Order parts &amp; grab grown herbs</h3>
+          <p>Place the core-build order — plugs, camera, pump, grow side. On the same trip, pick up 2–4 healthy potted herbs (basil, parsley) from a garden center, ~$4–5 each. They're your day-one plants.</p>
         </div>
-        <div class="step crit">
+        <div class="step" style="border-top-color:var(--leaf)">
           <span class="n">STEP 02</span>
-          <h3>Germinate parsley immediately</h3>
-          <p>Soak seeds 12–24 h, then sow into moist rockwool the moment they arrive. Parsley takes 10–28 days — everything else waits on it.</p>
-          <span class="flag">Critical path</span>
+          <h3>Transplant → a full garden today</h3>
+          <p>Nest each root ball in a net cup of clay pebbles, fill the reservoir, and you have a good-looking, working garden the same day — no germination wait. Heads up before you drop a plant in:</p>
+          <ul class="heads-up">
+            <li><b>Wash ALL the soil off the roots</b> (lukewarm water, gently) — soil left in the reservoir rots and clogs. The one step you can't skip.</li>
+            <li><b>Expect a few days of droop</b> (transplant shock) — lower the light a bit; it recovers.</li>
+            <li><b>Buy a plant, not a bunch.</b> Get a potted herb <i>plant</i> from a nursery's seedling section (one plant in a 3–4" pot of soil), or search <span class="code">live herb plant</span> online — not the produce-aisle “fresh herbs” packs, which are many weak seedlings crammed together (usable, but pull the clump apart into a few starts first).</li>
+          </ul>
+          <span class="flag" style="color:var(--leaf);border-color:var(--leaf)">Day-one default</span>
         </div>
         <div class="step">
           <span class="n">STEP 03</span>
@@ -690,13 +699,17 @@
         </div>
         <div class="step">
           <span class="n">STEP 04</span>
-          <h3>Plug in when parts arrive</h3>
-          <p>Build the water reservoir, get the plugs and camera onto your Wi-Fi, point the software at them, and set it to run on its own and restart itself.</p>
+          <h3>Point it at the plants</h3>
+          <p>Get the plugs and camera onto your Wi-Fi, aim the camera over the canopy, point the software at them, and set it to run on its own and restart itself.</p>
         </div>
       </div>
       <p class="safety-note">
+        <span class="safety-tag">Cheaper / from scratch</span>
+        Prefer to grow from seed? Same build, lower cost — you just add ~2–4 weeks of germination before there's anything to transplant (parsley is the laggard at 10–28 days: soak 12–24 h, sow into moist rockwool, keep it warm). Garden-center pots beat crammed grocery “living herb” clumps; if you use those, split them gently.
+      </p>
+      <p class="safety-note">
         <span class="safety-tag">Harvest</span>
-        Basil and mint come fast — first cuts about 3–4 weeks after transplant. Parsley is the patient one, months to full production. Lettuce depends on light and heat, and bolts when it gets too warm.
+        Transplanted basil and mint are cuttable within days once they settle — expect a few days of transplant shock first. Parsley is the patient one. Lettuce bolts when it gets too warm.
       </p>
     </div>
   </section>
