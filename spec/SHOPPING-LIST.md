@@ -11,9 +11,14 @@ until you get to V5.
 sow** and the **V4 unit at the same time** (earlier if it's the premium Auk V4b — its
 **100-day money-back clock starts at purchase**, so order early to overlap a full grow
 cycle), so both units germinate in parallel and you get an A/B from week one. Then buy the
-**+ V2** ($45) and **+ V3** ($55) deltas as you go (each is a small parts add + a config
+**+ V2** ($25) and **+ V3** ($55) deltas as you go (each is a small parts add + a config
 line). Decide on **V5** after ~a month of laptop-brain experience. Full superset cart +
 grand total at the bottom.
+
+> **Note on the +V2 delta:** the V1 default is the **KP125M energy-monitoring
+> 2-pack** — one plug runs the light, the second is the exact plug the V2 pump
+> needs, so the V2 plug then costs **$0**. That makes the +V2 delta just **~$25**
+> (pump + tubing + jug); the plug cost is already paid at V1.
 
 Prices are USD, mid-2026; those marked **(est.)** are market-typical estimates from the
 research files — verify at the source before buying (expect ±30% from coupons/sellers).
@@ -36,7 +41,7 @@ likely buys. None of these are in the variant totals.
 
 ---
 
-## V1 — Manual start (Kratky-style) · the default cart · ~$240
+## V1 — Manual start (Kratky-style) · the default cart · ~$255
 
 *(= Tier A in the SPEC BOM tables.)* The AI reads the camera (and the sight gauge, if you
 add V3) and **tells you** on Telegram when and roughly how much to pour. No pump, no
@@ -46,10 +51,10 @@ vacation autonomy — away >1 week needs a human.
 
 | # | Photo | Qty | Item | Est. price | Where / note |
 |---|---|---|---|---:|---|
-| 1 | <img src="../docs/img/components/kasa-smart-plug.jpg" width="80"> | 1 | [Kasa smart plug — one, for the light (EP10 single)](https://www.amazon.com/dp/B091699Z3W) | $8 (est.) | UL-listed, local LAN control; a basic single plug (EP10 class) is enough — the light needs no energy monitoring. Or grab the [KP125M energy-monitoring 2-pack](https://www.amazon.com/dp/B0BYGRLRS1) (~$25) now if you know you'll add the Tier B pump |
+| 1 | <img src="../docs/img/components/kasa-smart-plug.jpg" width="80"> | 1 | [Kasa **KP125M energy-monitoring 2-pack**](https://www.amazon.com/dp/B0BYGRLRS1) | $25 (est.) | **Recommended default.** UL-listed, local LAN control. One plug runs the light now; the second is exactly the energy-monitoring plug the V2 pump needs — so **the V2 plug (item 15) then costs $0**. Buying two singles later costs more. Only pick the [$8 EP10 single](https://www.amazon.com/dp/B091699Z3W) instead if you're certain you'll never automate watering (pure lifelong-Kratky) |
 | 2 | <img src="../docs/img/components/tapo-camera.jpg" width="80"> | 1 | [TP-Link Tapo C120 Wi-Fi camera (RTSP)](https://www.amazon.com/dp/B0CH45HPZT) | $25 (est.) | supports local RTSP snapshots; [tp-link.com](https://www.tp-link.com/us/home-networking/cloud-camera/tapo-c120/) |
 
-**Appliance subtotal: ~$33**
+**Appliance subtotal: ~$50** (2-pack $25 + camera $25; the EP10-single floor is ~$33)
 
 ### Grow side
 
@@ -70,7 +75,7 @@ vacation autonomy — away >1 week needs a human.
 
 **Grow-side subtotal: ~$205** (−~$30 for pure-Kratky lettuce-only → ~$175)
 
-### V1 total: **~$240** (appliance ~$33 + grow ~$205 = $238; pure-Kratky lettuce-only: **~$210**)
+### V1 total: **~$255** (appliance ~$50 + grow ~$205 = $255). *Cheaper floor for someone who'll never automate:* swap the 2-pack for the **$8 EP10 single** → appliance ~$33, **V1 ~$238**; further drop the air pump/stone/airline for pure-Kratky lettuce-only → **~$210**.
 
 ### Mounting & power (small accessories, ~$15–25, NOT in the totals above)
 
@@ -85,23 +90,23 @@ alternative to the improvised shelf.
 
 ---
 
-## + V2 adds — Auto top-up · +~$45 → ~$285
+## + V2 adds — Auto top-up · +~$25 → ~$280
 
 *(= Tier B.)* Adds the pump so the software waters for you within hard timer caps.
 Software switch is one config line (set `pump.plugHost`). This is the full "core" build.
 
 | # | Photo | Qty | Item | Est. price | Where / note |
 |---|---|---|---|---:|---|
-| 15 | <img src="../docs/img/components/kasa-smart-plug.jpg" width="80"> | 1 | [2nd Kasa plug — energy-monitoring, for the pump](https://www.amazon.com/dp/B0BYGRLRS1) | $21 (est.) | energy read = pump-health signal (SPEC §9a). KP125M is sold only as a [2-pack](https://www.amazon.com/dp/B0BYGRLRS1) (~$25 for two) — buy it at V1 and this line is ~$0; the single-buy alternative is the [KP115 energy-monitoring single](https://www.amazon.com/dp/B08LN3C7WK) (~$15). Also at [kasasmart.com](https://www.kasasmart.com/us/products/smart-plugs/kasa-smart-plug-slim-energy-monitoring-kp125m) |
+| 15 | <img src="../docs/img/components/kasa-smart-plug.jpg" width="80"> | 1 | [2nd Kasa plug — energy-monitoring, for the pump](https://www.amazon.com/dp/B0BYGRLRS1) | **$0** (est.) | energy read = pump-health signal (SPEC §9a). **Already bought** — it's the second plug from the V1 default [KP125M 2-pack](https://www.amazon.com/dp/B0BYGRLRS1) (~$25 for two), so this line is **$0** here. Only if you took the EP10-single floor at V1 do you buy a plug now: the [KP115 energy-monitoring single](https://www.amazon.com/dp/B08LN3C7WK) (~$15). Also at [kasasmart.com](https://www.kasasmart.com/us/products/smart-plugs/kasa-smart-plug-slim-energy-monitoring-kp125m) |
 | 16 | <img src="../docs/img/components/submersible-pump.jpg" width="80"> | 1 | [Small 120 V submersible fountain pump (DOMICA 90 GPH)](https://www.amazon.com/dp/B0892DKNR3) | $12 (est.) | switched by the pump plug; timed top-up |
 | 17 |  | 1 | [Vinyl tubing for the pump feed (3/8" ID, 10 ft)](https://www.amazon.com/dp/B07NQSNBTG) | $6 (est.) | jug → reservoir |
 | 18 |  | 1 | [1–2 gal jug (plain-water top-up feed)](https://www.amazon.com/1-gallon-water-jug-spigot/s?k=1+gallon+water+jug+with+spigot) | $6 (est.) | bounds the worst-case flood (SPEC §9) |
 
-**V2 adds: ~$45 → running total ~$285** (exact: $238 + $39 appliance + $6 jug = $283)
+**V2 adds: ~$25 → running total ~$280** (exact: $255 + $12 pump + $6 tubing + $6 jug = $279; the 2nd plug was already bought in the V1 2-pack, so it's $0 here)
 
 ---
 
-## + V3 adds — Water safety pack · +~$55 → ~$340
+## + V3 adds — Water safety pack · +~$55 → ~$335
 
 *(= Tier C.)* Cheap, independent layers so the build isn't blind to the reservoir (full
 rationale in `spec/SPEC.md` §9a); each catches a different water failure. Applies mainly
@@ -115,7 +120,7 @@ energy-monitoring KP125M in V2 — it's software, $0 extra.)
 | 20 |  | 1 | [Govee Wi-Fi Water Sensor, 3-pack (2.4 GHz, no hub)](https://www.amazon.com/Detector-Wireless-Notification-Security-Basement/dp/B07J9HZ5VN) | $35 (est.) | sits on the floor under the tote/pump; phone push + 100 dB alarm on any leak, independent of the brain |
 | 21 |  | 1 | [Plastic boot/drip tray, ~20×15 in](https://www.amazon.com/NINAMAR-Boot-Tray-Inch-Trays/dp/B07RL6BWTB) | $12 (est.) | passive containment under the whole tote; also gives the leak sensor a place to catch water |
 
-**V3 adds: ~$55 → running total ~$340** (exact: $283 + $55 = $338)
+**V3 adds: ~$55 → running total ~$335** (exact: $279 + $55 = $334)
 
 ---
 
@@ -178,13 +183,13 @@ to drive the pump directly instead of via the Kasa plug (+~$30).
 
 | Variant | Cost | Notes |
 |---|---:|---|
-| **V1 — Manual start** (default) | **~$240** | pure-Kratky lettuce-only: ~$210 |
-| **+ V2 — Auto top-up** | **~$285** | +$45 in place |
-| **+ V3 — Water safety** | **~$340** | +$55 in place |
+| **V1 — Manual start** (default) | **~$255** | EP10-single floor ~$238; pure-Kratky lettuce-only ~$210 |
+| **+ V2 — Auto top-up** | **~$280** | +$25 in place (2nd plug already in the V1 2-pack) |
+| **+ V3 — Water safety** | **~$335** | +$55 in place |
 | **V4a — Retrofit, budget kit** | **~$95** | independent unit; cheapest A/B control |
 | **V4b — Retrofit, premium Auk** | **~$235** | design-icon unit; 100-day money-back = risk-free A/B |
 | **+ V5 — On-device Pi** | **+~$135** | reuses V2/V3 garden minus the Tapo |
-| **SUPERSET — all five, in hand** | **~$570 / ~$710** | budget (V4a) / premium Auk (V4b); = V3 $338 + V4 + V5 $135 |
+| **SUPERSET — all five, in hand** | **~$565 / ~$705** | budget (V4a) / premium Auk (V4b); = V3 $334 + V4 + V5 $135 |
 
 Optional further add-ons (see `spec/SPEC.md` §4e): second Tapo camera (~$25), timed
 dosing pump + plug (~$25), digital pH pen (~$15). Ongoing consumables run **~$35/yr** per
