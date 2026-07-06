@@ -205,6 +205,28 @@
   .meme-cite a { color: var(--ink-faint); text-decoration-color: var(--line); }
   .meme-cite a:hover { color: var(--leaf); }
 
+  /* ---------- meme wall (outro collection) ---------- */
+  .wall { background: var(--paper-2); }
+  .wall-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 26px; }
+  .wall-head .eyebrow { flex-shrink: 0; }
+  .wall-head h2 { font-family: var(--font-serif); font-weight: 400; font-size: clamp(1.5rem, 3.5vw, 2rem); letter-spacing: -.01em; margin: 0; line-height: 1; color: var(--ink-soft); }
+  .wall-grid { column-count: 3; column-gap: 14px; }
+  @media (max-width: 820px) { .wall-grid { column-count: 2; } }
+  @media (max-width: 520px) { .wall-grid { column-count: 1; } }
+  .mcard { display: block; break-inside: avoid; margin: 0 0 14px; text-decoration: none; color: inherit; border: 1px solid var(--line); background: var(--card); border-radius: 8px; overflow: hidden; transition: border-color .12s ease, transform .12s ease; }
+  .mcard:hover { border-color: var(--leaf); transform: translateY(-2px); }
+  .mcard img { display: block; width: 100%; height: auto; }
+  .mcap { display: block; font-family: var(--font-mono); font-size: .66rem; line-height: 1.5; color: var(--ink-soft); padding: 10px 12px 12px; }
+  .mcap b { color: var(--ink); font-weight: 600; }
+  .mcap .src { display: block; color: var(--ink-faint); margin-top: 5px; letter-spacing: .02em; }
+  .mcard:hover .mcap .src, .mcard:hover .lk { color: var(--leaf); }
+  .mcard.link .lk { display: block; font-family: var(--font-mono); font-size: .82rem; color: var(--leaf); padding: 15px 12px 0; letter-spacing: .02em; }
+  .mcard .thumb { position: relative; display: block; }
+  .mcard .play { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 46px; height: 46px; border-radius: 50%; background: rgba(20,24,16,.6); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 1rem; padding-left: 3px; }
+  .wall-close { margin: 28px 0 0; }
+  .wall-close figcaption { text-align: center; }
+  .wall-close figcaption b { color: var(--leaf); font-style: italic; font-weight: 400; }
+
   /* inline code + JSON schema chip */
   code, .code { font-family: var(--font-mono); font-size: .84em; background: color-mix(in srgb, var(--leaf) 10%, transparent); border: 1px solid var(--line); border-radius: 4px; padding: .08em .4em; color: var(--ink); }
   .schema { font-family: var(--font-mono); font-size: .74rem; line-height: 1.5; color: var(--ink-soft); margin: 13px 0 0; padding: 10px 13px; background: var(--card); border: 1px solid var(--line); border-radius: 6px; overflow-x: auto; white-space: nowrap; }
@@ -634,23 +656,6 @@
     </div>
   </section>
 
-  <!-- one-wink meme: career-path illustration -->
-  <section class="meme-panel">
-    <div class="col">
-      <figure class="shot">
-        <img src="img/career-path.svg"
-             alt="Field-guide career path in four panels: a junior engineer at a laptop, then a senior engineer, then a staff engineer buried in dashboards, and finally the same person tending a samogrow herb garden — captioned 'a good head start.'"
-             width="1400" height="580" loading="lazy">
-      </figure>
-      <p class="meme-cite">
-        A real genre — see the Microsoft engineer whose title became "goose farmer"
-        (<a href="https://www.threads.com/@nixcraft/post/C6Zvz6cyg9I" target="_blank" rel="noopener">@nixcraft</a>),
-        and <a href="https://engineerdog.com/2023/05/29/why-do-so-many-programmers-want-to-be-farmers-how-to-build-a-corrugated-steel-garden-box/" target="_blank" rel="noopener">EngineerDog</a>
-        on why: gardening is "the exact opposite of coding."
-      </p>
-    </div>
-  </section>
-
   <!-- GETTING STARTED -->
   <section id="start">
     <div class="col">
@@ -693,6 +698,73 @@
         <span class="safety-tag">Harvest</span>
         Basil and mint come fast — first cuts about 3–4 weeks after transplant. Parsley is the patient one, months to full production. Lettuce depends on light and heat, and bolts when it gets too warm.
       </p>
+    </div>
+  </section>
+
+  <!-- MEME WALL (outro collection) -->
+  <section class="wall" id="genre">
+    <div class="col">
+      <div class="wall-head">
+        <span class="eyebrow">Required reading</span>
+        <h2>The genre is real</h2>
+      </div>
+      <div class="wall-grid">
+
+        <a class="mcard" href="https://www.reddit.com/r/ProgrammerHumor/" target="_blank" rel="noopener">
+          <img src="img/memes/five-years.jpg" width="900" height="772" loading="lazy"
+               alt="Comic: 'Where do you see yourself in 5 years?' A junior developer imagines a maximal hacker battlestation; a senior developer imagines a quiet farm.">
+          <span class="mcap">“Where do you see yourself in 5 years?” The junior wants the battlestation; the senior wants the farm.<span class="src">reddit · unknown artist ↗</span></span>
+        </a>
+
+        <a class="mcard" href="https://www.threads.com/@nixcraft/post/C6Zvz6cyg9I" target="_blank" rel="noopener">
+          <img src="img/memes/goose-farmer.jpg" width="720" height="900" loading="lazy"
+               alt="Screenshot of a LinkedIn profile whose job title reads 'Goose farmer' following 22 years at Microsoft.">
+          <span class="mcap">22 years at Microsoft, next role: “Goose farmer.” The story the internet turned into a meme.<span class="src">@drummatick · via @nixcraft ↗</span></span>
+        </a>
+
+        <div class="mcard">
+          <img src="img/memes/software-gardener.jpg" width="499" height="615" loading="lazy"
+               alt="Interview still: asked 'software engineer or software developer?', the caption answers 'software gardener.'">
+          <span class="mcap">“Engineer or developer?” — the correct answer: software gardener.<span class="src">Witcher cast interview</span></span>
+        </div>
+
+        <a class="mcard vid" href="https://www.youtube.com/shorts/Kw6eRrsKdHc" target="_blank" rel="noopener">
+          <span class="thumb">
+            <img src="img/memes/yt-thumb.jpg" width="480" height="360" loading="lazy"
+                 alt="YouTube short thumbnail: the engineer-to-farmer bit.">
+            <span class="play" aria-hidden="true">▶</span>
+          </span>
+          <span class="mcap">The engineer-quits-to-farm bit, in short form.<span class="src">youtube.com ↗</span></span>
+        </a>
+
+        <a class="mcard link" href="https://www.instagram.com/reel/DVi2IHzjAnd/" target="_blank" rel="noopener">
+          <span class="lk">Instagram reel ↗</span>
+          <span class="mcap">Another take on trading the IDE for a field.<span class="src">instagram.com</span></span>
+        </a>
+
+        <a class="mcard link" href="https://www.tiktok.com/@eliana_codes/video/7612725054111059222" target="_blank" rel="noopener">
+          <span class="lk">TikTok ↗</span>
+          <span class="mcap">The same daydream, set to sound.<span class="src">@eliana_codes</span></span>
+        </a>
+
+        <a class="mcard link" href="https://www.reddit.com/r/ProgrammerHumor/comments/1c2hph2/seriously/" target="_blank" rel="noopener">
+          <span class="lk">r/ProgrammerHumor ↗</span>
+          <span class="mcap">“Seriously” — the thread where everyone admits it.<span class="src">reddit.com</span></span>
+        </a>
+
+        <a class="mcard link" href="https://engineerdog.com/2023/05/29/why-do-so-many-programmers-want-to-be-farmers-how-to-build-a-corrugated-steel-garden-box/" target="_blank" rel="noopener">
+          <span class="lk">Why programmers want to farm ↗</span>
+          <span class="mcap"><b>“Gardening is the exact opposite of coding.”</b> The essay that names the whole phenomenon.<span class="src">EngineerDog</span></span>
+        </a>
+
+      </div>
+
+      <figure class="shot wall-close">
+        <img src="img/career-path.svg"
+             alt="Field-guide career path in four panels: a junior engineer at a laptop, then a senior engineer, then a staff engineer buried in dashboards, and finally the same person tending a samogrow herb garden — captioned 'a good head start.'"
+             width="1400" height="580" loading="lazy">
+        <figcaption class="meme-cite">Ours — the same arc, ending in a samogrow garden. <b>A good head start.</b></figcaption>
+      </figure>
     </div>
   </section>
 
