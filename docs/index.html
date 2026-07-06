@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <meta charset="utf-8">
 <title>samogrow by Nombox — DIY AI herb garden</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -59,7 +60,7 @@
     font-family: var(--font-serif);
     font-size: 18px;
     line-height: 1.62;
-    overflow-x: hidden;
+    overflow-x: clip;
   }
   /* grain + subtle vertical botanical wash */
   body::before {
@@ -364,7 +365,7 @@
         <a href="#how">Architecture</a>
         <a href="#cost">Cost</a>
         <a href="#features">Features</a>
-        <a href="#start">Get started</a>
+        <a href="#start">Quickstart</a>
         <a href="https://github.com/NikolayS/samogrow">GitHub ↗</a>
       </nav>
     </div>
@@ -383,7 +384,7 @@
         </p>
         <div class="cta-row fade d4">
           <a class="btn btn-solid" href="https://github.com/NikolayS/samogrow/blob/main/spec/SPEC.md">Read the spec →</a>
-          <a class="btn btn-ghost" href="https://github.com/NikolayS/samogrow">View on GitHub</a>
+          <a class="btn btn-ghost" href="#start">Quickstart →</a>
         </div>
       </div>
 
@@ -477,6 +478,10 @@
         <span class="safety-tag">Safety</span>
         The AI can request water; it cannot override the cap. Per-run and per-day pump caps, a bounded top-up jug (worst-case spill is just the jug's volume), and an optional float/leak sensor.
       </p>
+      <p class="safety-note">
+        <span class="safety-tag">Senses</span>
+        The <b>camera is the only automatic sensor</b> — the AI's eyes. The EC/TDS meter and pH kit are <b>handheld manual tools</b>: you dip and read them yourself, and the AI only learns a value when you type it into Telegram. Continuous EC/pH/level probes exist but need a microcontroller — a natural add-on to the V5 Pi build, out of scope for the wiring-free versions.
+      </p>
 
       <figure class="shot schematic">
         <img src="img/schematic.svg"
@@ -562,15 +567,15 @@
 
       <div style="margin-top:52px">
         <h3 class="parts-head">The parts</h3>
-        <p class="parts-sub">Every item is ordinary consumer gear — tap a thumbnail to view the source listing.</p>
+        <p class="parts-sub">Every item is ordinary consumer gear — tap a thumbnail to view the source listing, or <a href="https://www.amazon.com/hz/wishlist/ls/3SF86IUAST80H" target="_blank" rel="noopener">cart all 10 core items in one ready-to-order Amazon list →</a></p>
         <div class="parts">
           <a class="part" href="https://www.amazon.com/dp/B0BYGRLRS1" target="_blank" rel="noopener">
             <img src="img/components/kasa-smart-plug.jpg" alt="Kasa smart plugs, 2-pack" loading="lazy">
             <span class="cap">Kasa smart plugs (2-pack)</span>
           </a>
-          <a class="part" href="https://www.amazon.com/dp/B0CH45HPZT" target="_blank" rel="noopener">
-            <img src="img/components/tapo-camera.jpg" alt="TP-Link Tapo C120 Wi-Fi camera" loading="lazy">
-            <span class="cap">Tapo C120 Wi-Fi camera</span>
+          <a class="part" href="https://www.amazon.com/dp/B0866S3D82" target="_blank" rel="noopener">
+            <img src="img/components/tapo-camera.jpg" alt="TP-Link Tapo C100 1080p Wi-Fi camera" loading="lazy">
+            <span class="cap">Tapo C100 Wi-Fi camera</span>
           </a>
           <a class="part" href="https://www.amazon.com/dp/B0892DKNR3" target="_blank" rel="noopener">
             <img src="img/components/submersible-pump.jpg" alt="Small 120 V submersible fountain pump" loading="lazy">
@@ -593,12 +598,8 @@
             <span class="cap">LECA clay pebbles</span>
           </a>
           <a class="part" href="https://www.amazon.com/dp/B01EBXI7PG" target="_blank" rel="noopener">
-            <img src="img/components/air-pump.jpg" alt="Adjustable dual-outlet aquarium air pump" loading="lazy">
-            <span class="cap">Aquarium air pump</span>
-          </a>
-          <a class="part" href="https://www.amazon.com/dp/B01MV5C1I4" target="_blank" rel="noopener">
-            <img src="img/components/air-stone.jpg" alt="Air stone / disc diffuser, 2-pack" loading="lazy">
-            <span class="cap">Air stones</span>
+            <img src="img/components/air-pump.jpg" alt="Adjustable dual-outlet aquarium air-pump kit — bundles tubing, air stones and check valves" loading="lazy">
+            <span class="cap">Air-pump kit (stones + tubing incl.)</span>
           </a>
           <a class="part" href="https://www.amazon.com/dp/B071L15G5Y" target="_blank" rel="noopener">
             <img src="img/components/masterblend-nutrients.jpg" alt="MasterBlend 4-18-38 nutrient combo kit" loading="lazy">
@@ -665,8 +666,12 @@
     <div class="col">
       <div class="sec-head">
         <span class="sec-num">04</span>
-        <h2>Getting started — day one</h2>
+        <h2>Quickstart — day one</h2>
       </div>
+      <p class="sec-sub">
+        Want to try the software right now, before any parts arrive? Jump to <b>step 3</b> — it
+        runs the whole loop on your laptop with zero hardware.
+      </p>
 
       <figure class="shot" style="margin-bottom:38px">
         <img src="img/hero-mock.jpg"
@@ -679,7 +684,7 @@
         <div class="step">
           <span class="n">STEP 01</span>
           <h3>Order parts &amp; grab grown herbs</h3>
-          <p>Place the core-build order — plugs, camera, pump, grow side. On the same trip, pick up 2–4 healthy potted herbs (basil, parsley) from a garden center, ~$4–5 each. They're your day-one plants.</p>
+          <p>Fast path: all 10 core items are in one <a href="https://www.amazon.com/hz/wishlist/ls/3SF86IUAST80H" target="_blank" rel="noopener">Amazon list</a> — one click to cart the lot. Grab the tote and 2–4 healthy potted herbs (basil, parsley) locally from a garden center, ~$4–5 each — they're your day-one plants (no shipping wait).</p>
         </div>
         <div class="step" style="border-top-color:var(--leaf)">
           <span class="n">STEP 02</span>

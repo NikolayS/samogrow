@@ -1,6 +1,6 @@
 # samogrow by Nombox — Build Spec
 
-**Version:** v1.4.3
+**Version:** v1.3.5
 **Date:** 2026-07-05
 **Owner:** Nik (nik@postgres.ai)
 **Status:** Ready to build
@@ -161,6 +161,27 @@ The locked decision is a **custom TypeScript/Bun service** (Nik's mandate). From
   shape and weight, and a large attack surface. The custom Bun service keeps the
   attack surface to "call Claude + toggle two plugs + pull one RTSP frame."
 
+### 3b. What the AI actually senses (camera automatic; EC/pH manual)
+
+Be clear about this — it's the most common wrong assumption about the build. **The camera
+is the only automatic sensor.** It is the AI's eyes: the brain pulls a snapshot on its own
+cadence and Claude reads plant health, canopy fill, and (with the §9a sight gauge)
+reservoir level, every cycle, with no human in the loop.
+
+**The EC/TDS meter and the pH kit are handheld, manual instruments.** You dip them and read
+them yourself; they are **not connected to anything** and do **not** stream to the software.
+The AI only knows an EC or pH reading if **you type it into Telegram** ("EC 1.2, pH 6.1").
+That's a deliberate V1–V3 simplification, not an oversight: it keeps the garden to three
+Wi-Fi appliances with nothing to solder.
+
+**Upgrade path (honest).** Continuous EC / pH / water-temperature / water-level probes that
+feed the AI directly **do exist**, but every one of them needs an **ADC + microcontroller
+(ESP32-class)** or a **USB/serial probe** on the brain machine — i.e. exactly the on-device
+electronics that V1–V3 were designed to avoid. So live water-chemistry sensing is **out of
+scope for the no-microcontroller builds** and belongs as a natural **"sensor pack" alongside
+the V5 Pi build** (§4h, §12), where a controller and GPIO/USB already exist to read them.
+Until then, EC and pH stay in the loop the manual way — you measure, you relay.
+
 ---
 
 ## 4. Bill of materials
@@ -288,6 +309,13 @@ no breadboard, no enclosure, no jumper wire. Nothing to solder. In **Tier A** th
 camera; at **Tier B** only the pump itself and its tubing arrive — the plug is already in
 hand. (The EP10-single floor buys just the one light plug at Tier A and adds a pump plug
 at Tier B.)
+
+**Compatibility rule (not optional):** the plugs must be TP-Link **Kasa** — the brain
+speaks the local Kasa LAN protocol. TP-Link **Tapo** plugs (P100/P110/P210M) and other
+brands (Govee, Meross, GHome, generic Matter) do **not** work without a code change. The
+**pump plug must be an energy-monitoring Kasa** (KP125M/KP115/EP25) so its wattage read
+gives the dead-pump / dry-run signal (§9a); the **light plug can be any Kasa**. The camera
+must expose local **RTSP** — any Tapo does, via a camera account (§6).
 
 ### 4b. Grow side
 
@@ -910,7 +938,26 @@ removes. Take it only for the float-switch interlock or the CSI camera.
 
 ## 13. Changelog
 
-- **v1.4.4 (2026-07-05)** — Exact order specs on every BOM line; the air-pump kit now
+- **v1.3.5 (2026-07-05)** — **Lessons captured from placing a real order.** (1) Made the
+  **sensing model explicit** (new §3b + notes in `docs/index.html` and `SHOPPING-LIST.md`):
+  the **camera is the only automatic sensor**; the **EC/TDS meter and pH kit are handheld
+  manual tools** that don't stream — the AI only learns those readings if you type them into
+  Telegram — with an honest upgrade note that continuous EC/pH/temp/level probes need an
+  ADC + microcontroller (ESP32) or USB/serial probe, so they're out of scope for the
+  no-microcontroller V1–V3 and belong as a "sensor pack" alongside the V5 Pi build. (2) Added
+  an explicit **smart-plug compatibility rule** to `SHOPPING-LIST.md` and §4a/§6: plugs must
+  be TP-Link **Kasa** (Tapo P100/P110/P210M and other brands don't work without a code
+  change), and the **pump plug must be energy-monitoring** (KP125M/KP115/EP25); the light
+  plug can be any Kasa. (3) Reinforced **camera = Tapo C100 (1080p) sufficient, C120 (2K)
+  optional, local RTSP required.** (4) Added a **buyer's note** (Amazon variants/ASINs drift —
+  verify the bolded variant, substitute dead links by spec not by photo; camera clamps
+  frequently go out of stock) and a note that **tote, net pots, and plants are easy in-person
+  buys.** (5) Made the **tools block impossible to miss** — the 3" hole saw and 0.1 g scale
+  are build-critical. (6) `docs/index.html` cleanup: relabeled the parts-gallery camera to
+  **C100** and removed the standalone **air-stones** card (the air-pump kit already bundles
+  them — don't double-buy). Also **normalized changelog numbering** back onto the v1.3.x line
+  (the prior v1.4.x entries were an inconsistent jump). No prices changed.
+- **v1.3.4 (2026-07-05)** — Exact order specs on every BOM line; the air-pump kit now
   absorbs the air stone + airline. Baked a **"select this variant"** spec into every V1/V2/V3
   line (Tapo **C100 1080p** camera as the default over the C120 2K alt; **7 gal / ~23" tote**;
   **3" net pots 25-pack**; **1.5" rockwool 50-pack**; **10 L LECA**; MasterBlend **2.5 lb**
@@ -923,7 +970,7 @@ removes. Take it only for the float-switch interlock or the CSI camera.
   V4b **~$235 → ~$225**; superset **~$565/$705 → ~$530/$670**; §4i 2-yr TCO V1 **~$445 →
   ~$422**, V2 **~$470 → ~$446**. `docs/index.html`'s at-a-glance range (still ~$255–335) is
   now stale and needs a manual bump to **~$232–311**.
-- **v1.4.3 (2026-07-05)** — Made **transplanting a grown herb the default day-one path** —
+- **v1.3.3 (2026-07-05)** — Made **transplanting a grown herb the default day-one path** —
   buy 2–4 potted herbs (basil, parsley), wash all soil off the roots, and set the root balls
   into net cups for a full working garden the same day — with **growing from seed reframed
   as the cheaper, ~2–4-week-slower alternative** (parsley slowest at 10–28 days). Updated the
@@ -934,7 +981,7 @@ removes. Take it only for the float-switch interlock or the CSI camera.
   few days of transplant shock; garden-center pots beat crammed grocery "living herb" clumps).
   No plug/price numbers changed — the grown plants (~$4–5 each) are a roughly price-neutral,
   either/or substitute for the seed line, not an addition to any total.
-- **v1.4.2 (2026-07-05)** — Made the **KP125M energy-monitoring 2-pack (~$25)** the
+- **v1.3.2 (2026-07-05)** — Made the **KP125M energy-monitoring 2-pack (~$25)** the
   consistent V1 default across all three docs: one plug runs the light, the second is the
   V2 pump plug, so V2's plug is $0. V1 appliance subtotal ~$33 → **~$50** and V1 total
   ~$240 → **~$255**; the +V2 delta drops ~$45 → **~$25** (pump + tubing + jug only) with
@@ -943,7 +990,7 @@ removes. Take it only for the float-switch interlock or the CSI camera.
   Cascaded to the superset cart (~$570/$710 → **~$565/$705**), the §4a/§4c appliance +
   tier tables, and the §4i 2-yr TCO (V1 ~$430 → **~$445**, V2 ~$475 → **~$470**). No number
   moved by more than the plug cost shifting from V2 into V1.
-- **v1.4.1 (2026-07-05)** — **QA fixes** across the spec, `SHOPPING-LIST.md`, and
+- **v1.3.1 (2026-07-05)** — **QA fixes** across the spec, `SHOPPING-LIST.md`, and
   `docs/index.html`. Added the **EC/TDS meter** ($13) to the V1 grow side — it's
   required because the spec sets an EC target — and recomputed every affected total.
   Corrected the down-rounded V1 base ($33 appliance + $205 grow = **$238**, not the
@@ -964,7 +1011,7 @@ removes. Take it only for the float-switch interlock or the CSI camera.
   mirroring `software/README.md`); added **ffmpeg** install and an explicit **keep-awake**
   note; reworded the transplant step to move each species as it roots; and added a
   **zero-drill sight-gauge install** to §9a.
-- **v1.4 (2026-07-05)** — Reframed around **five concrete, buildable variants** (the
+- **v1.3 (2026-07-05)** — Reframed around **five concrete, buildable variants** (the
   user intends to build and try up to five). §4.0 now presents **V1 Manual/Kratky
   (~$220), V2 Auto top-up (~$266), V3 Auto + water-safety (~$320), V4 Retrofit a finished
   unit, V5 On-device Pi controller (+~$135)** with a comparison table gaining a "what
@@ -985,9 +1032,8 @@ removes. Take it only for the float-switch interlock or the CSI camera.
   per-pot series, weekly deep-review comparison). Updated the recommendation to "start V1
   immediately, order V4 in parallel, upgrade V1→V2→V3 in place, decide V5 after ~a month."
   Superseded the "start with Tier A" framing and bumped section numbers (cost comparison →
-  §4i).
-- **v1.3 (2026-07-05)** — Restructured the BOM and assembly around **explicit,
-  additive build variants**. Added §4.0 **Choose your variant** with a compact
+  §4i). This built on the same-day BOM/assembly restructure around **explicit, additive
+  build variants** — which added §4.0 **Choose your variant** with a compact
   comparison table (cost / effort / AI control / vacation autonomy / flood risk) and a
   "start at Tier A" recommendation. **Tier A — Manual start (Kratky-style, ~$220):**
   drops the pump, pump plug, tubing, and top-up jug; the AI reads the camera (+ sight

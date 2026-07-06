@@ -33,3 +33,5 @@ On a timer during light hours, the brain pulls a camera snapshot, asks Claude fo
 - `software/` — the brain: control loop, camera + AI vision analysis, Telegram bot
 
 Status: spec + shopping list + software ready — see the [project brief](https://nikolays.github.io/samogrow/), [SPEC](spec/SPEC.md), and [shopping list](spec/SHOPPING-LIST.md).
+
+Ready to build? The 10 core V1 items are collected in one [ready-to-order Amazon list](https://www.amazon.com/hz/wishlist/ls/3SF86IUAST80H) (~$216) — cart them in one pass; buy the tote and the plants in person, and the 3" hole saw + 0.1 g scale only if you don't already own them.

@@ -24,12 +24,52 @@ grand total at the bottom.
 Prices are USD, mid-2026; those marked **(est.)** are market-typical estimates from the
 research files — verify at the source before buying (expect ±30% from coupons/sellers).
 
+> **Ready-to-order:** all **10 V1-cart items** are collected in one public Amazon list —
+> **[open the samogrow V1 list →](https://www.amazon.com/hz/wishlist/ls/3SF86IUAST80H)**
+> (~$216) — so you can cart the whole electronics + grow side in one pass. The list holds the
+> KP125M 2-pack, Tapo C100, rockwool, LECA, air-pump kit, MasterBlend, TDS meter, Barrina
+> White T5, pH kit, and net cups. **Not in the list, on purpose:** buy the **tote and the
+> plants in person** (garden center / hardware store — no shipping wait), and add the **3"
+> hole saw + 0.1 g scale** only if you don't already own them. The per-item tables below stay
+> the reference for exact variants and rationale — and since *Amazon lists and prices drift*,
+> the same **verify-the-variant / substitute-by-spec** buyer's note applies to the list too.
+
+---
+
+## Compatibility rules (check these before you buy)
+
+Two hard rules the software depends on — get these wrong and the part won't work without a
+code change:
+
+- **Smart plugs must be TP-Link _Kasa_, not Tapo.** The brain speaks the local **Kasa** LAN
+  protocol. TP-Link **Tapo** plugs (P100 / P110 / P210M) and every other brand (Govee,
+  Meross, GHome, generic Matter) will **not** work as-is. The **pump plug specifically needs
+  energy monitoring** (KP125M / KP115 / EP25) — that wattage read is the dead-pump / dry-run
+  signal (SPEC §9a). The **light plug can be any Kasa** (the KP125M, EP10, or KP115 all work).
+- **The camera must expose local RTSP.** Any TP-Link **Tapo** camera does — you create a
+  camera account in the Tapo app for the RTSP username/password. The **C100 (1080p) is
+  sufficient**; the **C120 (2K)** is an optional pricier upgrade, not a requirement.
+
+**Buyer's note — Amazon listings drift.** Variant selectors and ASINs go stale between now
+and checkout: **verify the exact bolded variant** on each listing before you order, and if a
+specific link is dead or shows "currently unavailable," **substitute by the spec (brand +
+size), not by the photo.** Example: the small camera **clamp mounts frequently go out of
+stock** — any ¼"-thread ball-head clamp works. And **the tote, net pots, and the plants are
+easy in-person buys** (garden center / hardware store) — grab them locally the day you order
+instead of waiting on shipping.
+
 ---
 
 ## Tools you'll need (one-time, NOT counted in any total below)
 
 Assembly tools — the first few most people already own; the two in **bold** are the
 likely buys. None of these are in the variant totals.
+
+> **Don't skip these two — they're build-critical, and easy to forget:** the **3" (76 mm)
+> hole saw** cuts the net-cup holes in the tote lid — **no hole saw, no build** — and the
+> **0.1 g digital scale** weighs the three nutrient parts (kitchen scales can't resolve
+> grams, and a wrong mix burns or starves the plants). Both are **required unless you already
+> own them**; everything else in this table most people have.
 
 | Tool | Est. price | Note |
 |---|---:|---|
