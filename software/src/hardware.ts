@@ -16,7 +16,7 @@
 //
 // In mock mode (no hardware) every switch is log-only.
 
-import { connect } from "node:net";
+import { connect, type Socket } from "node:net";
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from "node:crypto";
 import type { Config, PlugType } from "./config.ts";
 
@@ -248,30 +248,111 @@ function parseSessionCookie(setCookie: string | null): string | null {
 class KlapConnection {
   private keys: KlapKeys | null = null;
   private cookie: string | null = null;
+  // The KLAP session is bound to the TCP connection, so the whole handshake +
+  // every request MUST reuse one keep-alive socket (a fresh connection per call
+  // — e.g. what fetch() does — lands handshake2/requests on a dead session and
+  // the device answers HTTP 400). We hold the socket and serialize requests
+  // over it (the seq counter must also increment strictly in order).
+  private sock: Socket | null = null;
+  private queue: Promise<unknown> = Promise.resolve();
   constructor(
     private readonly host: string,
     private readonly authHash: Buffer,
     private readonly timeoutMs = 5000,
   ) {}
 
+  private connectSocket(): Promise<Socket> {
+    if (this.sock && !this.sock.destroyed) return Promise.resolve(this.sock);
+    return new Promise((resolve, reject) => {
+      const sock = connect({ host: this.host, port: 80 });
+      sock.setNoDelay(true);
+      const t = setTimeout(() => {
+        sock.destroy();
+        reject(new Error(`KLAP connect to ${this.host} timed out`));
+      }, this.timeoutMs);
+      sock.once("connect", () => {
+        clearTimeout(t);
+        this.sock = sock;
+        resolve(sock);
+      });
+      sock.once("error", (e) => {
+        clearTimeout(t);
+        reject(e);
+      });
+      // When the socket eventually closes, drop it and the session so the next
+      // request reconnects and re-handshakes.
+      sock.once("close", () => {
+        if (this.sock === sock) {
+          this.sock = null;
+          this.keys = null;
+        }
+      });
+    });
+  }
+
+  private resetSocket(): void {
+    this.sock?.destroy();
+    this.sock = null;
+    this.keys = null;
+  }
+
+  // One HTTP/1.1 POST over the persistent socket, response read by Content-Length.
   private async post(
     path: string,
     body: Buffer,
     withCookie: boolean,
   ): Promise<{ status: number; body: Buffer; cookie: string | null }> {
-    const headers: Record<string, string> = { "Content-Type": "application/octet-stream" };
-    if (withCookie && this.cookie) headers["Cookie"] = this.cookie;
-    const res = await fetch(`http://${this.host}${path}`, {
-      method: "POST",
-      headers,
-      body: new Uint8Array(body),
-      signal: AbortSignal.timeout(this.timeoutMs),
+    const sock = await this.connectSocket();
+    const head =
+      [
+        `POST ${path} HTTP/1.1`,
+        `Host: ${this.host}`,
+        `Content-Type: application/octet-stream`,
+        `Content-Length: ${body.length}`,
+        ...(withCookie && this.cookie ? [`Cookie: ${this.cookie}`] : []),
+        `Connection: keep-alive`,
+      ].join("\r\n") + "\r\n\r\n";
+    return new Promise((resolve, reject) => {
+      let buf = Buffer.alloc(0);
+      let settled = false;
+      const cleanup = () => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        sock.off("data", onData);
+        sock.off("error", onErr);
+        sock.off("close", onErr);
+      };
+      const onErr = (e?: Error) => {
+        cleanup();
+        this.resetSocket();
+        reject(e ?? new Error(`KLAP socket to ${this.host} closed mid-request`));
+      };
+      const onData = (d: Buffer) => {
+        buf = Buffer.concat([buf, d]);
+        const sep = buf.indexOf("\r\n\r\n");
+        if (sep < 0) return;
+        const header = buf.subarray(0, sep).toString("latin1");
+        const cl = Number(header.match(/content-length:\s*(\d+)/i)?.[1] ?? 0);
+        const bodyBuf = buf.subarray(sep + 4);
+        if (bodyBuf.length < cl) return;
+        cleanup();
+        resolve({
+          status: Number(header.match(/HTTP\/1\.\d (\d+)/)?.[1] ?? 0),
+          body: bodyBuf.subarray(0, cl),
+          cookie: parseSessionCookie(header.match(/set-cookie:\s*([^\r\n]+)/i)?.[1] ?? null),
+        });
+      };
+      const timer = setTimeout(() => {
+        cleanup();
+        this.resetSocket();
+        reject(new Error(`KLAP ${path} to ${this.host} timed out`));
+      }, this.timeoutMs);
+      sock.on("data", onData);
+      sock.once("error", onErr);
+      sock.once("close", onErr);
+      sock.write(Buffer.concat([Buffer.from(head, "latin1"), body]));
     });
-    return {
-      status: res.status,
-      body: Buffer.from(await res.arrayBuffer()),
-      cookie: parseSessionCookie(res.headers.get("set-cookie")),
-    };
   }
 
   private async handshake(): Promise<void> {
@@ -302,16 +383,27 @@ class KlapConnection {
     return JSON.parse(klapDecrypt(k, k.seq, r.body));
   }
 
-  async request(payload: object): Promise<unknown> {
+  private async doRequest(payload: object): Promise<unknown> {
     if (!this.keys) await this.handshake();
     try {
       return await this.send(payload);
     } catch {
-      // Session likely expired or dropped — re-handshake once and retry.
-      this.keys = null;
+      // Session/socket likely dropped — reset the connection, re-handshake once.
+      this.resetSocket();
       await this.handshake();
       return await this.send(payload);
     }
+  }
+
+  // Serialize: KLAP requests share one socket and a strictly-incrementing seq,
+  // so they must not overlap. Each call waits for the previous to finish.
+  request(payload: object): Promise<unknown> {
+    const run = this.queue.then(() => this.doRequest(payload));
+    this.queue = run.then(
+      () => {},
+      () => {},
+    );
+    return run;
   }
 }
 
