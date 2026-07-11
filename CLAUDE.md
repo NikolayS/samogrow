@@ -18,6 +18,11 @@ A PR may be merged only when **all** of the following hold. If any is off, **fix
 
 2. **Review done via [github.com/Tanya301/samorev](https://github.com/Tanya301/samorev) and passing.**
    - Run the samorev review on the PR; it must pass.
+   - **Invocation** (from a local clone of samorev — `git clone`, `bun install`, `bun run build`):
+     ```bash
+     bun run samorev review <PR-URL> --no-comment --blocking
+     ```
+     `--blocking` exits non-zero if blocking issues are found; `--no-comment` prints locally without posting. Inside a Claude Code session, `/review-mr <PR-URL> --blocking` runs the same.
    - Address every finding (fix or an explicit, justified dismissal) before the gate is considered met.
 
 3. **Manual testing done, with evidence in the PR comments.**
