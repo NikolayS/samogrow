@@ -417,23 +417,30 @@ class KlapSwitch implements Switch {
   ) {
     this.conn = new KlapConnection(host, authHash);
   }
-  private async setRelay(state: 0 | 1): Promise<void> {
-    await this.conn.request({ system: { set_relay_state: { state } } });
+  // KLAP-firmware Kasa plugs (SMART.KASAPLUG, e.g. KP125M) speak TP-Link's newer
+  // Tapo-style method/params API. The legacy {system:{set_relay_state}} /
+  // {emeter:{get_realtime}} commands are accepted and decrypt fine but are
+  // silently ignored — so we use set_device_info / get_energy_usage here.
+  private async setOn(on: boolean): Promise<void> {
+    await this.conn.request({ method: "set_device_info", params: { device_on: on } });
   }
   async on(): Promise<void> {
-    await this.setRelay(1);
+    await this.setOn(true);
     this.isOn = true;
     log(`${this.name} (klap ${this.host}) ON`);
   }
   async off(): Promise<void> {
-    await this.setRelay(0);
+    await this.setOn(false);
     this.isOn = false;
     log(`${this.name} (klap ${this.host}) OFF`);
   }
   async readPowerWatts(): Promise<number | null> {
-    // Kasa-branded KLAP devices (KP125M) still expose the legacy emeter module.
     try {
-      return emeterWatts(await this.conn.request({ emeter: { get_realtime: {} } }));
+      const r = (await this.conn.request({ method: "get_energy_usage" })) as {
+        result?: { current_power?: number };
+      };
+      const mw = r?.result?.current_power; // milliwatts
+      return typeof mw === "number" ? mw / 1000 : null;
     } catch {
       return null;
     }
