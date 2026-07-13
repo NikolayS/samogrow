@@ -27,8 +27,9 @@ research files — verify at the source before buying (expect ±30% from coupons
 > **Ready-to-order:** all **10 V1-cart items** are collected in one public Amazon list —
 > **[open the samogrow V1 list →](https://www.amazon.com/hz/wishlist/ls/3SF86IUAST80H)**
 > (~$216) — so you can cart the whole electronics + grow side in one pass. The list holds the
-> KP125M 2-pack, Tapo C100, rockwool, LECA, air-pump kit, MasterBlend, TDS meter, Barrina
-> White T5, pH kit, and net cups. **Not in the list, on purpose:** buy the **tote and the
+> KP125M 2-pack, Tapo C100, rockwool *(seed-start only — skip it on the default transplant path,
+> −$12)*, LECA, air-pump kit, MasterBlend, TDS meter, Barrina White T5, pH kit, and net cups.
+> **Not in the list, on purpose:** buy the **tote and the
 > plants in person** (garden center / hardware store — no shipping wait), and add the **3"
 > hole saw + 0.1 g scale** only if you don't already own them. The per-item tables below stay
 > the reference for exact variants and rationale — and since *Amazon lists and prices drift*,
@@ -72,6 +73,14 @@ instead of waiting on shipping.
   the plants get **no calcium and no magnesium** (yellowing, deficiency, stunted growth). Always
   confirm the listing includes **all three bags** (any brand's complete combo kit works; a smaller
   1.25 lb combo still makes ~100 gal — over a year for one tote).
+- **⚠️ TDS/EC METER ×10 TRAP — always read the multiplier.** Cheap handheld pens (HM Digital
+  **TDS-3** class) show a tiny **`×10`** indicator on the display once the reading passes 999. A
+  display of **"115" with ×10 lit means 1,150 ppm**, not 115. Miss the flag and you'll misjudge
+  the solution by 10×. **This actually happened in the V1 field test** ([issue #3](https://github.com/NikolayS/samogrow/issues/3)):
+  batches that read "130" and "200" were really **1,300 and 2,000 ppm** — up to ~2× the target —
+  and the over-strong solution **salt-burned the plants** while we chased a phantom "weak" reading.
+  Your target is **displayed 80–110 with the ×10 flag lit = 800–1,100 ppm** (EC ~1.1–1.6 mS/cm).
+  Glance at the ×10 corner of the LCD *before* trusting any number.
 
 ---
 
@@ -118,16 +127,16 @@ vacation autonomy — away >1 week needs a human.
 |---|---|---|---|---:|---|
 | 3 | <img src="../docs/img/components/storage-tote.jpg" width="80"> | 1 | [Opaque black food-safe tote, **7 gal (~23" L)** (HDX black)](https://www.homedepot.com/p/HDX-7-Gal-Tough-Storage-Tote-in-Black-with-Yellow-Lid-999-7G-HDX/328027039) | $12 (est.) | **Select the 7 gal / ~23" long size** — must be opaque (algae) and ~23" so the 2 ft light spans it; drill 3" holes |
 | 4 | <img src="../docs/img/components/net-pots.jpg" width="80"> | 1 | [**3 inch** net pots, **25-pack** (VIVOSUN)](https://www.amazon.com/dp/B07VQVCRWV) | $13 (est.) | select 3" diameter, 25-count |
-| 5 | <img src="../docs/img/components/rockwool-plugs.jpg" width="80"> | 1 | [Grodan A-OK **1.5 inch** rockwool plugs, **50-pack**](https://www.amazon.com/dp/B071S1DHDQ) | $12 (est.) | select 1.5" plugs, 50-count |
-| 6 | <img src="../docs/img/components/clay-pebbles.jpg" width="80"> | 1 | [Hydroton / LECA clay pebbles, **10 liter** bag (made in Germany)](https://www.amazon.com/dp/B01KYYZ9DE) | $20 (est.) | select the 10 L bag; rinse first; reusable |
+| 5 | <img src="../docs/img/components/rockwool-plugs.jpg" width="80"> | *(seeds only)* | [Grodan A-OK **1.5 inch** rockwool plugs, **50-pack**](https://www.amazon.com/dp/B071S1DHDQ) | $12 (est.) | **Only needed if you start from SEED.** The default **transplant path** (item 11 — set a grown plant's root ball into pebbles) uses **no rockwool at all** — skip this line and save ~$12. Buy it only for germinating seeds. Select 1.5" plugs, 50-count |
+| 6 | <img src="../docs/img/components/clay-pebbles.jpg" width="80"> | 1 | [Hydroton / LECA clay pebbles, **10 liter** bag (made in Germany)](https://www.amazon.com/dp/B01KYYZ9DE) | $20 (est.) | select the 10 L bag; rinse first; reusable. **One bag goes a very long way** — a single tote of ~6 net cups uses only **~1/10 of the bag**, so one $20 bag supplies **~10 builds** (or years of refills). Amortized media cost ≈ **~$2 per garden** |
 | 7 | <img src="../docs/img/components/air-pump.jpg" width="80"> | 1 | [Uniclife **dual-outlet** air pump — select the **"10–100 Gallon" style**](https://www.amazon.com/dp/B01EBXI7PG) | $15 (est.) | **This bundle already includes the airline tubing + 2 air stones + 2 check valves** — so there's no separate air-stone or airline line to buy. Runs 24/7 on a **dumb** outlet — never a switched plug. *Pure-Kratky lettuce-only: skip item 7 (−~$15)* |
 | 8 | <img src="../docs/img/components/masterblend-nutrients.jpg" width="80"> | 1 | [MasterBlend 4-18-38 Combo Kit, **2.5 lb**](https://www.amazon.com/dp/B071L15G5Y) | $25 (est.) | **Select the 2.5 lb kit** (1 lb MasterBlend 4-18-38 + 1 lb Calcium Nitrate 15.5-0-0 + 0.5 lb Epsom salt) — makes ~180 gal, >1 yr for one tote. The 5 lb kit is only worth it for multiple beds. Mix all 3 parts |
 | 9 | <img src="../docs/img/components/ph-control-kit.jpg" width="80"> | 1 | [GH pH Control Kit — **8 oz pH Up + 8 oz pH Down + indicator**](https://www.amazon.com/dp/B000BNKWZY) | $22 (est.) | select the 8 oz Up/Down combo with indicator; target pH 5.5–6.5 |
-| 10 | <img src="../docs/img/components/barrina-light-strips.jpg" width="80"> | 1 | [Barrina T5 — **White (full-spectrum), 2 ft, 4-pack**](https://www.amazon.com/dp/B0BKPF8D8G) | $42 (est.) | **Pick WHITE** (the pinkish/yellow-tinted versions are weaker for growth); select **2 ft** to match the ~23" tote. The white-vs-black *cover* choice is cosmetic housing only. ~20 W/strip, linkable, adjustable height |
+| 10 | <img src="../docs/img/components/barrina-light-strips.jpg" width="80"> | 1 | [Barrina T5 — **White (full-spectrum), 2 ft, 4-pack**](https://www.amazon.com/dp/B0BKPF8D8G) | $42 (est.) | **Pick WHITE** (the pinkish/yellow-tinted versions are weaker for growth); select **2 ft** to match the ~23" tote. The white-vs-black *cover* choice is cosmetic housing only. ~20 W/strip, linkable, adjustable height. **The 4-pack covers 2 tote setups** (one tote wants ~2 strips) — the field-test unit used **2 of the 4 strips**, so the other two are already in hand for a **second garden** (amortized ≈ **~$21/tote**) |
 | 11 | <img src="../docs/img/components/seed-packets.jpg" width="80"> | 1 | **Plants (default): 2–4 potted herbs in 3–4" nursery pots (~$5 each)** — or [seed packets: Sow Right 5-herb collection](https://www.amazon.com/dp/B07CTMVKT9) | $15 (est.) | **Default: buy 2–4 grown herb plants in 3–4" nursery pots** (~$5 each) for a same-day garden (see the Fastest-start note below). Seeds are the slower alt: [Sow Right 5-herb](https://www.amazon.com/dp/B07CTMVKT9) + a [loose-leaf lettuce packet](https://www.amazon.com/dp/B0BJZ9L9B3). **Mint from neither** — root a live grocery cutting (free / ~$3); it won't come true from seed |
-| 12 |  | 1 | [EC/TDS meter — handheld pen, **0.0–9990 ppm range**](https://www.amazon.com/dp/B000VTQM70) | $13 (est.) | **required** — the spec sets an EC target (1.0–1.6 mS/cm ≈ 700–1100 ppm); you can't hit it without a meter. Select a 0–9990 ppm handheld pen (TDS-3 class) |
+| 12 |  | 1 | [EC/TDS meter — handheld pen, **0.0–9990 ppm range**](https://www.amazon.com/dp/B000VTQM70) | $13 (est.) | **required** — the spec sets an EC target (1.0–1.6 mS/cm ≈ 700–1100 ppm); you can't hit it without a meter. Select a 0–9990 ppm handheld pen (TDS-3 class). **⚠️ Read the `×10` flag** — above 999 ppm these pens display e.g. "115 ×10" = **1,150 ppm** (see the ×10 trap above); missing it burned the field-test plants |
 
-**Grow-side subtotal: ~$189** (the air-pump kit at item 7 already bundles the tubing + air stones + check valves, so there are no separate air-stone or airline lines). *Pure-Kratky lettuce-only: drop item 7 → ~$174.*
+**Grow-side subtotal: ~$189** (the air-pump kit at item 7 already bundles the tubing + air stones + check valves, so there are no separate air-stone or airline lines). *Transplant path (the default): drop item 5 rockwool → **~$177** (grow) / **~$220** (V1 total) — rockwool is seed-start only. Pure-Kratky lettuce-only: also drop item 7 → ~$174.*
 
 > **Fastest start (default): transplant grown herbs, skip germination.** Instead of waiting
 > ~2–4 weeks for seeds (item 11) to sprout, buy **2–4 grown herb plants — basil, parsley — in
@@ -137,7 +146,22 @@ vacation autonomy — away >1 week needs a human.
 > so item 11 is counted once either way. Seeds (item 11) stay as the cheaper, slower option for
 > growing from scratch.
 
-### V1 total: **~$232** (appliance ~$43 + grow ~$189 = $232). *Cheaper floor for someone who'll never automate:* swap the 2-pack for the **$8 EP10 single** → appliance ~$26, **V1 ~$215**; further drop the air-pump kit (item 7) for pure-Kratky lettuce-only → **~$200**.
+### V1 total: **~$232** (appliance ~$43 + grow ~$189 = $232). *Transplant path (the default) drops the seed-only rockwool (item 5) → **~$220**.* *Cheaper floor for someone who'll never automate:* swap the 2-pack for the **$8 EP10 single** → appliance ~$26, **V1 ~$215**; further drop the air-pump kit (item 7) for pure-Kratky lettuce-only → **~$200**.
+
+> **What's a pack vs. what's a per-garden cost (field-test finding).** Several V1 lines are
+> **multi-build packs** bought once — the first garden pays the full pack price, but the leftovers
+> make a **second unit much cheaper**:
+> | Item | You pay (pack) | Used per garden | Covers |
+> |---|---:|---|---|
+> | LECA pebbles (item 6) | $20 / 10 L bag | ~1/10 bag | **~10 builds** (~$2 each) |
+> | Barrina light (item 10) | $42 / 4-pack | ~2 strips | **2 tote setups** (~$21 each) |
+> | Kasa plug (item 1) | $25 / 2-pack | 1 plug (light) | V1 unit + the V2 pump plug |
+> | MasterBlend (item 8) | $25 / 2.5 lb kit | grams per batch | **~180 gal, >1 yr** |
+> | Rockwool (item 5) | $12 / 50-pack | **0** on transplant path | seeds only — skip it |
+>
+> So the **~$220 first (transplant) build** bootstraps the shared stock; a **second garden's
+> marginal cost is far lower** (mainly the tote, net cups, a camera, and — for V2 — a pump),
+> since the light, pebbles, spare plug, and nutrient are already in hand.
 
 ### Mounting & power (small accessories, ~$15–25, NOT in the totals above)
 
@@ -246,7 +270,7 @@ to drive the pump directly instead of via the Kasa plug (+~$30).
 
 | Variant | Cost | Notes |
 |---|---:|---|
-| **V1 — Manual start** (default) | **~$232** | EP10-single floor ~$215; pure-Kratky lettuce-only ~$200 |
+| **V1 — Manual start** (default) | **~$232** | **transplant path ~$220** (drops seed-only rockwool); EP10-single floor ~$215; pure-Kratky lettuce-only ~$200 |
 | **+ V2 — Auto top-up** | **~$256** | +$25 in place (2nd plug already in the V1 2-pack) |
 | **+ V3 — Water safety** | **~$311** | +$55 in place |
 | **V4a — Retrofit, budget kit** | **~$85** | independent unit; cheapest A/B control |

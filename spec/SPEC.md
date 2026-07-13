@@ -174,6 +174,15 @@ The AI only knows an EC or pH reading if **you type it into Telegram** ("EC 1.2,
 That's a deliberate V1–V3 simplification, not an oversight: it keeps the garden to three
 Wi-Fi appliances with nothing to solder.
 
+> **⚠️ Read the TDS meter's `×10` flag before you relay a number.** Cheap TDS-3-class pens
+> switch to a **×10 multiplier** (small `×10` glyph on the LCD) once the reading passes 999:
+> a display of **"115 ×10" is 1,150 ppm**, not 115. In the V1 field test this flag went
+> unnoticed — solutions that read "130"/"200" were actually **1,300 / 2,000 ppm**, ~2× the
+> target, and **salt-burned the plants** while the low-looking number made us (wrongly) suspect
+> underfeeding ([issue #3](https://github.com/NikolayS/samogrow/issues/3)). **Target: displayed
+> 80–110 with ×10 lit = 800–1,100 ppm** (EC ~1.1–1.6 mS/cm). If you relay EC to the AI, relay
+> the *true* value — glance at the multiplier first.
+
 **Upgrade path (honest).** Continuous EC / pH / water-temperature / water-level probes that
 feed the AI directly **do exist**, but every one of them needs an **ADC + microcontroller
 (ESP32-class)** or a **USB/serial probe** on the brain machine — i.e. exactly the on-device
@@ -323,14 +332,14 @@ must expose local **RTSP** — any Tapo does, via a camera account (§6).
 |---|---|---:|:--:|---|
 | Reservoir | Opaque food-safe tote, 7 gal (~23" L) | **$12** (est.) | A | must be opaque (algae); ~23" so the 2 ft light spans it; drill 3" holes |
 | Net cups | 3" net pots, 25-pack | **$13** (est.) | A | Amazon |
-| Starter plugs | Grodan A-OK 1.5" rockwool, 50 ct | **$12** (est.) | A | Amazon |
-| Grow media | Hydroton / LECA clay pebbles, ~10 L | **$20** (est.) | A | reusable, rinse first |
+| Starter plugs | Grodan A-OK 1.5" rockwool, 50 ct | **$12** (est.) | A | **seed-start only** — the default transplant path (§5) uses **none**; skip it (−$12) unless sowing seed |
+| Grow media | Hydroton / LECA clay pebbles, ~10 L | **$20** (est.) | A | reusable, rinse first. **One bag ≈ 10 builds** — a ~6-cup tote uses ~1/10 of the bag (~$2/garden amortized) |
 | Air pump kit | Uniclife dual-outlet air pump, "10–100 Gallon" style — **bundles tubing + 2 air stones + check valves** | **$15** (est.) | A* | runs 24/7, low power, always on; the kit absorbs the old separate air-stone + airline lines |
 | Nutrient | MasterBlend 4-18-38 Combo Kit, 2.5 lb | **$25** (est.) | A | makes ~180 gal — outlasts the build; 5 lb kit only for multiple beds |
 | pH | GH pH Control Kit (8 oz Up + 8 oz Down + indicator) | **$22** (est.) | A | target pH 5.5–6.5 |
-| Grow light | Barrina T5 2 ft full-spectrum strips, 4-pack — **pick WHITE** | **$42** (est.) | A | ~20 W/strip, linkable, adjustable height; white beats pink/yellow tints for growth |
+| Grow light | Barrina T5 2 ft full-spectrum strips, 4-pack — **pick WHITE** | **$42** (est.) | A | ~20 W/strip, linkable, adjustable height; white beats pink/yellow tints for growth. **4-pack = 2 tote setups** (~2 strips each); leftovers seed a 2nd unit (~$21/tote amortized) |
 | Seeds | Parsley + basil + cilantro + lettuce packets (+ live mint cutting) | **$15** (est.) | A | Sow Right / Botanical Interests; mint from a grocery cutting, not seed |
-| EC/TDS meter | HM Digital TDS-3 class handheld pen | **$13** (est.) | A | **required** — the EC target below can't be hit without it |
+| EC/TDS meter | HM Digital TDS-3 class handheld pen | **$13** (est.) | A | **required** — the EC target below can't be hit without it. **⚠️ read the `×10` flag**: "115 ×10" = 1,150 ppm, not 115 — missing it burned the field-test plants (§3b, issue #3) |
 | Top-up jug | 1–2 gal jug for plain-water feed | **$6** (est.) | **B** | feeds the pump; bounds worst-case flood (see §9) |
 | | **Tier A grow-side subtotal** | **~$189** | | |
 | | **Tier B grow-side add** | **+~$6** | | top-up jug |
