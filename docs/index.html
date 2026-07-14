@@ -480,7 +480,7 @@
       </p>
       <p class="safety-note">
         <span class="safety-tag">Senses</span>
-        The <b>camera is the only automatic sensor</b> — the AI's eyes. The EC/TDS meter and pH kit are <b>handheld manual tools</b>: you dip and read them yourself, and the AI only learns a value when you type it into Telegram. Continuous EC/pH/level probes exist but need a microcontroller — a natural add-on to the V5 Pi build, out of scope for the wiring-free versions.
+        The <b>camera is the only automatic sensor</b> — the AI's eyes. The EC/TDS meter and pH kit are <b>handheld manual tools</b>: you dip and read them yourself, and the AI only learns a value when you type it into Telegram. Continuous EC/pH/level probes exist but need a microcontroller — a natural add-on to the V5 Pi build, out of scope for the wiring-free versions. <b>One gotcha with cheap TDS pens: the <span class="code">×10</span> multiplier</b> — “115 ×10” means 1,150 ppm; missing it burned our first plants, so always relay the true value.
       </p>
 
       <figure class="shot schematic">
@@ -557,7 +557,7 @@
       </div>
 
       <div class="ongoing">
-        <div><span class="big">~$35</span><small>/ year — rockwool, seeds, pH refills. Nutrient kit lasts years.</small></div>
+        <div><span class="big">~$35</span><small>/ year — new plants or seeds, pH refills. Pebbles are reusable; one nutrient kit &amp; pebble bag last years / ~10 builds.</small></div>
         <div><span class="big">$3–7</span><small>/ month — Claude Haiku vision, ~24–48 photos a day.</small></div>
         <div><span class="big">$0</span><small>/ month — vendor subscription. No proprietary pods, ever.</small></div>
       </div>
@@ -694,6 +694,7 @@
             <li><b>Wash ALL the soil off the roots</b> (lukewarm water, gently) — soil left in the reservoir rots and clogs. The one step you can't skip.</li>
             <li><b>Expect a few days of droop</b> (transplant shock) — lower the light a bit; it recovers.</li>
             <li><b>Buy a plant, not a bunch.</b> Get a potted herb <i>plant</i> from a nursery's seedling section (one plant in a 3–4" pot of soil), or search <span class="code">live herb plant</span> online — not the produce-aisle “fresh herbs” packs, which are many weak seedlings crammed together (usable, but pull the clump apart into a few starts first).</li>
+            <li><b>⚠️ Feed to ~800–1,100 ppm — and read your TDS meter's <span class="code">×10</span> flag.</b> Cheap pens show <span class="code">115 ×10</span> = <b>1,150 ppm</b>, not 115. Miss that little multiplier and you'll dose ~10× and <b>burn the plants</b> — it happened to us (<a href="https://github.com/NikolayS/samogrow/issues/3" target="_blank" rel="noopener">field-test log</a>). Target on the display: <b>80–110 with ×10 lit</b>.</li>
           </ul>
           <span class="flag" style="color:var(--leaf);border-color:var(--leaf)">Day-one default</span>
         </div>
