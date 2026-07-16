@@ -25,4 +25,10 @@ Full write-up with mistakes & mitigations lives in the GitHub issue "V1 field-te
 
 **One-line lesson:** cheap TDS meters (HM Digital TDS-3) display a **×10 multiplier**; missing it made 1,300–2,000 ppm read as "130–200", so the solution was ~2× too strong and the leaves salt-burned. Target = displayed **80–110 with ×10 lit** = 800–1,100 ppm.
 
+## Recovery (2026-07-16)
+
+| Photo | What it shows |
+|---|---|
+| `img/2026-07-16-recovery-camera.jpeg` | **Live Tapo RTSP frame** (1920×1080) 3 days after the fix. Mint lush, basil/chives healthy, parsley recovering (some older-leaf yellowing), **dill bolted** (seed-stalks) — the only casualty, to its own biology, not the incident. Also proves the camera capture path works end-to-end. |
+
 *Photos are cropped to the subject. A plain tap-water meter check was also done (meter read a sane value → confirmed working) but isn't included here.*
