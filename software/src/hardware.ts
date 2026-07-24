@@ -245,7 +245,7 @@ function parseSessionCookie(setCookie: string | null): string | null {
 
 // A single KLAP session to one plug: handshakes lazily, carries the session
 // cookie, and re-handshakes once if a request fails (session expiry).
-class KlapConnection {
+export class KlapConnection {
   private keys: KlapKeys | null = null;
   private cookie: string | null = null;
   // The KLAP session is bound to the TCP connection, so the whole handshake +
