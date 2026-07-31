@@ -560,18 +560,31 @@ garden the same day. **Three things before you drop a plant in:**
    seedlings crammed into one plug; usable only if you pull the clump apart into a few starts
    first.
 
-**Alternative — grow from seed (cheaper, ~2–4 weeks slower).** Skip the plant purchase and
-start seeds the moment they arrive, before building anything. Parsley is the bottleneck at
-10–28 days.
+**Alternative — grow from seed in rockwool (cheaper, ~2–4 weeks slower).** Skip the plant
+purchase and start seeds the moment they arrive, before building anything. Parsley is the
+bottleneck at 10–28 days — expect slow, uneven germination and **don't give up on it.** This
+is also the path to **refill a net cup** later (e.g. after a plant bolts or fails).
 
-1. **Soak parsley seeds** in warm water 12–24 h (change the water once) to leach out
-   the coumarin germination inhibitors.
-2. Rinse/pH-condition rockwool plugs. Sow soaked parsley + basil + cilantro +
-   lettuce into separate plugs.
-3. Keep plugs **~70 °F (21 °C) and constantly moist** — one dry-out kills germinating
-   parsley. Basil sprouts in 5–7 days; parsley in 10–28. Transplant each sprout into a net
-   cup (surround with LECA) once it has roots out of the plug and true leaves.
-4. Use flat-leaf "Giant of Italy" parsley, Genovese basil, a slow-bolt cilantro
+1. **Soak parsley seeds** in warm water 12–24 h (change once) to leach the coumarin
+   germination inhibitors — noticeably faster and more even.
+2. **pH-condition the rockwool — don't skip.** Rockwool is alkaline (~pH 7.5–8) out of the
+   bag. Soak the plugs **~1 h in pH-5.5 water** (a splash of pH-Down), then **shake off the
+   excess** so they're damp-not-dripping — don't squeeze hard (crushing kills the air pockets).
+3. **Sow 2–3 seeds per plug** into the top hole, **~¼" (5 mm)** deep, and pinch it loosely
+   closed. Germination is spotty, so a few seeds hedge your odds — **thin to the strongest**
+   later. One plug per herb.
+4. **Germinate warm, humid, evenly moist.** Cover with a clear dome / plastic wrap, hold
+   **~70 °F (21 °C)**, and keep the rockwool **constantly damp with pH-5.5 water — no nutrients
+   yet.** One dry-out kills germinating parsley. Basil sprouts in 5–7 days; parsley 10–28.
+5. **Light the instant they sprout** — under the grow light immediately, or they stretch leggy
+   and flop. Pop the dome once they're up.
+6. **Transplant when rooted.** Once a seedling has true leaves and **roots poking out the
+   sides/bottom of the plug**, nest the **whole plug** (don't disturb it) in a 3" net cup
+   surrounded by LECA and lower it into the lid. Keep the **top of the plug at pebble level**
+   (a buried stem base rots) and the **water just touching the pot bottom** while roots are
+   short. Feed **half strength (~400–600 ppm)** for the first couple weeks, then ramp to full
+   (~800–1,100). **⚠️ Read the meter's `×10` flag** when you mix (§3b).
+7. Use flat-leaf "Giant of Italy" parsley, Genovese basil, a slow-bolt cilantro
    (Calypso/Santo), and a loose-leaf lettuce.
 
 For **mint**, either path uses a rooted cutting from a grocery bunch or a potted plant in
