@@ -191,7 +191,7 @@
   "pl.basket": "Kabaca <b>eksiksiz</b> bir eşdeğer sepet, yerelden alınan besinleri, LECA’yı, tohumları, pH malzemelerini, adaptörleri ve bir kutuyu eklediğinizde <b>~$190–260</b> civarına oturuyor — bu bir çıkarım, <b>kasada göreceğiniz bir tutar değil</b> ve ABD kurulumunun birebir garantili eşdeğeri de değil.",
   "pl.caveats": "Kargo, VAT/gümrük, satıcı varyantları ve kampanyalar, şebeke gerilimi, fiş tipi, kameranın RTSP desteği, akıllı prizin protokol/API uyumluluğu, garanti ve yerel tedarik — hepsi sonucu değiştirir; sipariş vermeden önce her ilanı doğrulayın. Bir de sert bir yazılım uyarısı: samogrow şu anda <b>Kasa (KLAP) prizlerini ve Tapo RTSP kameralarını</b> sürüyor; Tuya tarzı jenerik priz ve kameralar <b>adaptör çalışması yapılmadan mevcut yazılımla çalışmaz</b>.",
   "inc.title": "Olay blogu",
-  "inc.sub": "Gerçek bahçeler gerçek olaylar üretir; biz de bunları üretim kesintileri gibi yönetiyoruz: tarihli, önem derecesi etiketli, suçlayıcı olmayan ve herkese açık yazılmış. Bu dördü ilk fiziksel V1 kurulumundan — her biri GitHub’daki tam hikâyeye ve kök neden analizine bağlanıyor.",
+  "inc.sub": "Gerçek bahçeler gerçek olaylar üretir; biz de bunları üretim kesintileri gibi yönetiyoruz: tarihli, önem derecesi etiketli, suçlayıcı olmayan ve herkese açık yazılmış.",
   "inc.readmore": "Tam yazı &amp; RCA GitHub’da →",
   "inc.i1.title": "×10 olayı — on kat besin aşırı dozu",
   "inc.i1.story": "Ucuz TDS kalemi “115” gösteriyordu ve kimse yanındaki minicik <span class=\"code\">×10</span> işaretini fark etmedi. Rezervuar, su olduğundan on kat daha temizmiş gibi dozlandı ve tuz yoğunluğu bitkileri birkaç gün içinde yaktı.",

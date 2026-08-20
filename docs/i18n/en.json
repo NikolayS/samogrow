@@ -191,7 +191,7 @@
   "pl.basket": "A rough <b>complete</b> equivalent basket lands around <b>~$190–260</b> once you add locally sourced nutrients, LECA, seeds, pH supplies, adapters, and a tote — an inference, <b>not a checkout quote</b> and not a guaranteed drop-in equivalent of the U.S. build.",
   "pl.caveats": "Shipping, VAT/customs, seller variants and promos, mains voltage, plug type, camera RTSP support, smart-plug protocol/API compatibility, warranty, and local sourcing all change the result — verify every listing before ordering. And a hard software caveat: samogrow currently drives <b>Kasa (KLAP) plugs and Tapo RTSP cameras</b>; generic Tuya-style plugs and cameras <b>do not work with the current software without adapter work</b>.",
   "inc.title": "The incident blog",
-  "inc.sub": "Real gardens produce real incidents, and we run them like production outages: dated, severity-tagged, blameless, and written up in public. These four are from the first physical V1 build — each links to the full story and root-cause analysis on GitHub.",
+  "inc.sub": "Real gardens produce real incidents, and we run them like production outages: dated, severity-tagged, blameless, and written up in public.",
   "inc.readmore": "Full write-up &amp; RCA on GitHub →",
   "inc.i1.title": "The ×10 incident — a tenfold nutrient overdose",
   "inc.i1.story": "The cheap TDS pen showed “115” and nobody noticed the tiny <span class=\"code\">×10</span> flag next to it. The reservoir was dosed as if the water were ten times cleaner than it was, and the salt concentration burned the plants within days.",

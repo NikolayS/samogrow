@@ -19,6 +19,8 @@ const indexHtml = readFileSync(join(docs, "index.html"), "utf8");
 const i18nJs = readFileSync(join(docs, "i18n.js"), "utf8");
 const blogHtml = readFileSync(join(docs, "blog.html"), "utf8");
 const blogJs = readFileSync(join(docs, "blog.js"), "utf8");
+const bootstrapJs = readFileSync(join(docs, "i18n-bootstrap.js"), "utf8");
+const blogPageFiles = ["blog.html", "incident-i1.html", "incident-i3.html", "incident-i5.html", "incident-i6.html"];
 const readme = readFileSync(join(docs, "..", "README.md"), "utf8");
 const localeFiles = readdirSync(join(docs, "i18n")).filter((f) => f.endsWith(".json")).sort();
 const dicts = Object.fromEntries(
@@ -205,6 +207,12 @@ const usedKeys = new Set(
     )
   )
 );
+for (const key of ["inc.title", "inc.sub", "inc.readmore"]) usedKeys.add(key);
+for (const incident of ["i1", "i3", "i5", "i6"]) {
+  for (const part of ["title", "story", "impact", "lesson", "alt", "cap"]) {
+    usedKeys.add(`inc.${incident}.${part}`);
+  }
+}
 
 test("every data-i18n key in index.html exists in en.json", () => {
   for (const k of usedKeys) assert.ok(k in en, `index.html references missing key ${k}`);
@@ -213,15 +221,19 @@ test("every data-i18n key in index.html exists in en.json", () => {
 test("every en.json key is used by index.html or the JS runtime", () => {
   const jsApplied = new Set(["meta.title", "meta.description"]);
   for (const k of Object.keys(en)) {
-    assert.ok(usedKeys.has(k) || jsApplied.has(k) || (k.startsWith("inc.") && blogJs.includes("inc.")), `unused key ${k}`);
+    assert.ok(usedKeys.has(k) || jsApplied.has(k), `unused key ${k}`);
   }
 });
 
-test("bootstrap code list in index.html matches LOCALES in i18n.js", () => {
-  const m = indexHtml.match(/var codes = \[([^\]]+)\]/);
-  assert.ok(m, "bootstrap codes array not found in index.html");
+test("shared bootstrap code list matches LOCALES and is loaded by every page", () => {
+  const m = bootstrapJs.match(/var codes = \[([^\]]+)\]/);
+  assert.ok(m, "bootstrap codes array not found");
   const bootCodes = m[1].split(",").map((s) => s.trim().replace(/"/g, ""));
   assert.deepEqual(bootCodes, CODES);
+  for (const file of ["index.html", ...blogPageFiles]) {
+    const html = file === "index.html" ? indexHtml : readFileSync(join(docs, file), "utf8");
+    assert.match(html, /<script src="i18n-bootstrap\.js"><\/script>/, `${file} missing pre-paint bootstrap`);
+  }
 });
 
 test("English defaults baked into index.html match en.json (no drift)", () => {
@@ -290,7 +302,7 @@ test("falls back to English when nothing matches", () => {
 test("persistence uses a stable storage key wired into the runtime", () => {
   assert.equal(STORAGE_KEY, "samogrow-lang");
   assert.match(i18nJs, /localStorage\.setItem\(STORAGE_KEY/);
-  assert.match(indexHtml, /localStorage\.getItem\("samogrow-lang"\)/);
+  assert.match(bootstrapJs, /localStorage\.getItem\("samogrow-lang"\)/);
 });
 
 test("README documents URL-first locale precedence and a shareable example", () => {
@@ -308,6 +320,7 @@ const minimalPage = (initial = "en") => `<!doctype html>
   <button id="lang-btn" aria-expanded="false" aria-controls="lang-menu"><span id="lang-current">EN</span></button>
   <ul id="lang-menu" hidden></ul>
   <a data-lang-link href="blog.html">Blog</a>
+  <a data-lang-link href="notes/post.html#evidence">Nested post</a>
   <h2 data-i18n="sample">English sample</h2>
   <img data-i18n-attrs="alt:sample.alt,src:sample.src,constructor:sample.src" alt="English alt" src="safe.png">
 </body></html>`;
@@ -416,7 +429,8 @@ test("manual switch updates the shareable URL without dropping query parameters 
   assert.equal(dom.window.location.search, "?ref=newsletter&lang=uk");
   assert.equal(dom.window.location.hash, "#incidents");
   assert.equal(dom.window.localStorage.getItem(STORAGE_KEY), "uk");
-  assert.equal(dom.window.document.querySelector('a[data-lang-link]').getAttribute("href"), "blog.html?lang=uk");
+  const links = [...dom.window.document.querySelectorAll('a[data-lang-link]')].map((a) => a.getAttribute("href"));
+  assert.deepEqual(links, ["/blog.html?lang=uk", "/notes/post.html?lang=uk#evidence"]);
 });
 
 test("auto-detected locale is added to the URL for sharing", async () => {
@@ -519,7 +533,7 @@ test("disabled localStorage falls back to navigator language without throwing", 
   assert.equal(dom.window.document.querySelector("#lang-current").textContent, "UK");
 });
 
-const bootstrapScript = indexHtml.match(/<script>\s*(\/\/ i18n bootstrap[\s\S]*?)<\/script>/)?.[1];
+const bootstrapScript = bootstrapJs;
 
 function runBootstrap({ stored, languages = ["en-US"], storageThrows = false,
   url = "https://samogrow.test/" } = {}) {
@@ -599,22 +613,79 @@ test("pre-paint bootstrap safety timer reveals baked-in English after 2000 ms", 
 // ---------- incident blog ----------
 
 const INCIDENTS = [
-  { id: "I-1", date: "2026-07-13", sev: "SEV-2", issue: "https://github.com/NikolayS/samogrow/issues/3",
+  { id: "I-1", date: "2026-07-13", sev: "SEV-2", file: "incident-i1.html", issue: "https://github.com/NikolayS/samogrow/issues/3",
     img: "img/incidents/2026-07-13-reservoir-128x10.jpeg", key: "i1" },
-  { id: "I-3", date: "2026-07-24", sev: "SEV-3", issue: "https://github.com/NikolayS/samogrow/issues/6",
+  { id: "I-3", date: "2026-07-24", sev: "SEV-3", file: "incident-i3.html", issue: "https://github.com/NikolayS/samogrow/issues/6",
     img: "img/incidents/2026-07-24-pest-frass-macro.jpeg", key: "i3" },
-  { id: "I-5", date: "2026-08-12", sev: "SEV-3", issue: "https://github.com/NikolayS/samogrow/issues/10",
+  { id: "I-5", date: "2026-08-12", sev: "SEV-3", file: "incident-i5.html", issue: "https://github.com/NikolayS/samogrow/issues/10",
     img: "img/incidents/2026-08-12-aphids-parsley.jpeg", key: "i5" },
-  { id: "I-6", date: "2026-08-15", sev: "SEV-3", issue: "https://github.com/NikolayS/samogrow/issues/11",
+  { id: "I-6", date: "2026-08-15", sev: "SEV-3", file: "incident-i6.html", issue: "https://github.com/NikolayS/samogrow/issues/11",
     img: "img/incidents/2026-08-18-neem-burn-basil.jpeg", key: "i6" },
 ];
+
+function runBlog(file = "blog.html", url = `https://samogrow.test/${file}`) {
+  const dom = new JSDOM(readFileSync(join(docs, file), "utf8"), { url, runScripts: "outside-only" });
+  dom.window.eval(blogJs);
+  return dom;
+}
+
+test("blog.js executes the index and renders four correctly wired cards", () => {
+  const dom = runBlog();
+  const cards = [...dom.window.document.querySelectorAll(".post-card")];
+  assert.equal(cards.length, 4);
+  for (const [index, inc] of INCIDENTS.entries()) {
+    const card = cards[index];
+    assert.equal(card.getAttribute("href"), inc.file);
+    assert.equal(card.querySelector("img").getAttribute("src"), inc.img);
+    assert.equal(card.querySelector("h2").dataset.i18n, `inc.${inc.key}.title`);
+    assert.equal(card.querySelector("p").dataset.i18n, `inc.${inc.key}.story`);
+  }
+  assert.equal(dom.window.document.querySelector('[data-i18n="inc.sub"]').textContent.trim(), en["inc.sub"]);
+});
+
+test("blog.js executes every incident page and renders the selected post", () => {
+  for (const inc of INCIDENTS) {
+    const dom = runBlog(inc.file);
+    const article = dom.window.document.querySelector("article.post");
+    assert.ok(article, `${inc.file} did not render an article`);
+    assert.equal(article.querySelector("h1").dataset.i18n, `inc.${inc.key}.title`);
+    assert.equal(article.querySelector("img").dataset.i18nAttrs, `alt:inc.${inc.key}.alt`);
+    assert.equal(article.querySelector("img").getAttribute("src"), inc.img);
+    assert.equal(article.querySelector('a[target="_blank"]').getAttribute("href"), inc.issue);
+  }
+});
+
+test("unknown incident key safely falls back to the blog index", () => {
+  const html = readFileSync(join(docs, "incident-i1.html"), "utf8").replace('data-post="i1"', 'data-post="unknown"');
+  const dom = new JSDOM(html, { url: "https://samogrow.test/incident-unknown.html", runScripts: "outside-only" });
+  dom.window.eval(blogJs);
+  assert.equal(dom.window.document.querySelectorAll(".post-card").length, 4);
+});
+
+test("blog rendering is translated with page-scoped metadata and language-preserving links", async () => {
+  const dom = runBlog("incident-i1.html", "https://samogrow.test/incident-i1.html?lang=uk");
+  Object.defineProperty(dom.window.document, "readyState", { value: "complete", configurable: true });
+  dom.window.fetch = async (url) => {
+    const code = /\/([a-z]{2,3})\.json$/.exec(url)?.[1] || "en";
+    return { ok: true, json: async () => dicts[code] };
+  };
+  dom.window.eval(i18nJs);
+  await flush();
+  const { document } = dom.window;
+  assert.equal(document.documentElement.lang, "uk");
+  assert.equal(document.querySelector("h1").innerHTML, dicts.uk["inc.i1.title"]);
+  assert.equal(document.title, dicts.uk["inc.i1.title"]);
+  assert.equal(document.querySelector('meta[name="description"]').content,
+    dicts.uk["inc.i1.story"].replace(/<[^>]+>/g, ""));
+  assert.equal(document.querySelector('a[href^="/blog.html"]').getAttribute("href"), "/blog.html?lang=uk");
+});
 
 test("incident blog and every post have separate language-preserving pages", () => {
   assert.match(indexHtml, /<section id="incidents">/);
   assert.match(indexHtml, /<a href="blog\.html" data-lang-link data-i18n="nav\.incidents">/);
   assert.match(blogHtml, /id="blog-content"/);
   for (const inc of INCIDENTS) {
-    const page = readFileSync(join(docs, `incident-${inc.key}.html`), "utf8");
+    const page = readFileSync(join(docs, inc.file), "utf8");
     assert.match(page, new RegExp(`data-post="${inc.key}"`), `${inc.id} dedicated page missing`);
     assert.ok(blogJs.includes(`file: "incident-${inc.key}.html"`), `${inc.id} blog link missing`);
     assert.ok(blogJs.includes(`issue: "${inc.issue}"`), `${inc.id} issue link missing`);
@@ -647,7 +718,8 @@ test("each incident has translated title/story/impact/lesson/alt/caption in ever
         assert.ok((dict[key] || "").trim().length > 0, `${code}.json ${key} empty`);
       }
     }
-    assert.ok(blogJs.includes(`data-i18n-attrs="alt:inc.' + item.key + '.alt"`), `alt wiring missing for ${inc.id}`);
+    const dom = runBlog(inc.file);
+    assert.equal(dom.window.document.querySelector("img").dataset.i18nAttrs, `alt:inc.${inc.key}.alt`);
   }
 });
 

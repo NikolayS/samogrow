@@ -191,7 +191,7 @@
   "pl.basket": "Zgrubny <b>kompletny</b> koszyk-odpowiednik wychodzi około <b>~$190–260</b>, gdy doliczyć kupione lokalnie nawozy, LECA, nasiona, zestaw pH, przejściówki i skrzynkę — to szacunek, <b>nie kwota z koszyka</b> i nie gwarantowany odpowiednik 1:1 zestawu z USA.",
   "pl.caveats": "Wysyłka, VAT/cło, warianty i promocje sprzedawców, napięcie sieci, typ wtyczki, obsługa RTSP w kamerze, zgodność protokołu/API inteligentnej wtyczki, gwarancja i lokalne zakupy — wszystko to zmienia wynik; sprawdź każdą ofertę przed zamówieniem. I twarde zastrzeżenie programowe: samogrow obsługuje dziś <b>wtyczki Kasa (KLAP) i kamery Tapo RTSP</b>; generyczne wtyczki i kamery w stylu Tuya <b>nie zadziałają z obecnym oprogramowaniem bez pracy nad adapterem</b>.",
   "inc.title": "Blog incydentów",
-  "inc.sub": "Prawdziwe ogrody produkują prawdziwe incydenty, a my prowadzimy je jak awarie produkcyjne: z datą, znacznikiem severity, bez szukania winnych i z publicznym opisem. Te cztery pochodzą z pierwszej fizycznej budowy V1 — każdy linkuje do pełnej historii i analizy przyczyn źródłowych na GitHub.",
+  "inc.sub": "Prawdziwe ogrody produkują prawdziwe incydenty, a my prowadzimy je jak awarie produkcyjne: z datą, znacznikiem severity, bez szukania winnych i z publicznym opisem.",
   "inc.readmore": "Pełny opis &amp; RCA na GitHub →",
   "inc.i1.title": "Incydent ×10 — dziesięciokrotne przedawkowanie nawozu",
   "inc.i1.story": "Tani miernik TDS pokazywał „115” i nikt nie zauważył malutkiej flagi <span class=\"code\">×10</span> obok. Zbiornik dozowano tak, jakby woda była dziesięć razy czystsza, niż była, a stężenie soli spaliło rośliny w kilka dni.",

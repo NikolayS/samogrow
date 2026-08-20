@@ -1,3 +1,5 @@
+/* Shared incident renderer. blog.html omits data-post to render the index;
+ * incident-i*.html sets data-post to select one record from this roster. */
 (function () {
   "use strict";
 
@@ -76,10 +78,12 @@
   var key = document.body.getAttribute("data-post");
   if (key) {
     var selected = incidents.find(function (item) { return item.key === key; });
-    if (selected) root.innerHTML = post(selected);
-  } else {
-    root.innerHTML = '<header class="hero shell"><span class="eyebrow">Field notes</span>' +
-      '<h1 data-i18n="inc.title">The incident blog</h1><p class="lede" data-i18n="inc.sub">Real gardens produce real incidents, and we run them like production outages: dated, severity-tagged, blameless, and written up in public.</p></header>' +
-      '<div class="post-grid shell">' + incidents.map(card).join("") + '</div>';
+    if (selected) {
+      root.innerHTML = post(selected);
+      return;
+    }
   }
+  root.innerHTML = '<header class="hero shell"><span class="eyebrow">Field notes</span>' +
+    '<h1 data-i18n="inc.title">The incident blog</h1><p class="lede" data-i18n="inc.sub">Real gardens produce real incidents, and we run them like production outages: dated, severity-tagged, blameless, and written up in public.</p></header>' +
+    '<div class="post-grid shell">' + incidents.map(card).join("") + '</div>';
 })();

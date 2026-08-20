@@ -191,7 +191,7 @@
   "pl.basket": "Một giỏ hàng tương đương <b>đầy đủ</b> ước chừng rơi vào khoảng <b>~$190–260</b> sau khi cộng thêm dinh dưỡng, LECA, hạt giống, đồ pH, adapter và thùng chứa mua tại chỗ — đây là suy luận, <b>không phải giá lúc thanh toán</b> và cũng không đảm bảo thay thế một-đổi-một cho bản dựng ở Mỹ.",
   "pl.caveats": "Phí vận chuyển, VAT/hải quan, biến thể người bán và khuyến mãi, điện áp lưới, kiểu phích cắm, hỗ trợ RTSP của camera, tương thích giao thức/API của ổ cắm thông minh, bảo hành và nguồn hàng tại chỗ đều làm thay đổi kết quả — hãy kiểm chứng từng listing trước khi đặt hàng. Và một lưu ý cứng về phần mềm: samogrow hiện chỉ điều khiển <b>ổ cắm Kasa (KLAP) và camera Tapo RTSP</b>; ổ cắm và camera kiểu Tuya đại trà <b>không chạy được với phần mềm hiện tại nếu không viết thêm adapter</b>.",
   "inc.title": "Blog sự cố",
-  "inc.sub": "Vườn thật thì sinh sự cố thật, và chúng tôi xử lý chúng như sự cố production: có ngày tháng, gắn nhãn mức độ nghiêm trọng, không đổ lỗi cá nhân, và viết công khai. Bốn sự cố này đến từ bản dựng vật lý V1 đầu tiên — mỗi mục đều dẫn tới câu chuyện đầy đủ và phân tích nguyên nhân gốc trên GitHub.",
+  "inc.sub": "Vườn thật thì sinh sự cố thật, và chúng tôi xử lý chúng như sự cố production: có ngày tháng, gắn nhãn mức độ nghiêm trọng, không đổ lỗi cá nhân, và viết công khai.",
   "inc.readmore": "Bài viết đầy đủ &amp; RCA trên GitHub →",
   "inc.i1.title": "Sự cố ×10 — quá liều dinh dưỡng gấp mười lần",
   "inc.i1.story": "Chiếc bút TDS rẻ tiền hiện “115” và không ai để ý cái dấu <span class=\"code\">×10</span> bé xíu ngay cạnh. Bể chứa bị pha như thể nước sạch gấp mười lần thực tế, và nồng độ muối đã đốt cháy cây chỉ trong vài ngày.",

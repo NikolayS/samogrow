@@ -191,7 +191,7 @@
   "pl.basket": "Een ruwe <b>complete</b> equivalente boodschappenmand komt uit rond <b>~$190–260</b> zodra je lokaal gekochte voeding, LECA, zaden, pH-benodigdheden, adapters en een bak meerekent — een inschatting, <b>geen afrekenbedrag</b> en geen gegarandeerd één-op-één-equivalent van de Amerikaanse build.",
   "pl.caveats": "Verzendkosten, VAT/douane, verkopersvarianten en acties, netspanning, stekkertype, RTSP-ondersteuning van de camera, protocol/API-compatibiliteit van de slimme stekker, garantie en lokaal inkopen veranderen allemaal de uitkomst — controleer elke listing voor je bestelt. En één harde software-kanttekening: samogrow stuurt op dit moment <b>Kasa-stekkers (KLAP) en Tapo RTSP-camera’s</b> aan; generieke stekkers en camera’s in Tuya-stijl <b>werken niet met de huidige software zonder adapterwerk</b>.",
   "inc.title": "Het incidentenblog",
-  "inc.sub": "Echte tuinen produceren echte incidenten, en wij behandelen ze als productie-storingen: gedateerd, met severity-label, blameless en openbaar uitgeschreven. Deze vier komen uit de eerste fysieke V1-build — elk linkt naar het volledige verhaal en de root-cause-analyse op GitHub.",
+  "inc.sub": "Echte tuinen produceren echte incidenten, en wij behandelen ze als productie-storingen: gedateerd, met severity-label, blameless en openbaar uitgeschreven.",
   "inc.readmore": "Volledig verslag &amp; RCA op GitHub →",
   "inc.i1.title": "Het ×10-incident — een tienvoudige overdosis voeding",
   "inc.i1.story": "De goedkope TDS-pen toonde “115” en niemand zag het piepkleine <span class=\"code\">×10</span>-vlaggetje ernaast. Het reservoir werd gedoseerd alsof het water tien keer schoner was dan het was, en de zoutconcentratie verbrandde de planten binnen enkele dagen.",

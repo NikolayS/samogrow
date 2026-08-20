@@ -131,7 +131,7 @@
       try {
         var url = new URL(links[i].getAttribute("href"), root.location.href);
         url.searchParams.set("lang", code);
-        links[i].setAttribute("href", url.pathname.split("/").pop() + url.search + url.hash);
+        links[i].setAttribute("href", url.pathname + url.search + url.hash);
       } catch (e) {}
     }
   }
@@ -161,9 +161,11 @@
     html.lang = code;
     html.dir = locale.dir;
 
-    if (dict["meta.title"]) document.title = dict["meta.title"];
+    var titleKey = html.getAttribute("data-i18n-title") || "meta.title";
+    var descriptionKey = html.getAttribute("data-i18n-description") || "meta.description";
+    if (dict[titleKey]) document.title = dict[titleKey].replace(/<[^>]+>/g, "");
     var meta = document.querySelector('meta[name="description"]');
-    if (meta && dict["meta.description"]) meta.setAttribute("content", dict["meta.description"]);
+    if (meta && dict[descriptionKey]) meta.setAttribute("content", dict[descriptionKey].replace(/<[^>]+>/g, ""));
 
     var nodes = document.querySelectorAll("[data-i18n]");
     for (var i = 0; i < nodes.length; i++) {

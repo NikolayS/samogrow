@@ -423,42 +423,7 @@
   .d1{animation-delay:.05s}.d2{animation-delay:.15s}.d3{animation-delay:.28s}.d4{animation-delay:.4s}
   @media (prefers-reduced-motion: reduce) { .fade { animation: none; opacity: 1; transform: none; } }
 </style>
-<script>
-  // i18n bootstrap: pick the locale before first paint so a non-English visit
-  // doesn't flash English. This matcher intentionally mirrors matchLocale() in
-  // i18n.js; the test suite runs both over the same cases and enforces roster
-  // parity. Baked-in English remains the fallback if a locale cannot load.
-  (function () {
-    var codes = ["ar","bn","de","en","es","fr","hi","id","it","ja","ko","nl","pl","pt","ru","th","tr","uk","vi","zh"];
-    function match(tag) {
-      var normalized = String(tag || "").toLowerCase();
-      if (codes.indexOf(normalized) >= 0) return normalized;
-      var base = normalized.split("-")[0];
-      return codes.indexOf(base) >= 0 ? base : null;
-    }
-    var pick = null;
-    try { pick = match(new URLSearchParams(location.search).get("lang")); } catch (e) {}
-    if (!pick) {
-      try { pick = localStorage.getItem("samogrow-lang"); } catch (e) {}
-      pick = match(pick);
-    }
-    if (!pick) {
-      var prefs = (navigator.languages && navigator.languages.length) ? navigator.languages : [navigator.language || "en"];
-      for (var i = 0; i < prefs.length && !pick; i++) {
-        pick = match(prefs[i]);
-      }
-    }
-    document.documentElement.setAttribute("data-i18n-initial", pick || "en");
-    if (pick && pick !== "en") {
-      document.documentElement.classList.add("i18n-pending");
-      // Safety valve: never keep the page hidden if the locale fails to load.
-      window.__samogrowI18nTimer = setTimeout(function () {
-        document.documentElement.classList.remove("i18n-pending");
-        window.__samogrowI18nTimer = null;
-      }, 2000);
-    }
-  })();
-</script>
+<script src="i18n-bootstrap.js"></script>
 
 <div class="wrap">
   <div class="topbar">
