@@ -82,7 +82,7 @@
   "cmp.no": "no",
   "cmp.sites": "sites",
   "cmp.pots": "pots",
-  "cmp.auk.note": "*Auk estimate, not a checkout quote: the first ~6 months of nutrients and one crop's coco are included. The range adds 2–3 refills (using current Auk Mini pricing because Mini 2 refill prices are not published) and $12–48 of electricity. No subscription or proprietary pods; U.S./Canada tax is added at checkout, while European VAT/taxes and delivery are included.",
+  "cmp.auk.note": "*Auk estimate, not a checkout quote: the first ~6 months of nutrients and one crop's coco are included. The range adds 2–3 refills using current Auk Mini pricing because Mini 2 refill prices are not published. Electricity is excluded from every table row; Auk publishes $0.5–2/month (~$12–48 over two years), putting its power-inclusive total around ~$320–400. No subscription or proprietary pods; U.S./Canada tax is added at checkout, while European VAT/taxes and delivery are included.",
   "cost.note": "Nothing here is a black box: commodity seeds, code you can fork, and no vendor who can deprecate your garden or move the AI behind a paywall — the way <b>AeroGarden owners were stranded</b> when the company wound down and the app and pods went with it. The two-year math is just the receipt: ~$470 all-in, roughly $1,245 under Gardyn (the only commercial unit with real camera + AI) and below even a Click &amp; Grow.",
   "cost.ongoing.1": "/ year — new plants or seeds, pH refills. Pebbles are reusable; one nutrient kit &amp; pebble bag last years / ~10 builds.",
   "cost.ongoing.2": "/ month — Claude Haiku vision, ~24–48 photos a day.",

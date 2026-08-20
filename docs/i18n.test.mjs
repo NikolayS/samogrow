@@ -771,13 +771,19 @@ test("Auk comparison includes realistic recurring costs and capacity context", (
   const rows = [...table.querySelectorAll("tbody tr")].map((row) =>
     [...row.querySelectorAll("td")].map((cell) => cell.textContent.trim())
   );
-  assert.deepEqual(rows[0], ["samogrow · 12 sites", "$280", "$70 + $120 AI", "yes", "~$470"]);
-  assert.deepEqual(rows[3], ["Auk Mini 2 · 4 pots", "$229", "~$80–160*", "no", "~$310–390*"]);
-  assert.equal(280 + 70 + 120, 470, "samogrow total must equal hardware + grow + AI");
-  const aukRange = [229 + 80, 229 + 160].map((amount) => Math.round(amount / 10) * 10);
-  assert.deepEqual(aukRange, [310, 390], "Auk displayed range must be hardware + extras rounded to tens");
+  assert.deepEqual(rows, [
+    ["samogrow · 6 sites", "$280", "$70 + $120 AI", "yes", "~$470"],
+    ["Gardyn Home 4 · 30 sites", "$899", "$816", "yes", "~$1,715"],
+    ["Click & Grow SG9 · 9 sites", "$200", "$400", "no", "~$600"],
+    ["Auk Mini 2 · 4 pots", "$229", "~$80–120*", "no", "~$310–350*"],
+  ]);
+  const amounts = (value) => [...value.matchAll(/\$(\d+(?:,\d+)?)/g)].map((match) => Number(match[1].replace(",", "")));
+  assert.equal(amounts(rows[0][1])[0] + amounts(rows[0][2]).reduce((a, b) => a + b), amounts(rows[0][4])[0],
+    "samogrow total must equal rendered hardware + grow + AI");
+  const aukRange = amounts(rows[3][2]).map((extra) => Math.round((amounts(rows[3][1])[0] + extra) / 10) * 10);
+  assert.deepEqual(aukRange, amounts(rows[3][4]), "Auk rendered total must equal rendered hardware + extras rounded to tens");
   const note = en["cmp.auk.note"];
-  for (const fact of ["~6 months", "2–3 refills", "$12–48", "not published", "No subscription", "tax", "VAT"]) {
+  for (const fact of ["~6 months", "2–3 refills", "$0.5–2", "$12–48", "~$320–400", "excluded from every", "not published", "No subscription", "tax", "VAT"]) {
     assert.ok(note.includes(fact), `Auk caveat missing: ${fact}`);
   }
   for (const [code, dict] of Object.entries(dicts)) {
