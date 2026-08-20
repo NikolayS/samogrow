@@ -39,6 +39,8 @@ The site is available in 20 languages: English, Spanish, French, German, Italian
 
 To add a language, add its entry to `LOCALES` in `docs/i18n.js`, add the same code to the pre-paint `codes` roster in `docs/index.html`, and create `docs/i18n/<code>.json` with exactly the English catalog's keys. Run `npm run test:docs`; roster/key parity and the duplicated pre-paint matcher are enforced by the suite.
 
+The site also carries an **incident blog** — the four dated, severity-tagged field-test incidents (×10 nutrient overdose, transplant-borne leafroller, camera-missed aphids, neem phototoxicity) with evidence photos served locally from `docs/img/incidents/` and links to the full RCAs in the issues. All prices on the site are labeled as a rough **U.S. mid-2026 baseline in USD**, with a Poland / EU-plug marketplace example (snapshot observed 2026-08-20) showing how another market changes the math — explicitly not a checkout quote, and with a warning that generic Tuya-style plugs/cameras need adapter work with the current software.
+
 Status: spec + shopping list + software ready — see the [project brief](https://nikolays.github.io/samogrow/), [SPEC](spec/SPEC.md), and [shopping list](spec/SHOPPING-LIST.md).
 
 Ready to build? The 10 core V1 items are collected in one [ready-to-order Amazon list](https://www.amazon.com/hz/wishlist/ls/3SF86IUAST80H) (~$216) — cart them in one pass; buy the tote and the plants in person, and the 3" hole saw + 0.1 g scale only if you don't already own them.

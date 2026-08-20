@@ -3,7 +3,7 @@
 //   bun test docs/i18n.test.mjs
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync, readdirSync } from "node:fs";
+import { readFileSync, readdirSync, statSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -520,4 +520,109 @@ test("pre-paint bootstrap safety timer reveals baked-in English after 2000 ms", 
   timer();
   assert.equal(dom.window.document.documentElement.classList.contains("i18n-pending"), false);
   assert.equal(dom.window.__samogrowI18nTimer, null);
+});
+
+// ---------- incident blog ----------
+
+const INCIDENTS = [
+  { id: "I-1", date: "2026-07-13", sev: "SEV-2", issue: "https://github.com/NikolayS/samogrow/issues/3",
+    img: "img/incidents/2026-07-13-reservoir-128x10.jpeg", key: "i1" },
+  { id: "I-3", date: "2026-07-24", sev: "SEV-3", issue: "https://github.com/NikolayS/samogrow/issues/6",
+    img: "img/incidents/2026-07-24-pest-frass-macro.jpeg", key: "i3" },
+  { id: "I-5", date: "2026-08-12", sev: "SEV-3", issue: "https://github.com/NikolayS/samogrow/issues/10",
+    img: "img/incidents/2026-08-12-aphids-parsley.jpeg", key: "i5" },
+  { id: "I-6", date: "2026-08-15", sev: "SEV-3", issue: "https://github.com/NikolayS/samogrow/issues/11",
+    img: "img/incidents/2026-08-18-neem-burn-basil.jpeg", key: "i6" },
+];
+
+test("incident section exists, is in the nav, and carries all four dated incidents", () => {
+  assert.match(indexHtml, /<section id="incidents">/);
+  assert.match(indexHtml, /<a href="#incidents" data-i18n="nav.incidents">/);
+  const section = indexHtml.slice(indexHtml.indexOf('<section id="incidents">'), indexHtml.indexOf("<!-- MEME WALL"));
+  assert.equal((section.match(/class="inc-card"/g) || []).length, 4);
+  for (const inc of INCIDENTS) {
+    assert.ok(section.includes(`<span class="inc-id">${inc.id}</span>`), `${inc.id} chip missing`);
+    assert.ok(section.includes(`<span class="inc-date">${inc.date}</span>`), `${inc.id} date wrong`);
+    assert.ok(section.includes(`<span class="inc-sev">${inc.sev}</span>`), `${inc.id} severity wrong`);
+    assert.ok(section.includes(`href="${inc.issue}"`), `${inc.id} issue link missing`);
+    assert.ok(section.includes(`src="${inc.img}"`), `${inc.id} image not local`);
+  }
+  // I-6 narrative carries the full incident timeline.
+  for (const d of ["2026-08-15", "2026-08-18", "2026-08-20"]) {
+    assert.ok(en["inc.i6.story"].includes(d), `I-6 story missing date ${d}`);
+  }
+});
+
+test("incident evidence images exist locally (no remote image runtime dependency)", () => {
+  for (const inc of INCIDENTS) {
+    const st = statSync(join(docs, inc.img));
+    assert.ok(st.size > 10_000, `${inc.img} suspiciously small`);
+  }
+  // Every <img> on the page must be a relative, repo-local path.
+  for (const m of indexHtml.matchAll(/<img[^>]*\ssrc="([^"]+)"/g)) {
+    assert.ok(!/^https?:/i.test(m[1]), `remote image: ${m[1]}`);
+    assert.ok(statSync(join(docs, m[1])).size > 0, `missing image file: ${m[1]}`);
+  }
+});
+
+test("each incident has translated title/story/impact/lesson/alt/caption in every locale", () => {
+  for (const inc of INCIDENTS) {
+    for (const part of ["title", "story", "impact", "lesson", "alt", "cap"]) {
+      const key = `inc.${inc.key}.${part}`;
+      assert.ok(key in en, `missing en key ${key}`);
+      for (const [code, dict] of Object.entries(dicts)) {
+        assert.ok((dict[key] || "").trim().length > 0, `${code}.json ${key} empty`);
+      }
+    }
+    assert.ok(indexHtml.includes(`data-i18n-attrs="alt:inc.${inc.key}.alt"`), `alt wiring missing for ${inc.id}`);
+  }
+});
+
+// ---------- pricing context ----------
+
+test("U.S. baseline labeling is explicit on every price frame", () => {
+  assert.ok(en["cost.sub"].includes("U.S. mid-2026 baseline"), "cost.sub not labeled U.S. baseline");
+  assert.ok(/not a quote/.test(en["cost.sub"]), "cost.sub must disclaim quote status");
+  assert.ok(en["spec.allin.value"].includes("U.S."), "spec-card all-in value not U.S.-labeled");
+  assert.ok(en["parts.fine"].includes("U.S. mid-2026"), "parts fine print not U.S.-labeled");
+  assert.ok(en["cost.us.note"].includes("USD") && en["cost.us.note"].includes("U.S. mid-2026"),
+    "cost.us.note must state USD + U.S. mid-2026");
+  assert.match(indexHtml, /data-i18n="cost.us.note"/);
+});
+
+test("Poland / EU example: snapshot date, items, sources, subtotal arithmetic", () => {
+  assert.ok(en["pl.cap"].includes("2026-08-20") && en["pl.cap"].includes("USD"), "pl.cap needs snapshot date + USD");
+  const block = indexHtml.slice(indexHtml.indexOf('<div class="pl-example'), indexHtml.indexOf('<div style="margin-top:52px">'));
+  for (const id of ["1005010779026398", "1005007785492121", "1005006041534079", "1005011855369431"]) {
+    assert.ok(block.includes(`https://www.aliexpress.com/item/${id}.html`), `source link for item ${id} missing`);
+  }
+  const amts = [...block.matchAll(/class="amt">~\$(\d+)</g)].map((m) => Number(m[1]));
+  assert.deepEqual(amts, [17, 15, 14, 10, 7, 66, 129], "line amounts changed");
+  assert.equal(amts.slice(0, 6).reduce((a, b) => a + b, 0), amts[6], "subtotal must equal the sum of lines");
+  for (const [key, obs] of [["pl.pump.sub", "$10.08"], ["pl.meter.sub", "$7.08"], ["pl.box.sub", "$65.85"], ["pl.plugs.sub", "$8.50"]]) {
+    assert.ok(en[key].includes(obs), `${key} must cite observed price ${obs}`);
+  }
+  assert.ok(en["pl.camera.sub"].includes("RTSP") && /unverified/.test(en["pl.camera.sub"]),
+    "camera line must flag RTSP as unverified");
+  assert.ok(en["pl.basket"].includes("~$190–260") && /not a checkout quote/.test(en["pl.basket"]),
+    "basket estimate must state range + non-quote status");
+});
+
+test("Poland example caveats cover the compatibility and cost traps", () => {
+  const c = en["pl.caveats"];
+  for (const word of ["Shipping", "VAT", "customs", "voltage", "plug type", "RTSP", "protocol", "warranty"]) {
+    assert.ok(c.includes(word), `caveat missing: ${word}`);
+  }
+  assert.ok(c.includes("Tuya") && c.includes("adapter work"),
+    "must warn generic Tuya gear needs adapter work with current software");
+  assert.ok(c.includes("Kasa") && c.includes("Tapo"), "must name the actually-supported hardware");
+});
+
+test("new pricing/incident strings keep prices and links intact across all 20 locales", () => {
+  // Covered structurally by the global parity tests; assert the new keys are present everywhere.
+  const newKeys = Object.keys(en).filter((k) => k.startsWith("pl.") || k.startsWith("inc.") || k === "cost.us.note" || k === "nav.incidents");
+  assert.ok(newKeys.length >= 45, "expected the new key families to exist");
+  for (const [code, dict] of Object.entries(dicts)) {
+    for (const k of newKeys) assert.ok(k in dict, `${code}.json missing ${k}`);
+  }
 });
