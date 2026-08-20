@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<html lang="en" dir="ltr">
 <meta charset="utf-8">
 <title>samogrow by Nombox — DIY AI herb garden</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -53,6 +54,7 @@
 
   * { box-sizing: border-box; }
   html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+  html.i18n-pending body { visibility: hidden; }
   body {
     margin: 0;
     background-color: var(--paper);
@@ -98,13 +100,49 @@
     backdrop-filter: blur(8px);
     border-bottom: 1px solid var(--line);
   }
-  .topbar .col { display: flex; align-items: baseline; justify-content: space-between; height: 54px; }
+  .topbar .col { display: flex; align-items: center; justify-content: space-between; gap: 18px; height: 54px; }
   .brand { font-family: var(--font-serif); font-weight: 400; letter-spacing: 0; font-size: 1.15rem; }
   .brand b { color: var(--leaf); font-weight: 700; }
-  .topnav { display: flex; gap: 22px; font-family: var(--font-mono); font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; }
+  .topnav { display: flex; gap: 22px; font-family: var(--font-mono); font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; margin-inline-start: auto; }
   .topnav a { text-decoration: none; color: var(--ink-soft); }
   .topnav a:hover { color: var(--leaf); }
   @media (max-width: 720px) { .topnav { display: none; } }
+
+  /* ---------- language switcher ---------- */
+  .lang { position: relative; flex-shrink: 0; }
+  .lang-btn {
+    font-family: var(--font-mono); font-size: .78rem; font-weight: 600; letter-spacing: .1em;
+    display: inline-flex; align-items: center; gap: 7px;
+    min-height: 38px; padding: 6px 12px; cursor: pointer;
+    color: var(--ink); background: var(--card); border: 1px solid var(--line); border-radius: 6px;
+  }
+  .lang-btn:hover, .lang-btn[aria-expanded="true"] { border-color: var(--leaf); color: var(--leaf); }
+  .lang-btn:focus-visible { outline: 2px solid var(--leaf); outline-offset: 2px; }
+  .lang-btn .lang-globe { width: 15px; height: 15px; flex-shrink: 0; }
+  .lang-btn .lang-caret { font-size: .6rem; }
+  .lang-menu {
+    position: absolute; inset-inline-end: 0; top: calc(100% + 8px); z-index: 40;
+    margin: 0; padding: 6px; list-style: none;
+    min-width: 92px; max-height: min(60vh, 420px); overflow-y: auto;
+    background: var(--card); border: 1px solid var(--line); border-radius: 8px;
+    box-shadow: 0 18px 40px -20px var(--shadow);
+  }
+  .lang-menu[hidden] { display: none; }
+  .lang-menu li {
+    display: flex; align-items: baseline; gap: 10px;
+    font-family: var(--font-mono); font-size: .78rem;
+    padding: 9px 10px; border-radius: 5px; cursor: pointer; color: var(--ink-soft);
+  }
+  .lang-menu li .abbr { font-weight: 700; letter-spacing: .08em; color: var(--ink); min-width: 2.4em; }
+  .lang-menu li:hover { background: color-mix(in srgb, var(--leaf) 12%, transparent); }
+  .lang-menu li:focus-visible { outline: 2px solid var(--leaf); outline-offset: -2px; }
+  .lang-menu li[aria-selected="true"] { color: var(--leaf); }
+  .lang-menu li[aria-selected="true"] .abbr { color: var(--leaf); }
+  .lang-menu li[aria-selected="true"]::after { content: "✓"; margin-inline-start: auto; color: var(--leaf); }
+  @media (max-width: 720px) {
+    .lang-btn { min-height: 44px; padding: 8px 14px; }
+    .lang-menu li { padding: 12px 10px; }
+  }
 
   /* ---------- hero ---------- */
   .hero { padding: 76px 0 40px; position: relative; overflow: clip; }
@@ -280,6 +318,35 @@
   .ongoing .big { font-family: var(--font-serif); font-size: 1.7rem; color: var(--ink); display: block; }
   .ongoing small { color: var(--ink-faint); }
 
+  /* ---------- incident blog ---------- */
+  .inc-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px; }
+  @media (max-width: 820px) { .inc-grid { grid-template-columns: 1fr; } }
+  .inc-card { border: 1px solid var(--line); background: var(--card); display: flex; flex-direction: column; box-shadow: 0 12px 30px -26px var(--shadow); }
+  .inc-card figure { margin: 0; }
+  .inc-card img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 10; object-fit: cover; border-bottom: 1px solid var(--line); }
+  .inc-body { padding: 18px 20px 22px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+  .inc-meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-family: var(--font-mono); font-size: .64rem; letter-spacing: .1em; }
+  .inc-meta .inc-id { color: var(--leaf); font-weight: 700; }
+  .inc-meta .inc-date { color: var(--ink-faint); }
+  .inc-meta .inc-sev { color: var(--soil); border: 1px solid var(--soil); padding: 2px 7px; text-transform: uppercase; }
+  .inc-card h3 { font-family: var(--font-serif); font-weight: 400; font-size: 1.3rem; margin: 0; line-height: 1.15; }
+  .inc-card .inc-story { margin: 0; font-size: .95rem; line-height: 1.55; color: var(--ink-soft); }
+  .inc-facts { list-style: none; margin: 2px 0 0; padding: 0; display: grid; gap: 7px; }
+  .inc-facts li { font-family: var(--font-mono); font-size: .7rem; line-height: 1.5; color: var(--ink-soft); padding-left: 15px; position: relative; }
+  .inc-facts li::before { content: "→"; position: absolute; left: 0; color: var(--leaf); }
+  .inc-facts li b { color: var(--ink); font-weight: 600; }
+  .inc-link { margin-top: auto; padding-top: 8px; font-family: var(--font-mono); font-size: .74rem; letter-spacing: .06em; }
+  .inc-link a { text-decoration: none; color: var(--leaf); }
+  .inc-link a:hover { text-decoration: underline; }
+  .inc-cap { font-family: var(--font-mono); font-size: .62rem; color: var(--ink-faint); line-height: 1.5; padding: 8px 12px 0; }
+
+  /* ---------- regional price example ---------- */
+  .pl-example { margin-top: 44px; border: 1px solid var(--line); background: var(--card); }
+  .pl-example .vcap { padding: 13px 20px 6px; }
+  .pl-note { font-size: .92rem; color: var(--ink-soft); line-height: 1.55; margin: 0; padding: 10px 20px 16px; }
+  .pl-note b { color: var(--ink); font-style: italic; font-weight: 400; }
+  .pl-caveats { border-top: 1px dashed var(--soil); }
+
   /* ---------- getting started ---------- */
   .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; }
   @media (max-width: 860px) { .steps { grid-template-columns: 1fr 1fr; } }
@@ -356,18 +423,66 @@
   .d1{animation-delay:.05s}.d2{animation-delay:.15s}.d3{animation-delay:.28s}.d4{animation-delay:.4s}
   @media (prefers-reduced-motion: reduce) { .fade { animation: none; opacity: 1; transform: none; } }
 </style>
+<script>
+  // i18n bootstrap: pick the locale before first paint so a non-English visit
+  // doesn't flash English. This matcher intentionally mirrors matchLocale() in
+  // i18n.js; the test suite runs both over the same cases and enforces roster
+  // parity. Baked-in English remains the fallback if a locale cannot load.
+  (function () {
+    var codes = ["en","es","fr","de","it","pt","nl","pl","ru","uk","tr","ar","hi","bn","id","vi","th","ja","ko","zh"];
+    function match(tag) {
+      var normalized = String(tag || "").toLowerCase();
+      if (codes.indexOf(normalized) >= 0) return normalized;
+      var base = normalized.split("-")[0];
+      return codes.indexOf(base) >= 0 ? base : null;
+    }
+    var pick = null;
+    try { pick = localStorage.getItem("samogrow-lang"); } catch (e) {}
+    pick = match(pick);
+    if (!pick) {
+      var prefs = (navigator.languages && navigator.languages.length) ? navigator.languages : [navigator.language || "en"];
+      for (var i = 0; i < prefs.length && !pick; i++) {
+        pick = match(prefs[i]);
+      }
+    }
+    document.documentElement.setAttribute("data-i18n-initial", pick || "en");
+    if (pick && pick !== "en") {
+      document.documentElement.classList.add("i18n-pending");
+      // Safety valve: never keep the page hidden if the locale fails to load.
+      window.__samogrowI18nTimer = setTimeout(function () {
+        document.documentElement.classList.remove("i18n-pending");
+        window.__samogrowI18nTimer = null;
+      }, 2000);
+    }
+  })();
+</script>
 
 <div class="wrap">
   <div class="topbar">
     <div class="col">
       <div class="brand">samo<b>grow</b> 🌿</div>
       <nav class="topnav">
-        <a href="#how">Architecture</a>
-        <a href="#cost">Cost</a>
-        <a href="#features">Features</a>
-        <a href="#start">Quickstart</a>
-        <a href="https://github.com/NikolayS/samogrow">GitHub ↗</a>
+        <a href="#how" data-i18n="nav.how">Architecture</a>
+        <a href="#cost" data-i18n="nav.cost">Cost</a>
+        <a href="#features" data-i18n="nav.features">Features</a>
+        <a href="#start" data-i18n="nav.start">Quickstart</a>
+        <a href="#incidents" data-i18n="nav.incidents">Incidents</a>
+        <a href="https://github.com/NikolayS/samogrow" data-i18n="nav.github">GitHub ↗</a>
       </nav>
+      <div class="lang" id="lang-switcher">
+        <button type="button" class="lang-btn" id="lang-btn" aria-haspopup="listbox" aria-controls="lang-menu" aria-expanded="false"
+                aria-label="Language" data-i18n-attrs="aria-label:lang.switcher">
+          <svg class="lang-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <circle cx="12" cy="12" r="9"></circle>
+            <ellipse cx="12" cy="12" rx="4" ry="9"></ellipse>
+            <path d="M3.6 9h16.8M3.6 15h16.8"></path>
+          </svg>
+          <span id="lang-current">EN</span>
+          <span class="lang-caret" aria-hidden="true">▾</span>
+        </button>
+        <ul class="lang-menu" id="lang-menu" role="listbox" aria-label="Choose language"
+            data-i18n-attrs="aria-label:lang.listbox" hidden></ul>
+      </div>
     </div>
   </div>
 
@@ -375,16 +490,16 @@
   <header class="hero">
     <div class="col hero-grid">
       <div class="hero-lead">
-        <div class="eyebrow fade d1">A service you can read · open source · it feeds you</div>
-        <h1 class="fade d2">samo<span class="sprout">grow</span><span class="leaf">🌿</span> <span style="font-size:.32em;letter-spacing:0;font-style:italic;color:var(--ink-faint);">by Nombox</span></h1>
-        <p class="lede fade d3">
+        <div class="eyebrow fade d1" data-i18n="hero.eyebrow">A service you can read · open source · it feeds you</div>
+        <h1 class="fade d2">samo<span class="sprout">grow</span><span class="leaf">🌿</span> <span style="font-size:.32em;letter-spacing:0;font-style:italic;color:var(--ink-faint);" data-i18n="hero.by">by Nombox</span></h1>
+        <p class="lede fade d3" data-i18n="hero.lede">
           You already keep a machine on 24/7. Give it one more job. samogrow runs a
           <b>herb garden</b> from a camera, two smart plugs, and a Claude API key —
           open source (MIT), no pods, no subscription.
         </p>
         <div class="cta-row fade d4">
-          <a class="btn btn-solid" href="https://github.com/NikolayS/samogrow/blob/main/spec/SPEC.md">Read the spec →</a>
-          <a class="btn btn-ghost" href="#start">Quickstart →</a>
+          <a class="btn btn-solid" href="https://github.com/NikolayS/samogrow/blob/main/spec/SPEC.md" data-i18n="hero.cta.spec">Read the spec →</a>
+          <a class="btn btn-ghost" href="#start" data-i18n="hero.cta.quickstart">Quickstart →</a>
         </div>
       </div>
 
@@ -392,20 +507,21 @@
         <figure class="shot hero-illo fade d3">
           <img src="img/build-illustration.jpg"
                alt="Field-guide illustration of the samogrow build: two full-spectrum T5 light strips above a green DWC tote of basil, parsley, cilantro and lettuce in net cups, a top-up water jug with a small pump, a Wi-Fi camera, an air pump feeding an air stone, and two smart plugs."
+               data-i18n-attrs="alt:hero.illo.alt"
                width="1536" height="1024">
-          <figcaption>The build, illustrated — real photos will replace this once the first unit is assembled.</figcaption>
+          <figcaption data-i18n="hero.illo.cap">The build, illustrated — real photos will replace this once the first unit is assembled.</figcaption>
         </figure>
         <aside class="spec-card fade d4">
-          <span class="eyebrow">At a glance</span>
-          <div class="spec-row"><span>All-in hardware</span><span class="hi">~$232–311 (variants)</span></div>
-          <div class="spec-row"><span>Appliance side</span><span>$33–68</span></div>
-          <div class="spec-row"><span>Grow side</span><span>$205–211</span></div>
-          <div class="spec-row"><span>Consumables</span><span>~$35 / yr</span></div>
-          <div class="spec-row"><span>Claude API</span><span>$3–7 / mo</span></div>
-          <div class="spec-row"><span>Source</span><span class="hi">MIT · tests + CI</span></div>
-          <div class="spec-row"><span>Dry run</span><span class="hi">mock mode, 0 hardware</span></div>
-          <div class="spec-row"><span>Vendor subscription</span><span class="hi">none</span></div>
-          <div class="spec-row"><span>Soldering</span><span class="hi">none</span></div>
+          <span class="eyebrow" data-i18n="spec.eyebrow">At a glance</span>
+          <div class="spec-row"><span data-i18n="spec.allin.label">All-in hardware</span><span class="hi" data-i18n="spec.allin.value">~$232–311 (U.S., variants)</span></div>
+          <div class="spec-row"><span data-i18n="spec.appliance.label">Appliance side</span><span data-i18n="spec.appliance.value">$33–68</span></div>
+          <div class="spec-row"><span data-i18n="spec.grow.label">Grow side</span><span data-i18n="spec.grow.value">$205–211</span></div>
+          <div class="spec-row"><span data-i18n="spec.consumables.label">Consumables</span><span data-i18n="spec.consumables.value">~$35 / yr</span></div>
+          <div class="spec-row"><span data-i18n="spec.api.label">Claude API</span><span data-i18n="spec.api.value">$3–7 / mo</span></div>
+          <div class="spec-row"><span data-i18n="spec.source.label">Source</span><span class="hi" data-i18n="spec.source.value">MIT · tests + CI</span></div>
+          <div class="spec-row"><span data-i18n="spec.dryrun.label">Dry run</span><span class="hi" data-i18n="spec.dryrun.value">mock mode, 0 hardware</span></div>
+          <div class="spec-row"><span data-i18n="spec.subscription.label">Vendor subscription</span><span class="hi" data-i18n="spec.subscription.value">none</span></div>
+          <div class="spec-row"><span data-i18n="spec.soldering.label">Soldering</span><span class="hi" data-i18n="spec.soldering.value">none</span></div>
         </aside>
       </div>
     </div>
@@ -416,9 +532,9 @@
     <div class="col">
       <div class="sec-head">
         <span class="sec-num">01</span>
-        <h2>How it works</h2>
+        <h2 data-i18n="how.title">How it works</h2>
       </div>
-      <p class="sec-sub">
+      <p class="sec-sub" data-i18n="how.sub">
         The garden is three off-the-shelf Wi-Fi gadgets — two smart plugs and a camera — with
         nothing to maintain. The brain is <b>nombox</b>, a small TypeScript/Bun service
         (<code>@anthropic-ai/sdk</code> for vision, <code>grammY</code> for Telegram, everything
@@ -432,14 +548,14 @@
         <!-- brain -->
         <div>
           <div class="node brain-node">
-            <span class="eyebrow">The brain — your laptop / VM</span>
-            <h3>samogrow service</h3>
-            <p>A small program that sends each photo to Claude, reads back the verdict, switches the light and pump plugs, and runs the Telegram bot. It is the only thing you maintain.</p>
+            <span class="eyebrow" data-i18n="how.brain.eyebrow">The brain — your laptop / VM</span>
+            <h3 data-i18n="how.brain.title">samogrow service</h3>
+            <p data-i18n="how.brain.body">A small program that sends each photo to Claude, reads back the verdict, switches the light and pump plugs, and runs the Telegram bot. It is the only thing you maintain.</p>
           </div>
           <div class="node cloud-node">
-            <span class="eyebrow" style="color:var(--soil)">Cloud</span>
+            <span class="eyebrow" style="color:var(--soil)" data-i18n="how.cloud.eyebrow">Cloud</span>
             <h3>Claude &amp; Telegram</h3>
-            <p>Claude reads each photo and returns a structured verdict; Telegram carries the daily digest, alerts, and your commands. Only the still image leaves your network — the camera is local RTSP, no cloud camera account.</p>
+            <p data-i18n="how.cloud.body">Claude reads each photo and returns a structured verdict; Telegram carries the daily digest, alerts, and your commands. Only the still image leaves your network — the camera is local RTSP, no cloud camera account.</p>
           </div>
         </div>
 
@@ -454,40 +570,41 @@
         <div class="appliances">
           <div class="appliance">
             <span class="ico">💡</span>
-            <span><b>Grow light</b><small>Kasa smart plug · scheduled</small></span>
+            <span><b data-i18n="how.app.light.name">Grow light</b><small data-i18n="how.app.light.sub">Kasa smart plug · scheduled</small></span>
           </div>
           <div class="appliance">
             <span class="ico">💧</span>
-            <span><b>Top-up pump</b><small>Kasa smart plug · hard timer caps</small></span>
+            <span><b data-i18n="how.app.pump.name">Top-up pump</b><small data-i18n="how.app.pump.sub">Kasa smart plug · hard timer caps</small></span>
           </div>
           <div class="appliance">
             <span class="ico">📷</span>
-            <span><b>Wi-Fi camera</b><small>Tapo RTSP · local snapshot</small></span>
+            <span><b data-i18n="how.app.camera.name">Wi-Fi camera</b><small data-i18n="how.app.camera.sub">Tapo RTSP · local snapshot</small></span>
           </div>
           <div class="appliance">
             <span class="ico">🫧</span>
-            <span><b>Air pump</b><small>dumb outlet · always on 24/7</small></span>
+            <span><b data-i18n="how.app.air.name">Air pump</b><small data-i18n="how.app.air.sub">dumb outlet · always on 24/7</small></span>
           </div>
         </div>
       </div>
-      <p class="arrow-flow arrow">
+      <p class="arrow-flow arrow" data-i18n="how.flow">
         Each cycle: the brain grabs a snapshot, <b>Claude</b> returns a verdict, the brain
         <b>switches the plugs</b> within fixed safety caps, and the result lands in Telegram.
       </p>
       <p class="safety-note">
-        <span class="safety-tag">Safety</span>
-        The AI can request water; it cannot override the cap. Per-run and per-day pump caps, a bounded top-up jug (worst-case spill is just the jug's volume), and an optional float/leak sensor.
+        <span class="safety-tag" data-i18n="how.safety.tag">Safety</span>
+        <span data-i18n="how.safety.body">The AI can request water; it cannot override the cap. Per-run and per-day pump caps, a bounded top-up jug (worst-case spill is just the jug's volume), and an optional float/leak sensor.</span>
       </p>
       <p class="safety-note">
-        <span class="safety-tag">Senses</span>
-        The <b>camera is the only automatic sensor</b> — the AI's eyes. The EC/TDS meter and pH kit are <b>handheld manual tools</b>: you dip and read them yourself, and the AI only learns a value when you type it into Telegram. Continuous EC/pH/level probes exist but need a microcontroller — a natural add-on to the V5 Pi build, out of scope for the wiring-free versions. <b>One gotcha with cheap TDS pens: the <span class="code">×10</span> multiplier</b> — “115 ×10” means 1,150 ppm; missing it burned our first plants, so always relay the true value.
+        <span class="safety-tag" data-i18n="how.senses.tag">Senses</span>
+        <span data-i18n="how.senses.body">The <b>camera is the only automatic sensor</b> — the AI's eyes. The EC/TDS meter and pH kit are <b>handheld manual tools</b>: you dip and read them yourself, and the AI only learns a value when you type it into Telegram. Continuous EC/pH/level probes exist but need a microcontroller — a natural add-on to the V5 Pi build, out of scope for the wiring-free versions. <b>One gotcha with cheap TDS pens: the <span class="code">×10</span> multiplier</b> — “115 ×10” means 1,150 ppm; missing it burned our first plants, so always relay the true value.</span>
       </p>
 
       <figure class="shot schematic">
         <img src="img/schematic.svg"
              alt="samogrow system schematic: an always-on machine runs the Bun brain, which talks to the Claude API and Telegram over the internet and, over home Wi-Fi, commands two Kasa smart plugs (light and top-up pump), a jug pump feeding the DWC tote, an always-on air pump, and a Tapo RTSP camera watching the plants."
+             data-i18n-attrs="alt:how.schematic.alt"
              loading="lazy">
-        <figcaption>The same loop as a wiring-free system schematic — three network appliances, one laptop brain.</figcaption>
+        <figcaption data-i18n="how.schematic.cap">The same loop as a wiring-free system schematic — three network appliances, one laptop brain.</figcaption>
       </figure>
     </div>
   </section>
@@ -497,10 +614,11 @@
     <div class="col">
       <div class="sec-head">
         <span class="sec-num">02</span>
-        <h2>What it costs</h2>
+        <h2 data-i18n="cost.title">What it costs</h2>
       </div>
-      <p class="sec-sub">
-        One price frame: <b>~$255</b> for the manual build to start, <b>~$280</b> for the
+      <p class="sec-sub" data-i18n="cost.sub">
+        One price frame — a rough <b>U.S. mid-2026 baseline</b>, not a quote, and very much
+        location-dependent: <b>~$255</b> for the manual build to start, <b>~$280</b> for the
         automated core, up to <b>~$335</b> with the water-safety add-ons. That is the same
         one-time bracket as the <em>no-AI</em> countertop units, while delivering the camera +
         AI capability that otherwise only ships on a $899 Gardyn with a ~$408/yr subscription.
@@ -510,43 +628,44 @@
         <div>
         <div class="cost-stack">
           <div class="line">
-            <span>Network appliances<small>2-pack (both plugs) · camera · pump · tubing</small></span>
+            <span><span data-i18n="cost.stack.appliances.label">Network appliances</span><small data-i18n="cost.stack.appliances.sub">2-pack (both plugs) · camera · pump · tubing</small></span>
             <span class="amt">$68</span>
           </div>
           <div class="line">
-            <span>Grow side<small>DWC reservoir · light · nutrient · seeds · EC meter</small></span>
+            <span><span data-i18n="cost.stack.grow.label">Grow side</span><small data-i18n="cost.stack.grow.sub">DWC reservoir · light · nutrient · seeds · EC meter</small></span>
             <span class="amt">$211</span>
           </div>
           <div class="line total">
-            <span class="lbl">Core build total</span>
+            <span class="lbl" data-i18n="cost.stack.total.lbl">Core build total</span>
             <span class="amt">~$280</span>
           </div>
         </div>
 
         <div class="variants">
-          <div class="vcap">Build it in tiers</div>
-          <div class="vt pick"><span>A · Manual start<small>you pour when the AI says</small></span><span class="amt">~$255</span></div>
-          <div class="vt"><span>B · + Auto top-up<small>pump does the watering</small></span><span class="amt">~$280</span></div>
-          <div class="vt"><span>C · + Water safety<small>gauge · leak sensor · tray</small></span><span class="amt">+~$55</span></div>
+          <div class="vcap" data-i18n="cost.variants.cap">Build it in tiers</div>
+          <div class="vt pick"><span><span data-i18n="cost.variants.a.label">A · Manual start</span><small data-i18n="cost.variants.a.sub">you pour when the AI says</small></span><span class="amt">~$255</span></div>
+          <div class="vt"><span><span data-i18n="cost.variants.b.label">B · + Auto top-up</span><small data-i18n="cost.variants.b.sub">pump does the watering</small></span><span class="amt">~$280</span></div>
+          <div class="vt"><span><span data-i18n="cost.variants.c.label">C · + Water safety</span><small data-i18n="cost.variants.c.sub">gauge · leak sensor · tray</small></span><span class="amt">+~$55</span></div>
         </div>
+        <p class="fine" style="margin-top:12px" data-i18n="cost.us.note">All amounts in USD, a rough U.S. mid-2026 snapshot — shipping, taxes, sellers, and season move every line. See the Poland / EU example below for how a different market changes the math.</p>
         </div>
 
         <div>
           <div class="cmp-scroll">
             <table class="cmp">
-              <caption>2-year total cost of ownership</caption>
+              <caption data-i18n="cmp.caption">2-year total cost of ownership</caption>
               <thead>
-                <tr><th>System</th><th>Hardware</th><th>2-yr extras</th><th>AI</th><th>2-yr total</th></tr>
+                <tr><th data-i18n="cmp.th.system">System</th><th data-i18n="cmp.th.hardware">Hardware</th><th data-i18n="cmp.th.extras">2-yr extras</th><th data-i18n="cmp.th.ai">AI</th><th data-i18n="cmp.th.total">2-yr total</th></tr>
               </thead>
               <tbody>
-                <tr class="us"><td>samogrow</td><td>$280</td><td>$190</td><td class="yes">yes</td><td>~$470</td></tr>
-                <tr><td>Gardyn Home 4</td><td>$899</td><td>$816</td><td class="yes">yes</td><td>~$1,715</td></tr>
-                <tr><td>Click &amp; Grow SG9</td><td>$200</td><td>$400</td><td class="no">no</td><td>~$600</td></tr>
-                <tr><td>Auk Mini 2</td><td>$229</td><td>$0</td><td class="no">no</td><td>~$229</td></tr>
+                <tr class="us"><td>samogrow</td><td>$280</td><td>$190</td><td class="yes" data-i18n="cmp.yes">yes</td><td>~$470</td></tr>
+                <tr><td>Gardyn Home 4</td><td>$899</td><td>$816</td><td class="yes" data-i18n="cmp.yes">yes</td><td>~$1,715</td></tr>
+                <tr><td>Click &amp; Grow SG9</td><td>$200</td><td>$400</td><td class="no" data-i18n="cmp.no">no</td><td>~$600</td></tr>
+                <tr><td>Auk Mini 2</td><td>$229</td><td>$0</td><td class="no" data-i18n="cmp.no">no</td><td>~$229</td></tr>
               </tbody>
             </table>
           </div>
-          <p class="cmp-note">
+          <p class="cmp-note" data-i18n="cost.note">
             Nothing here is a black box: commodity seeds, code you can fork, and no vendor who can
             deprecate your garden or move the AI behind a paywall — the way <b>AeroGarden owners were
             stranded</b> when the company wound down and the app and pods went with it. The two-year
@@ -557,68 +676,82 @@
       </div>
 
       <div class="ongoing">
-        <div><span class="big">~$35</span><small>/ year — new plants or seeds, pH refills. Pebbles are reusable; one nutrient kit &amp; pebble bag last years / ~10 builds.</small></div>
-        <div><span class="big">$3–7</span><small>/ month — Claude Haiku vision, ~24–48 photos a day.</small></div>
-        <div><span class="big">$0</span><small>/ month — vendor subscription. No proprietary pods, ever.</small></div>
+        <div><span class="big">~$35</span><small data-i18n="cost.ongoing.1">/ year — new plants or seeds, pH refills. Pebbles are reusable; one nutrient kit &amp; pebble bag last years / ~10 builds.</small></div>
+        <div><span class="big">$3–7</span><small data-i18n="cost.ongoing.2">/ month — Claude Haiku vision, ~24–48 photos a day.</small></div>
+        <div><span class="big">$0</span><small data-i18n="cost.ongoing.3">/ month — vendor subscription. No proprietary pods, ever.</small></div>
       </div>
-      <p class="fine" style="margin-top:16px">
+      <p class="fine" style="margin-top:16px" data-i18n="cost.apiFine">
         The API line is arithmetic, not a guess: ~$0.0036 per analysis on Claude Haiku × 24 images/day ≈ $2.6/mo (≈ $5/mo at 48/day).
       </p>
 
+      <div class="pl-example variants">
+        <div class="vcap" data-i18n="pl.cap">Poland / EU-plug example — marketplace snapshot in USD, observed 2026-08-20</div>
+        <p class="pl-note" data-i18n="pl.intro">The U.S. numbers above don't travel. Here is what the same idea looks like shopped from Poland with EU plugs, using representative AliExpress listings whose prices were observed via PriceArchive on 2026-08-20 — kept in USD for comparison.</p>
+        <div class="vt"><span><span data-i18n="pl.plugs.label">2 × EU Wi-Fi power-metering smart plugs</span><small data-i18n="pl.plugs.sub"><a href="https://www.aliexpress.com/w/wholesale-wifi-smart-plug-eu-power-meter.html" target="_blank" rel="noopener">AliExpress / PriceArchive search result</a> · ~$8.50 each · plug protocol/API compatibility unverified</small></span><span class="amt">~$17</span></div>
+        <div class="vt"><span><span data-i18n="pl.camera.label">1080p Wi-Fi camera</span><small data-i18n="pl.camera.sub"><a href="https://www.aliexpress.com/item/1005010779026398.html" target="_blank" rel="noopener">PriceArchive item 1005010779026398</a> · RTSP support explicitly unverified</small></span><span class="amt">~$15</span></div>
+        <div class="vt"><span><span data-i18n="pl.lamp.label">Full-spectrum grow lamp</span><small data-i18n="pl.lamp.sub"><a href="https://www.aliexpress.com/w/wholesale-full-spectrum-led-grow-light.html" target="_blank" rel="noopener">representative listing</a> · actual draw &amp; coverage must be verified</small></span><span class="amt">~$14</span></div>
+        <div class="vt"><span><span data-i18n="pl.pump.label">Submersible pump</span><small data-i18n="pl.pump.sub"><a href="https://www.aliexpress.com/item/1005007785492121.html" target="_blank" rel="noopener">item 1005007785492121</a> · $10.08 observed 2026-08-11</small></span><span class="amt">~$10</span></div>
+        <div class="vt"><span><span data-i18n="pl.meter.label">Handheld pH/TDS meter</span><small data-i18n="pl.meter.sub"><a href="https://www.aliexpress.com/item/1005006041534079.html" target="_blank" rel="noopener">item 1005006041534079</a> · $7.08 observed 2026-08-07</small></span><span class="amt">~$7</span></div>
+        <div class="vt"><span><span data-i18n="pl.box.label">12-hole hydroponic box + air pump</span><small data-i18n="pl.box.sub"><a href="https://www.aliexpress.com/item/1005011855369431.html" target="_blank" rel="noopener">item 1005011855369431</a> · $65.85 observed · source last updated 2026-04-26</small></span><span class="amt">~$66</span></div>
+        <div class="vt pick"><span><span data-i18n="pl.subtotal.label">Representative marketplace hardware</span><small data-i18n="pl.subtotal.sub">the six lines above, before anything local</small></span><span class="amt">~$129</span></div>
+        <p class="pl-note" data-i18n="pl.basket">A rough <b>complete</b> equivalent basket lands around <b>~$190–260</b> once you add locally sourced nutrients, LECA, seeds, pH supplies, adapters, and a tote — an inference, <b>not a checkout quote</b> and not a guaranteed drop-in equivalent of the U.S. build.</p>
+        <p class="pl-note pl-caveats" data-i18n="pl.caveats">Shipping, VAT/customs, seller variants and promos, mains voltage, plug type, camera RTSP support, smart-plug protocol/API compatibility, warranty, and local sourcing all change the result — verify every listing before ordering. And a hard software caveat: samogrow currently drives <b>Kasa (KLAP) plugs and Tapo RTSP cameras</b>; generic Tuya-style plugs and cameras <b>do not work with the current software without adapter work</b>.</p>
+      </div>
+
       <div style="margin-top:52px">
-        <h3 class="parts-head">The parts</h3>
-        <p class="parts-sub">Every item is ordinary consumer gear — tap a thumbnail to view the source listing, or <a href="https://www.amazon.com/hz/wishlist/ls/3SF86IUAST80H" target="_blank" rel="noopener">cart all 10 core items in one ready-to-order Amazon list →</a></p>
+        <h3 class="parts-head" data-i18n="parts.head">The parts</h3>
+        <p class="parts-sub" data-i18n="parts.sub">Every item is ordinary consumer gear — tap a thumbnail to view the source listing, or <a href="https://www.amazon.com/hz/wishlist/ls/3SF86IUAST80H" target="_blank" rel="noopener">cart all 10 core items in one ready-to-order Amazon list →</a></p>
         <div class="parts">
           <a class="part" href="https://www.amazon.com/dp/B0BYGRLRS1" target="_blank" rel="noopener">
-            <img src="img/components/kasa-smart-plug.jpg" alt="Kasa smart plugs, 2-pack" loading="lazy">
-            <span class="cap">Kasa smart plugs (2-pack)</span>
+            <img src="img/components/kasa-smart-plug.jpg" alt="Kasa smart plugs, 2-pack" data-i18n-attrs="alt:parts.plug.alt" loading="lazy">
+            <span class="cap" data-i18n="parts.plug.cap">Kasa smart plugs (2-pack)</span>
           </a>
           <a class="part" href="https://www.amazon.com/dp/B0866S3D82" target="_blank" rel="noopener">
-            <img src="img/components/tapo-camera.jpg" alt="TP-Link Tapo C100 1080p Wi-Fi camera" loading="lazy">
-            <span class="cap">Tapo C100 Wi-Fi camera</span>
+            <img src="img/components/tapo-camera.jpg" alt="TP-Link Tapo C100 1080p Wi-Fi camera" data-i18n-attrs="alt:parts.camera.alt" loading="lazy">
+            <span class="cap" data-i18n="parts.camera.cap">Tapo C100 Wi-Fi camera</span>
           </a>
           <a class="part" href="https://www.amazon.com/dp/B0892DKNR3" target="_blank" rel="noopener">
-            <img src="img/components/submersible-pump.jpg" alt="Small 120 V submersible fountain pump" loading="lazy">
-            <span class="cap">Top-up fountain pump</span>
+            <img src="img/components/submersible-pump.jpg" alt="Small 120 V submersible fountain pump" data-i18n-attrs="alt:parts.pump.alt" loading="lazy">
+            <span class="cap" data-i18n="parts.pump.cap">Top-up fountain pump</span>
           </a>
           <a class="part" href="https://www.homedepot.com/p/HDX-7-Gal-Tough-Storage-Tote-in-Black-with-Yellow-Lid-999-7G-HDX/328027039" target="_blank" rel="noopener">
-            <img src="img/components/storage-tote.jpg" alt="Opaque HDX storage tote for the DWC reservoir" loading="lazy">
-            <span class="cap">Opaque DWC tote</span>
+            <img src="img/components/storage-tote.jpg" alt="Opaque HDX storage tote for the DWC reservoir" data-i18n-attrs="alt:parts.tote.alt" loading="lazy">
+            <span class="cap" data-i18n="parts.tote.cap">Opaque DWC tote</span>
           </a>
           <a class="part" href="https://www.amazon.com/dp/B07VQVCRWV" target="_blank" rel="noopener">
-            <img src="img/components/net-pots.jpg" alt="3-inch net pots, 25-pack" loading="lazy">
-            <span class="cap">3&quot; net pots</span>
+            <img src="img/components/net-pots.jpg" alt="3-inch net pots, 25-pack" data-i18n-attrs="alt:parts.netpots.alt" loading="lazy">
+            <span class="cap" data-i18n="parts.netpots.cap">3&quot; net pots</span>
           </a>
           <a class="part" href="https://www.amazon.com/dp/B071S1DHDQ" target="_blank" rel="noopener">
-            <img src="img/components/rockwool-plugs.jpg" alt="Grodan A-OK rockwool starter plugs" loading="lazy">
-            <span class="cap">Rockwool starter plugs</span>
+            <img src="img/components/rockwool-plugs.jpg" alt="Grodan A-OK rockwool starter plugs" data-i18n-attrs="alt:parts.rockwool.alt" loading="lazy">
+            <span class="cap" data-i18n="parts.rockwool.cap">Rockwool starter plugs</span>
           </a>
           <a class="part" href="https://www.amazon.com/dp/B01KYYZ9DE" target="_blank" rel="noopener">
-            <img src="img/components/clay-pebbles.jpg" alt="Hydroton LECA clay pebbles" loading="lazy">
-            <span class="cap">LECA clay pebbles</span>
+            <img src="img/components/clay-pebbles.jpg" alt="Hydroton LECA clay pebbles" data-i18n-attrs="alt:parts.pebbles.alt" loading="lazy">
+            <span class="cap" data-i18n="parts.pebbles.cap">LECA clay pebbles</span>
           </a>
           <a class="part" href="https://www.amazon.com/dp/B01EBXI7PG" target="_blank" rel="noopener">
-            <img src="img/components/air-pump.jpg" alt="Adjustable dual-outlet aquarium air-pump kit — bundles tubing, air stones and check valves" loading="lazy">
-            <span class="cap">Air-pump kit (stones + tubing incl.)</span>
+            <img src="img/components/air-pump.jpg" alt="Adjustable dual-outlet aquarium air-pump kit — bundles tubing, air stones and check valves" data-i18n-attrs="alt:parts.airpump.alt" loading="lazy">
+            <span class="cap" data-i18n="parts.airpump.cap">Air-pump kit (stones + tubing incl.)</span>
           </a>
           <a class="part" href="https://www.amazon.com/dp/B071L15G5Y" target="_blank" rel="noopener">
-            <img src="img/components/masterblend-nutrients.jpg" alt="MasterBlend 4-18-38 nutrient combo kit" loading="lazy">
-            <span class="cap">MasterBlend nutrients</span>
+            <img src="img/components/masterblend-nutrients.jpg" alt="MasterBlend 4-18-38 nutrient combo kit" data-i18n-attrs="alt:parts.nutrients.alt" loading="lazy">
+            <span class="cap" data-i18n="parts.nutrients.cap">MasterBlend nutrients</span>
           </a>
           <a class="part" href="https://www.amazon.com/dp/B000BNKWZY" target="_blank" rel="noopener">
-            <img src="img/components/ph-control-kit.jpg" alt="General Hydroponics pH control kit" loading="lazy">
-            <span class="cap">pH control kit</span>
+            <img src="img/components/ph-control-kit.jpg" alt="General Hydroponics pH control kit" data-i18n-attrs="alt:parts.ph.alt" loading="lazy">
+            <span class="cap" data-i18n="parts.ph.cap">pH control kit</span>
           </a>
           <a class="part" href="https://www.amazon.com/dp/B0BKPF8D8G" target="_blank" rel="noopener">
-            <img src="img/components/barrina-light-strips.jpg" alt="Barrina T5 full-spectrum grow-light strips, 4-pack" loading="lazy">
-            <span class="cap">Barrina T5 light strips</span>
+            <img src="img/components/barrina-light-strips.jpg" alt="Barrina T5 full-spectrum grow-light strips, 4-pack" data-i18n-attrs="alt:parts.light.alt" loading="lazy">
+            <span class="cap" data-i18n="parts.light.cap">Barrina T5 light strips</span>
           </a>
           <a class="part" href="https://www.amazon.com/dp/B07CTMVKT9" target="_blank" rel="noopener">
-            <img src="img/components/seed-packets.jpg" alt="Sow Right five-herb seed collection" loading="lazy">
-            <span class="cap">Herb seed collection</span>
+            <img src="img/components/seed-packets.jpg" alt="Sow Right five-herb seed collection" data-i18n-attrs="alt:parts.seeds.alt" loading="lazy">
+            <span class="cap" data-i18n="parts.seeds.cap">Herb seed collection</span>
           </a>
         </div>
-        <p class="fine" style="margin-top:16px">Prices are mid-2026 estimates, ±30% with coupons and sellers — verify at the source before ordering.</p>
+        <p class="fine" style="margin-top:16px" data-i18n="parts.fine">Prices are rough U.S. mid-2026 estimates, ±30% with coupons and sellers, and location-dependent — verify at the source before ordering.</p>
       </div>
     </div>
   </section>
@@ -628,34 +761,34 @@
     <div class="col">
       <div class="sec-head">
         <span class="sec-num">03</span>
-        <h2>Key features</h2>
+        <h2 data-i18n="feat.title">Key features</h2>
       </div>
       <div class="feat-grid">
         <div class="feat">
           <span class="ico">🧪</span>
           <span class="fnum">F.01</span>
-          <h3>Run it now, before you order parts</h3>
-          <p>Mock mode runs the whole loop with zero hardware — real Claude call, real Telegram push, against a sample photo. Clone the repo and:</p>
+          <h3 data-i18n="feat.1.title">Run it now, before you order parts</h3>
+          <p data-i18n="feat.1.body">Mock mode runs the whole loop with zero hardware — real Claude call, real Telegram push, against a sample photo. Clone the repo and:</p>
           <p class="schema"><span class="k">SAMOGROW_MOCK=1</span> bun run src/main.ts</p>
         </div>
         <div class="feat">
           <span class="ico">🔍</span>
           <span class="fnum">F.02</span>
-          <h3>Claude reads a photo, returns a structured verdict</h3>
-          <p>Every <code>N</code> minutes it pulls an RTSP still, sends it to Claude Haiku, and gets back typed JSON it can act on:</p>
+          <h3 data-i18n="feat.2.title">Claude reads a photo, returns a structured verdict</h3>
+          <p data-i18n="feat.2.body">Every <code>N</code> minutes it pulls an RTSP still, sends it to Claude Haiku, and gets back typed JSON it can act on:</p>
           <p class="schema">{ <span class="k">water</span>: bool, <span class="k">light_hours</span>: int, <span class="k">pots</span>: [{id, health}], <span class="k">confidence</span>: 0–1 }</p>
         </div>
         <div class="feat">
           <span class="ico">🚰</span>
           <span class="fnum">F.03</span>
-          <h3>Auto top-up with hard safety caps</h3>
-          <p>Per-run and per-day pump caps are the flood backstop, backed by a bounded 1–2 gal jug and an optional float/leak sensor. The cap is enforced in code, not by the model.</p>
+          <h3 data-i18n="feat.3.title">Auto top-up with hard safety caps</h3>
+          <p data-i18n="feat.3.body">Per-run and per-day pump caps are the flood backstop, backed by a bounded 1–2 gal jug and an optional float/leak sensor. The cap is enforced in code, not by the model.</p>
         </div>
         <div class="feat">
           <span class="ico">📨</span>
           <span class="fnum">F.04</span>
-          <h3>Telegram control &amp; daily digest</h3>
-          <p>A daily photo + health note, inline “Water now / Report” buttons, and ad-hoc questions from your phone. The bot obeys only your chat ID.</p>
+          <h3 data-i18n="feat.4.title">Telegram control &amp; daily digest</h3>
+          <p data-i18n="feat.4.body">A daily photo + health note, inline “Water now / Report” buttons, and ad-hoc questions from your phone. The bot obeys only your chat ID.</p>
         </div>
       </div>
     </div>
@@ -666,9 +799,9 @@
     <div class="col">
       <div class="sec-head">
         <span class="sec-num">04</span>
-        <h2>Quickstart — day one</h2>
+        <h2 data-i18n="start.title">Quickstart — day one</h2>
       </div>
-      <p class="sec-sub">
+      <p class="sec-sub" data-i18n="start.sub">
         Want to try the software right now, before any parts arrive? Jump to <b>step 3</b> — it
         runs the whole loop on your laptop with zero hardware.
       </p>
@@ -676,47 +809,141 @@
       <figure class="shot" style="margin-bottom:38px">
         <img src="img/hero-mock.jpg"
              alt="Rendered mock-up of a finished samogrow build on a kitchen counter: a dark opaque tote of basil, parsley, cilantro and lettuce in net cups under two adjustable full-spectrum T5 strips, with a top-up water jug and pump, an air pump, a Wi-Fi camera, and two smart plugs."
+             data-i18n-attrs="alt:start.fig.alt"
              width="1536" height="1024" loading="lazy">
-        <figcaption><b>AI-generated mock-up</b> — what the finished build looks like once assembled (reservoir, light, top-up jug + pump, air pump, camera, two smart plugs). Not a photo of a shipped unit.</figcaption>
+        <figcaption data-i18n="start.fig.cap"><b>AI-generated mock-up</b> — what the finished build looks like once assembled (reservoir, light, top-up jug + pump, air pump, camera, two smart plugs). Not a photo of a shipped unit.</figcaption>
       </figure>
 
       <div class="steps">
         <div class="step">
-          <span class="n">STEP 01</span>
-          <h3>Order parts &amp; grab grown herbs</h3>
-          <p>Fast path: all 10 core items are in one <a href="https://www.amazon.com/hz/wishlist/ls/3SF86IUAST80H" target="_blank" rel="noopener">Amazon list</a> — one click to cart the lot. Grab the tote and 2–4 healthy potted herbs (basil, parsley) locally from a garden center, ~$4–5 each — they're your day-one plants (no shipping wait).</p>
+          <span class="n" data-i18n="step.1.n">STEP 01</span>
+          <h3 data-i18n="step.1.title">Order parts &amp; grab grown herbs</h3>
+          <p data-i18n="step.1.body">Fast path: all 10 core items are in one <a href="https://www.amazon.com/hz/wishlist/ls/3SF86IUAST80H" target="_blank" rel="noopener">Amazon list</a> — one click to cart the lot. Grab the tote and 2–4 healthy potted herbs (basil, parsley) locally from a garden center, ~$4–5 each — they're your day-one plants (no shipping wait).</p>
         </div>
         <div class="step" style="border-top-color:var(--leaf)">
-          <span class="n">STEP 02</span>
-          <h3>Transplant → a full garden today</h3>
-          <p>Nest each root ball in a net cup of clay pebbles, fill the reservoir, and you have a good-looking, working garden the same day — no germination wait. Heads up before you drop a plant in:</p>
+          <span class="n" data-i18n="step.2.n">STEP 02</span>
+          <h3 data-i18n="step.2.title">Transplant → a full garden today</h3>
+          <p data-i18n="step.2.body">Nest each root ball in a net cup of clay pebbles, fill the reservoir, and you have a good-looking, working garden the same day — no germination wait. Heads up before you drop a plant in:</p>
           <ul class="heads-up">
-            <li><b>Wash ALL the soil off the roots</b> (lukewarm water, gently) — soil left in the reservoir rots and clogs. The one step you can't skip.</li>
-            <li><b>Expect a few days of droop</b> (transplant shock) — lower the light a bit; it recovers.</li>
-            <li><b>Buy a plant, not a bunch.</b> Get a potted herb <i>plant</i> from a nursery's seedling section (one plant in a 3–4" pot of soil), or search <span class="code">live herb plant</span> online — not the produce-aisle “fresh herbs” packs, which are many weak seedlings crammed together (usable, but pull the clump apart into a few starts first).</li>
-            <li><b>⚠️ Feed to ~800–1,100 ppm — and read your TDS meter's <span class="code">×10</span> flag.</b> Cheap pens show <span class="code">115 ×10</span> = <b>1,150 ppm</b>, not 115. Miss that little multiplier and you'll dose ~10× and <b>burn the plants</b> — it happened to us (<a href="https://github.com/NikolayS/samogrow/issues/3" target="_blank" rel="noopener">field-test log</a>). Target on the display: <b>80–110 with ×10 lit</b>.</li>
+            <li data-i18n="step.2.h1"><b>Wash ALL the soil off the roots</b> (lukewarm water, gently) — soil left in the reservoir rots and clogs. The one step you can't skip.</li>
+            <li data-i18n="step.2.h2"><b>Expect a few days of droop</b> (transplant shock) — lower the light a bit; it recovers.</li>
+            <li data-i18n="step.2.h3"><b>Buy a plant, not a bunch.</b> Get a potted herb <i>plant</i> from a nursery's seedling section (one plant in a 3–4" pot of soil), or search <span class="code">live herb plant</span> online — not the produce-aisle “fresh herbs” packs, which are many weak seedlings crammed together (usable, but pull the clump apart into a few starts first).</li>
+            <li data-i18n="step.2.h4"><b>⚠️ Feed to ~800–1,100 ppm — and read your TDS meter's <span class="code">×10</span> flag.</b> Cheap pens show <span class="code">115 ×10</span> = <b>1,150 ppm</b>, not 115. Miss that little multiplier and you'll dose ~10× and <b>burn the plants</b> — it happened to us (<a href="https://github.com/NikolayS/samogrow/issues/3" target="_blank" rel="noopener">field-test log</a>). Target on the display: <b>80–110 with ×10 lit</b>.</li>
           </ul>
-          <span class="flag" style="color:var(--leaf);border-color:var(--leaf)">Day-one default</span>
+          <span class="flag" style="color:var(--leaf);border-color:var(--leaf)" data-i18n="step.2.flag">Day-one default</span>
         </div>
         <div class="step">
-          <span class="n">STEP 03</span>
-          <h3>Set up the software in practice mode</h3>
-          <p>Get the program running on your computer and connect the Telegram bot, then test the whole loop against a sample photo — no devices needed yet.</p>
+          <span class="n" data-i18n="step.3.n">STEP 03</span>
+          <h3 data-i18n="step.3.title">Set up the software in practice mode</h3>
+          <p data-i18n="step.3.body">Get the program running on your computer and connect the Telegram bot, then test the whole loop against a sample photo — no devices needed yet.</p>
         </div>
         <div class="step">
-          <span class="n">STEP 04</span>
-          <h3>Point it at the plants</h3>
-          <p>Get the plugs and camera onto your Wi-Fi, aim the camera over the canopy, point the software at them, and set it to run on its own and restart itself.</p>
+          <span class="n" data-i18n="step.4.n">STEP 04</span>
+          <h3 data-i18n="step.4.title">Point it at the plants</h3>
+          <p data-i18n="step.4.body">Get the plugs and camera onto your Wi-Fi, aim the camera over the canopy, point the software at them, and set it to run on its own and restart itself.</p>
         </div>
       </div>
       <p class="safety-note">
-        <span class="safety-tag">Cheaper / from scratch</span>
-        Prefer to grow from seed? Same build, lower cost — you just add ~2–4 weeks of germination before there's anything to transplant (parsley is the laggard at 10–28 days: soak 12–24 h, sow into moist rockwool, keep it warm). Garden-center pots beat crammed grocery “living herb” clumps; if you use those, split them gently.
+        <span class="safety-tag" data-i18n="start.seed.tag">Cheaper / from scratch</span>
+        <span data-i18n="start.seed.body">Prefer to grow from seed? Same build, lower cost — you just add ~2–4 weeks of germination before there's anything to transplant (parsley is the laggard at 10–28 days: soak 12–24 h, sow into moist rockwool, keep it warm). Garden-center pots beat crammed grocery “living herb” clumps; if you use those, split them gently.</span>
       </p>
       <p class="safety-note">
-        <span class="safety-tag">Harvest</span>
-        Transplanted basil and mint are cuttable within days once they settle — expect a few days of transplant shock first. Parsley is the patient one. Lettuce bolts when it gets too warm.
+        <span class="safety-tag" data-i18n="start.harvest.tag">Harvest</span>
+        <span data-i18n="start.harvest.body">Transplanted basil and mint are cuttable within days once they settle — expect a few days of transplant shock first. Parsley is the patient one. Lettuce bolts when it gets too warm.</span>
       </p>
+    </div>
+  </section>
+
+  <!-- INCIDENT BLOG -->
+  <section id="incidents">
+    <div class="col">
+      <div class="sec-head">
+        <span class="sec-num">05</span>
+        <h2 data-i18n="inc.title">The incident blog</h2>
+      </div>
+      <p class="sec-sub" data-i18n="inc.sub">
+        Real gardens produce real incidents, and we run them like production outages: dated,
+        severity-tagged, blameless, and written up in public. These four are from the first
+        physical V1 build — each links to the full story and root-cause analysis on GitHub.
+      </p>
+
+      <div class="inc-grid">
+        <article class="inc-card">
+          <figure>
+            <img src="img/incidents/2026-07-13-reservoir-128x10.jpeg" loading="lazy" width="1600" height="880"
+                 alt="Evidence photo from incident I-1: a handheld TDS meter held over the DWC reservoir reads 128 with the small ×10 multiplier flag lit — the reading that revealed the tenfold nutrient overdose."
+                 data-i18n-attrs="alt:inc.i1.alt">
+            <figcaption class="inc-cap" data-i18n="inc.i1.cap">The smoking gun: 128 on the display, ×10 flag lit — 1,280 ppm in the reservoir.</figcaption>
+          </figure>
+          <div class="inc-body">
+            <div class="inc-meta"><span class="inc-id">I-1</span><span class="inc-date">2026-07-13</span><span class="inc-sev">SEV-2</span></div>
+            <h3 data-i18n="inc.i1.title">The ×10 incident — a tenfold nutrient overdose</h3>
+            <p class="inc-story" data-i18n="inc.i1.story">The cheap TDS pen showed “115” and nobody noticed the tiny <span class="code">×10</span> flag next to it. The reservoir was dosed as if the water were ten times cleaner than it was, and the salt concentration burned the plants within days.</p>
+            <ul class="inc-facts">
+              <li data-i18n="inc.i1.impact"><b>Impact:</b> salt burn across the tote — necrotic mint, declining parsley; the most expensive lesson of the field test.</li>
+              <li data-i18n="inc.i1.lesson"><b>Lesson:</b> always read the multiplier flag and relay true ppm; a units-validation step now guards every reported reading.</li>
+            </ul>
+            <p class="inc-link"><a href="https://github.com/NikolayS/samogrow/issues/3" target="_blank" rel="noopener" data-i18n="inc.readmore">Full write-up &amp; RCA on GitHub →</a></p>
+          </div>
+        </article>
+
+        <article class="inc-card">
+          <figure>
+            <img src="img/incidents/2026-07-24-pest-frass-macro.jpeg" loading="lazy" width="1600" height="862"
+                 alt="Evidence photo from incident I-3: macro shot of black frass pellets — caterpillar droppings — scattered on the yellow reservoir lid, the clue that finally revealed the hidden leafroller."
+                 data-i18n-attrs="alt:inc.i3.alt">
+            <figcaption class="inc-cap" data-i18n="inc.i3.cap">Not soil: frass on the lid — the droppings that gave the nocturnal caterpillar away.</figcaption>
+          </figure>
+          <div class="inc-body">
+            <div class="inc-meta"><span class="inc-id">I-3</span><span class="inc-date">2026-07-24</span><span class="inc-sev">SEV-3</span></div>
+            <h3 data-i18n="inc.i3.title">The leafroller — a stowaway on a transplant</h3>
+            <p class="inc-story" data-i18n="inc.i3.story">A caterpillar hitchhiked in on a garden-center transplant and spent two weeks eating mint by night, hiding in a silked rolled leaf by day. It was never seen in the act — the case was cracked from its droppings accumulating on the lid.</p>
+            <ul class="inc-facts">
+              <li data-i18n="inc.i3.impact"><b>Impact:</b> one mint stem stripped bare, chewed mint and basil leaves; no plant lost.</li>
+              <li data-i18n="inc.i3.lesson"><b>Lesson:</b> transplants import pests — inspect and quarantine new plants, and treat frass as a first-class alarm signal.</li>
+            </ul>
+            <p class="inc-link"><a href="https://github.com/NikolayS/samogrow/issues/6" target="_blank" rel="noopener" data-i18n="inc.readmore">Full write-up &amp; RCA on GitHub →</a></p>
+          </div>
+        </article>
+
+        <article class="inc-card">
+          <figure>
+            <img src="img/incidents/2026-08-12-aphids-parsley.jpeg" loading="lazy" width="1500" height="1275"
+                 alt="Evidence photo from incident I-5: close-up of grey-green aphids clustered along parsley stems and leaves, with fine pale stippling on the foliage."
+                 data-i18n-attrs="alt:inc.i5.alt">
+            <figcaption class="inc-cap" data-i18n="inc.i5.cap">Aphid clusters on the parsley — invisible to the overhead camera, obvious in the hand.</figcaption>
+          </figure>
+          <div class="inc-body">
+            <div class="inc-meta"><span class="inc-id">I-5</span><span class="inc-date">2026-08-12</span><span class="inc-sev">SEV-3</span></div>
+            <h3 data-i18n="inc.i5.title">Aphids the camera never saw</h3>
+            <p class="inc-story" data-i18n="inc.i5.story">Sap-sucking aphids colonized the parsley and basil, cupping the basil's new growth. The automated camera checks are blind to pests this small — a hands-on leaf inspection found them, days after an early warning (“a few small flies”) went unacted-on.</p>
+            <ul class="inc-facts">
+              <li data-i18n="inc.i5.impact"><b>Impact:</b> distorted basil growth and stippled parsley; recoverable, no plant lost.</li>
+              <li data-i18n="inc.i5.lesson"><b>Lesson:</b> the camera is not a pest sensor — schedule human leaf checks, and act on small anomalies instead of filing them away.</li>
+            </ul>
+            <p class="inc-link"><a href="https://github.com/NikolayS/samogrow/issues/10" target="_blank" rel="noopener" data-i18n="inc.readmore">Full write-up &amp; RCA on GitHub →</a></p>
+          </div>
+        </article>
+
+        <article class="inc-card">
+          <figure>
+            <img src="img/incidents/2026-08-18-neem-burn-basil.jpeg" loading="lazy" width="1500" height="1200"
+                 alt="Evidence photo from incident I-6: basil leaves with large bronze-brown necrotic scorch patches across the leaf surfaces — oil phototoxicity damage from a neem spray applied under the grow light."
+                 data-i18n-attrs="alt:inc.i6.alt">
+            <figcaption class="inc-cap" data-i18n="inc.i6.cap">Bronze scorch on the basil, three days after a neem spray under a lit grow light.</figcaption>
+          </figure>
+          <div class="inc-body">
+            <div class="inc-meta"><span class="inc-id">I-6</span><span class="inc-date">2026-08-15</span><span class="inc-sev">SEV-3</span></div>
+            <h3 data-i18n="inc.i6.title">Neem under the light — the self-inflicted burn</h3>
+            <p class="inc-story" data-i18n="inc.i6.story">Treating the aphids, we sprayed neem oil once (~2026-08-15) with the grow light ON. Neem is phototoxic: oil film plus radiant light scorched the basil and mint. Damage surfaced 2026-08-18; the RCA landed 2026-08-20. The pest treatment worked — and caused the next incident.</p>
+            <ul class="inc-facts">
+              <li data-i18n="inc.i6.impact"><b>Impact:</b> bronze necrotic patches on basil (worst) and mint; leaf-level only, recovering.</li>
+              <li data-i18n="inc.i6.lesson"><b>Lesson:</b> lights OFF before spraying any oil — a hard precondition now written into the treatment guidance, not a footnote.</li>
+            </ul>
+            <p class="inc-link"><a href="https://github.com/NikolayS/samogrow/issues/11" target="_blank" rel="noopener" data-i18n="inc.readmore">Full write-up &amp; RCA on GitHub →</a></p>
+          </div>
+        </article>
+      </div>
     </div>
   </section>
 
@@ -724,56 +951,60 @@
   <section class="wall" id="genre">
     <div class="col">
       <div class="wall-head">
-        <span class="eyebrow">Required reading</span>
-        <h2>The genre is real</h2>
+        <span class="eyebrow" data-i18n="genre.eyebrow">Required reading</span>
+        <h2 data-i18n="genre.title">The genre is real</h2>
       </div>
       <div class="wall-grid">
 
         <a class="mcard" href="https://www.reddit.com/r/ProgrammerHumor/" target="_blank" rel="noopener">
           <img src="img/memes/five-years.jpg" width="900" height="772" loading="lazy"
-               alt="Comic: 'Where do you see yourself in 5 years?' A junior developer imagines a maximal hacker battlestation; a senior developer imagines a quiet farm.">
-          <span class="mcap">“Where do you see yourself in 5 years?” The junior wants the battlestation; the senior wants the farm.<span class="src">reddit · unknown artist ↗</span></span>
+               alt="Comic: 'Where do you see yourself in 5 years?' A junior developer imagines a maximal hacker battlestation; a senior developer imagines a quiet farm."
+               data-i18n-attrs="alt:genre.m1.alt">
+          <span class="mcap"><span data-i18n="genre.m1.cap">“Where do you see yourself in 5 years?” The junior wants the battlestation; the senior wants the farm.</span><span class="src">reddit · unknown artist ↗</span></span>
         </a>
 
         <a class="mcard" href="https://www.threads.com/@nixcraft/post/C6Zvz6cyg9I" target="_blank" rel="noopener">
           <img src="img/memes/goose-farmer.jpg" width="720" height="900" loading="lazy"
-               alt="Screenshot of a LinkedIn profile whose job title reads 'Goose farmer' following 22 years at Microsoft.">
-          <span class="mcap">22 years at Microsoft, next role: “Goose farmer.” The story the internet turned into a meme.<span class="src">@drummatick · via @nixcraft ↗</span></span>
+               alt="Screenshot of a LinkedIn profile whose job title reads 'Goose farmer' following 22 years at Microsoft."
+               data-i18n-attrs="alt:genre.m2.alt">
+          <span class="mcap"><span data-i18n="genre.m2.cap">22 years at Microsoft, next role: “Goose farmer.” The story the internet turned into a meme.</span><span class="src">@drummatick · via @nixcraft ↗</span></span>
         </a>
 
         <div class="mcard">
           <img src="img/memes/software-gardener.jpg" width="499" height="615" loading="lazy"
-               alt="Interview still: asked 'software engineer or software developer?', the caption answers 'software gardener.'">
-          <span class="mcap">“Engineer or developer?” — the correct answer: software gardener.<span class="src">Witcher cast interview</span></span>
+               alt="Interview still: asked 'software engineer or software developer?', the caption answers 'software gardener.'"
+               data-i18n-attrs="alt:genre.m3.alt">
+          <span class="mcap"><span data-i18n="genre.m3.cap">“Engineer or developer?” — the correct answer: software gardener.</span><span class="src">Witcher cast interview</span></span>
         </div>
 
         <a class="mcard vid" href="https://www.youtube.com/shorts/Kw6eRrsKdHc" target="_blank" rel="noopener">
           <span class="thumb">
             <img src="img/memes/yt-thumb.jpg" width="480" height="360" loading="lazy"
-                 alt="YouTube short thumbnail: the engineer-to-farmer bit.">
+                 alt="YouTube short thumbnail: the engineer-to-farmer bit."
+                 data-i18n-attrs="alt:genre.m4.alt">
             <span class="play" aria-hidden="true">▶</span>
           </span>
-          <span class="mcap">The engineer-quits-to-farm bit, in short form.<span class="src">youtube.com ↗</span></span>
+          <span class="mcap"><span data-i18n="genre.m4.cap">The engineer-quits-to-farm bit, in short form.</span><span class="src">youtube.com ↗</span></span>
         </a>
 
         <a class="mcard link" href="https://www.instagram.com/reel/DVi2IHzjAnd/" target="_blank" rel="noopener">
-          <span class="lk">Instagram reel ↗</span>
-          <span class="mcap">Another take on trading the IDE for a field.<span class="src">instagram.com</span></span>
+          <span class="lk" data-i18n="genre.m5.lk">Instagram reel ↗</span>
+          <span class="mcap"><span data-i18n="genre.m5.cap">Another take on trading the IDE for a field.</span><span class="src">instagram.com</span></span>
         </a>
 
         <a class="mcard link" href="https://www.tiktok.com/@eliana_codes/video/7612725054111059222" target="_blank" rel="noopener">
-          <span class="lk">TikTok ↗</span>
-          <span class="mcap">The same daydream, set to sound.<span class="src">@eliana_codes</span></span>
+          <span class="lk" data-i18n="genre.m6.lk">TikTok ↗</span>
+          <span class="mcap"><span data-i18n="genre.m6.cap">The same daydream, set to sound.</span><span class="src">@eliana_codes</span></span>
         </a>
 
         <a class="mcard link" href="https://www.reddit.com/r/ProgrammerHumor/comments/1c2hph2/seriously/" target="_blank" rel="noopener">
-          <span class="lk">r/ProgrammerHumor ↗</span>
-          <span class="mcap">“Seriously” — the thread where everyone admits it.<span class="src">reddit.com</span></span>
+          <span class="lk" data-i18n="genre.m7.lk">r/ProgrammerHumor ↗</span>
+          <span class="mcap"><span data-i18n="genre.m7.cap">“Seriously” — the thread where everyone admits it.</span><span class="src">reddit.com</span></span>
         </a>
 
         <a class="mcard link" href="https://engineerdog.com/2023/05/29/why-do-so-many-programmers-want-to-be-farmers-how-to-build-a-corrugated-steel-garden-box/" target="_blank" rel="noopener">
-          <span class="lk">Why programmers want to farm ↗</span>
-          <span class="mcap"><b>“Gardening is the exact opposite of coding.”</b> The essay that names the whole phenomenon.<span class="src">EngineerDog</span></span>
+          <span class="lk" data-i18n="genre.m8.lk">Why programmers want to farm ↗</span>
+          <span class="mcap"><span data-i18n="genre.m8.cap"><b>“Gardening is the exact opposite of coding.”</b> The essay that names the whole phenomenon.</span><span class="src">EngineerDog</span></span>
         </a>
 
       </div>
@@ -781,8 +1012,9 @@
       <figure class="shot wall-close">
         <img src="img/career-path.svg"
              alt="Field-guide career path in four panels: a junior engineer at a laptop, then a senior engineer, then a staff engineer buried in dashboards, and finally the same person tending a samogrow herb garden — captioned 'a good head start.'"
+             data-i18n-attrs="alt:genre.close.alt"
              width="1400" height="580" loading="lazy">
-        <figcaption class="meme-cite">Ours — the same arc, ending in a samogrow garden. <b>A good head start.</b></figcaption>
+        <figcaption class="meme-cite" data-i18n="genre.close.cap">Ours — the same arc, ending in a samogrow garden. <b>A good head start.</b></figcaption>
       </figure>
     </div>
   </section>
@@ -792,16 +1024,18 @@
     <div class="col foot-grid">
       <div>
         <div class="foot-brand">samo<b>grow</b> 🌿</div>
-        <p class="foot-note">
+        <p class="foot-note" data-i18n="foot.note">
           An open, kit-style alternative to Auk, Click &amp; Grow, and Gardyn.
           Deep Water Culture · commodity consumables · no vendor subscription / no proprietary pods.
         </p>
       </div>
       <div class="foot-links">
-        <a href="https://github.com/NikolayS/samogrow"><span class="arr">→</span> GitHub repository</a>
-        <a href="https://github.com/NikolayS/samogrow/blob/main/spec/SPEC.md"><span class="arr">→</span> SPEC.md — full build spec</a>
-        <a href="https://github.com/NikolayS/samogrow/blob/main/spec/SHOPPING-LIST.md"><span class="arr">→</span> SHOPPING-LIST.md — copy-paste order list</a>
+        <a href="https://github.com/NikolayS/samogrow"><span class="arr">→</span> <span data-i18n="foot.gh">GitHub repository</span></a>
+        <a href="https://github.com/NikolayS/samogrow/blob/main/spec/SPEC.md"><span class="arr">→</span> <span data-i18n="foot.spec">SPEC.md — full build spec</span></a>
+        <a href="https://github.com/NikolayS/samogrow/blob/main/spec/SHOPPING-LIST.md"><span class="arr">→</span> <span data-i18n="foot.shop">SHOPPING-LIST.md — copy-paste order list</span></a>
       </div>
     </div>
   </footer>
 </div>
+<script src="i18n.js" defer></script>
+</html>

@@ -31,6 +31,15 @@ On a timer during light hours, the brain pulls a camera snapshot, asks Claude fo
 - `research/` — market and parts research (commercial analogs, hydroponics methods, electronics, software stack)
 - `spec/` — the build spec (samospec-style): goal, architecture, BOM with prices, assembly plan, sprint plan
 - `software/` — the brain: control loop, camera + AI vision analysis, Telegram bot
+- `docs/` — the [project site](https://nikolays.github.io/samogrow/) (static GitHub Pages, no deployment build step; npm is used only for tests)
+
+## Website languages
+
+The site is available in 20 languages: English, Spanish, French, German, Italian, Portuguese, Dutch, Polish, Russian, Ukrainian, Turkish, Arabic, Hindi, Bengali, Indonesian, Vietnamese, Thai, Japanese, Korean, and Chinese. The language is auto-detected from the browser (`navigator.languages`, falling back to English); a manual pick in the topbar switcher is remembered in `localStorage` and wins over auto-detection. If a locale file cannot load, the baked-in English page remains visible and a failed manual choice is not remembered. Translations live in `docs/i18n/*.json` (one flat key→string file per language) applied by dependency-free `docs/i18n.js`; `npm run test:docs` checks locale parity, labels, DOM behavior, fetch failures, and selection logic.
+
+To add a language, add its entry to `LOCALES` in `docs/i18n.js`, add the same code to the pre-paint `codes` roster in `docs/index.html`, and create `docs/i18n/<code>.json` with exactly the English catalog's keys. Run `npm run test:docs`; roster/key parity and the duplicated pre-paint matcher are enforced by the suite.
+
+The site also carries an **incident blog** — the four dated, severity-tagged field-test incidents (×10 nutrient overdose, transplant-borne leafroller, camera-missed aphids, neem phototoxicity) with evidence photos served locally from `docs/img/incidents/` and links to the full RCAs in the issues. All prices on the site are labeled as a rough **U.S. mid-2026 baseline in USD**, with a Poland / EU-plug marketplace example (snapshot observed 2026-08-20) showing how another market changes the math — explicitly not a checkout quote, and with a warning that generic Tuya-style plugs/cameras need adapter work with the current software.
 
 Status: spec + shopping list + software ready — see the [project brief](https://nikolays.github.io/samogrow/), [SPEC](spec/SPEC.md), and [shopping list](spec/SHOPPING-LIST.md).
 

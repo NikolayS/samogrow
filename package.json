@@ -1,0 +1,10 @@
+{
+  "name": "samogrow-site",
+  "private": true,
+  "scripts": {
+    "test:docs": "node --test docs/i18n.test.mjs"
+  },
+  "devDependencies": {
+    "jsdom": "^26.1.0"
+  }
+}
