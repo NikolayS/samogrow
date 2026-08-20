@@ -437,8 +437,11 @@
       return codes.indexOf(base) >= 0 ? base : null;
     }
     var pick = null;
-    try { pick = localStorage.getItem("samogrow-lang"); } catch (e) {}
-    pick = match(pick);
+    try { pick = match(new URLSearchParams(location.search).get("lang")); } catch (e) {}
+    if (!pick) {
+      try { pick = localStorage.getItem("samogrow-lang"); } catch (e) {}
+      pick = match(pick);
+    }
     if (!pick) {
       var prefs = (navigator.languages && navigator.languages.length) ? navigator.languages : [navigator.language || "en"];
       for (var i = 0; i < prefs.length && !pick; i++) {

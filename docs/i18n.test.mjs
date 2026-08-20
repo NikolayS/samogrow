@@ -13,7 +13,7 @@ const docs = dirname(fileURLToPath(import.meta.url));
 const require = createRequire(import.meta.url);
 const I18N = require(join(docs, "i18n.js"));
 
-const { LOCALES, CODES, chooseLocale, matchLocale, optionLabel, STORAGE_KEY } = I18N;
+const { LOCALES, CODES, chooseLocale, matchLocale, queryLocale, optionLabel, STORAGE_KEY } = I18N;
 
 const indexHtml = readFileSync(join(docs, "index.html"), "utf8");
 const i18nJs = readFileSync(join(docs, "i18n.js"), "utf8");
@@ -265,6 +265,14 @@ test("first matching navigator language wins, in order", () => {
   assert.equal(chooseLocale(null, ["ar-EG", "en"]), "ar");
 });
 
+test("lang query parameter accepts exact and regional locale tags", () => {
+  assert.equal(queryLocale("?lang=ru"), "ru");
+  assert.equal(queryLocale("?campaign=launch&lang=pt-BR"), "pt");
+  assert.equal(queryLocale("?lang=UK"), "uk");
+  assert.equal(queryLocale("?lang=xx"), null);
+  assert.equal(queryLocale(""), null);
+});
+
 test("falls back to English when nothing matches", () => {
   assert.equal(chooseLocale(null, ["eo", "tlh"]), "en");
   assert.equal(chooseLocale(null, []), "en");
@@ -302,9 +310,10 @@ const flush = async () => {
   await new Promise((resolve) => setTimeout(resolve, 0));
 };
 
-function runtimeDom({ initial = "en", languages = ["en-US"], stored, storageThrows = false, fetchImpl } = {}) {
+function runtimeDom({ initial = "en", languages = ["en-US"], stored, storageThrows = false, fetchImpl,
+  url = "https://samogrow.test/" } = {}) {
   const dom = new JSDOM(minimalPage(initial), {
-    url: "https://samogrow.test/",
+    url,
     runScripts: "outside-only",
     pretendToBeVisual: true
   });
@@ -367,7 +376,39 @@ test("switcher executes click and keyboard interactions with abbreviation-only o
   assert.equal(document.documentElement.lang, "ru");
   assert.equal(document.querySelector("#lang-current").textContent, "RU");
   assert.equal(dom.window.localStorage.getItem(STORAGE_KEY), "ru");
+  assert.equal(dom.window.location.search, "?lang=ru");
   assert.equal(options.find((option) => option.dataset.code === "ru").getAttribute("aria-selected"), "true");
+});
+
+test("URL locale overrides stored and browser choices and is canonicalized", async () => {
+  const dom = runtimeDom({
+    initial: "de",
+    stored: "fr",
+    languages: ["es-ES"],
+    url: "https://samogrow.test/?campaign=launch&lang=pt-BR#cost"
+  });
+  await flush();
+  assert.equal(dom.window.document.documentElement.lang, "pt");
+  assert.equal(dom.window.location.search, "?campaign=launch&lang=pt");
+  assert.equal(dom.window.location.hash, "#cost");
+  assert.equal(dom.window.localStorage.getItem(STORAGE_KEY), "fr", "URL selection must not overwrite the saved manual preference");
+});
+
+test("manual switch updates the shareable URL without dropping query parameters or hash", async () => {
+  const dom = runtimeDom({ url: "https://samogrow.test/?ref=newsletter#incidents" });
+  dom.window.document.querySelector('[data-code="uk"]').click();
+  await flush();
+  assert.equal(dom.window.location.search, "?ref=newsletter&lang=uk");
+  assert.equal(dom.window.location.hash, "#incidents");
+  assert.equal(dom.window.localStorage.getItem(STORAGE_KEY), "uk");
+});
+
+test("auto-detected locale is added to the URL for sharing", async () => {
+  const dom = runtimeDom({ initial: null, languages: ["ru-RU"], url: "https://samogrow.test/#how" });
+  await flush();
+  assert.equal(dom.window.document.documentElement.lang, "ru");
+  assert.equal(dom.window.location.search, "?lang=ru");
+  assert.equal(dom.window.location.hash, "#how");
 });
 
 test("runtime applies translated DOM, metadata, attributes, and RTL direction", async () => {
@@ -424,11 +465,17 @@ test("failed manual switch preserves the last known-good saved preference", asyn
 });
 
 test("non-ok locale response takes the same safe fallback path", async () => {
-  const dom = runtimeDom({ initial: "uk", fetchImpl: async () => ({ ok: false, status: 404 }) });
+  const dom = runtimeDom({
+    initial: "uk",
+    url: "https://samogrow.test/?lang=uk#how",
+    fetchImpl: async () => ({ ok: false, status: 404 })
+  });
   await flush();
   assert.equal(dom.window.document.documentElement.lang, "");
   assert.equal(dom.window.document.querySelector("#lang-current").textContent, "EN");
   assert.equal(dom.window.document.documentElement.classList.contains("i18n-pending"), false);
+  assert.equal(dom.window.location.search, "?lang=en", "failed locale must not leave a misleading share URL");
+  assert.equal(dom.window.location.hash, "#how");
 });
 
 test("a stale fetch cannot overwrite a newer locale selection", async () => {
@@ -458,9 +505,10 @@ test("disabled localStorage falls back to navigator language without throwing", 
 
 const bootstrapScript = indexHtml.match(/<script>\s*(\/\/ i18n bootstrap[\s\S]*?)<\/script>/)?.[1];
 
-function runBootstrap({ stored, languages = ["en-US"], storageThrows = false } = {}) {
+function runBootstrap({ stored, languages = ["en-US"], storageThrows = false,
+  url = "https://samogrow.test/" } = {}) {
   const dom = new JSDOM("<!doctype html><html><body></body></html>", {
-    url: "https://samogrow.test/",
+    url,
     runScripts: "outside-only"
   });
   Object.defineProperty(dom.window.navigator, "languages", { value: languages, configurable: true });
@@ -496,6 +544,16 @@ test("pre-paint bootstrap and runtime matcher choose the same locale", () => {
       chooseLocale(sample.stored, sample.languages)
     );
   }
+});
+
+test("pre-paint bootstrap gives ?lang= precedence over storage and browser settings", () => {
+  const { dom } = runBootstrap({
+    stored: "de",
+    languages: ["fr-FR"],
+    url: "https://samogrow.test/?lang=uk#incidents"
+  });
+  assert.equal(dom.window.document.documentElement.dataset.i18nInitial, "uk");
+  assert.equal(dom.window.document.documentElement.classList.contains("i18n-pending"), true);
 });
 
 test("loading-document branch initializes once on DOMContentLoaded", async () => {

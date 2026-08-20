@@ -4,11 +4,13 @@
  * values may carry inline HTML that must be preserved by translations).
  * English is baked into index.html, so the first paint in English costs nothing.
  *
- * Locale choice: localStorage (manual pick) → navigator.languages (exact tag,
- * then base subtag, e.g. "pt-BR" → "pt") → "en".
+ * Locale choice: ?lang= URL parameter → localStorage (manual pick) →
+ * navigator.languages (exact tag, then base subtag, e.g. "pt-BR" → "pt") →
+ * "en". The active locale is always reflected back into ?lang= so the current
+ * page, query string, and anchor can be copied as a shareable language link.
  *
- * The pure parts (LOCALES, matchLocale, chooseLocale, optionLabel) are exported
- * for the Node test suite; the DOM section only runs in a browser.
+ * The pure parts (LOCALES, matchLocale, chooseLocale, queryLocale, optionLabel)
+ * are exported for the Node test suite; the DOM section only runs in a browser.
  */
 (function (root) {
   "use strict";
@@ -63,6 +65,14 @@
     return DEFAULT_LOCALE;
   }
 
+  function queryLocale(search) {
+    try {
+      return matchLocale(new URLSearchParams(String(search || "")).get("lang"));
+    } catch (e) {
+      return null;
+    }
+  }
+
   /* Switcher option labeling: the VISIBLE text is the abbreviation only;
    * the native language name is exposed to assistive tech via aria-label. */
   function optionLabel(locale) {
@@ -76,6 +86,7 @@
     STORAGE_KEY: STORAGE_KEY,
     matchLocale: matchLocale,
     chooseLocale: chooseLocale,
+    queryLocale: queryLocale,
     optionLabel: optionLabel
   };
 
@@ -104,6 +115,14 @@
 
   function getStored() {
     try { return localStorage.getItem(STORAGE_KEY); } catch (e) { return null; }
+  }
+
+  function syncUrl(code) {
+    try {
+      var url = new URL(root.location.href);
+      url.searchParams.set("lang", code);
+      root.history.replaceState(root.history.state, "", url.href);
+    } catch (e) {}
   }
 
   function loadDict(code) {
@@ -154,6 +173,7 @@
     }
     current = code;
     updateSwitcher();
+    syncUrl(code);
     reveal();
   }
 
@@ -169,6 +189,7 @@
     }, function (err) {
       if (requestId !== requestSeq) return;
       // Locale failed to load: never leave the page hidden or half-applied.
+      syncUrl(current);
       reveal();
       if (root.console && console.warn) console.warn("samogrow i18n:", err);
     });
@@ -275,13 +296,15 @@
 
   function init() {
     buildSwitcher();
-    var initial = matchLocale(document.documentElement.getAttribute("data-i18n-initial"));
+    var initial = queryLocale(root.location && root.location.search);
+    if (!initial) initial = matchLocale(document.documentElement.getAttribute("data-i18n-initial"));
     if (!initial) {
       initial = chooseLocale(getStored(), navigator.languages && navigator.languages.length
         ? navigator.languages
         : [navigator.language || DEFAULT_LOCALE]);
     }
     if (initial === DEFAULT_LOCALE) {
+      syncUrl(initial);
       reveal(); // page is already English
       updateSwitcher();
     } else {
