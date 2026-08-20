@@ -767,13 +767,25 @@ test("Poland example caveats cover the compatibility and cost traps", () => {
 });
 
 test("Auk comparison includes realistic recurring costs and capacity context", () => {
-  assert.match(indexHtml, /samogrow · 12 sites/);
-  assert.match(indexHtml, /Auk Mini 2 · 4 pots/);
-  assert.match(indexHtml, /~\$80–160\*/);
-  assert.match(indexHtml, /~\$310–390\*/);
+  const table = new JSDOM(indexHtml).window.document.querySelector("table.cmp");
+  const rows = [...table.querySelectorAll("tbody tr")].map((row) =>
+    [...row.querySelectorAll("td")].map((cell) => cell.textContent.trim())
+  );
+  assert.deepEqual(rows[0], ["samogrow · 12 sites", "$280", "$70 + $120 AI", "yes", "~$470"]);
+  assert.deepEqual(rows[3], ["Auk Mini 2 · 4 pots", "$229", "~$80–160*", "no", "~$310–390*"]);
+  assert.equal(280 + 70 + 120, 470, "samogrow total must equal hardware + grow + AI");
+  const aukRange = [229 + 80, 229 + 160].map((amount) => Math.round(amount / 10) * 10);
+  assert.deepEqual(aukRange, [310, 390], "Auk displayed range must be hardware + extras rounded to tens");
   const note = en["cmp.auk.note"];
   for (const fact of ["~6 months", "2–3 refills", "$12–48", "not published", "No subscription", "tax", "VAT"]) {
     assert.ok(note.includes(fact), `Auk caveat missing: ${fact}`);
+  }
+  for (const [code, dict] of Object.entries(dicts)) {
+    assert.ok(dict["cmp.sites"] && dict["cmp.pots"], `${code} missing translated capacity labels`);
+    for (const fact of ["$12–48", "Auk Mini"]) {
+      assert.ok(dict["cmp.auk.note"].includes(fact), `${code} Auk caveat missing: ${fact}`);
+    }
+    assert.match(dict["cmp.auk.note"], /Mini[- ]2/, `${code} Auk caveat missing Mini 2`);
   }
 });
 
