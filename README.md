@@ -35,7 +35,9 @@ On a timer during light hours, the brain pulls a camera snapshot, asks Claude fo
 
 ## Website languages
 
-The site is available in 20 languages: English, Spanish, French, German, Italian, Portuguese, Dutch, Polish, Russian, Ukrainian, Turkish, Arabic, Hindi, Bengali, Indonesian, Vietnamese, Thai, Japanese, Korean, and Chinese. The language is auto-detected from the browser (`navigator.languages`, falling back to English); a manual pick in the topbar switcher is remembered in `localStorage` and wins over auto-detection. Translations live in `docs/i18n/*.json` (one flat key→string file per language) applied by dependency-free `docs/i18n.js`; `node --test docs/i18n.test.mjs` checks locale parity, labels, and the selection logic.
+The site is available in 20 languages: English, Spanish, French, German, Italian, Portuguese, Dutch, Polish, Russian, Ukrainian, Turkish, Arabic, Hindi, Bengali, Indonesian, Vietnamese, Thai, Japanese, Korean, and Chinese. The language is auto-detected from the browser (`navigator.languages`, falling back to English); a manual pick in the topbar switcher is remembered in `localStorage` and wins over auto-detection. If a locale file cannot load, the baked-in English page remains visible and a failed manual choice is not remembered. Translations live in `docs/i18n/*.json` (one flat key→string file per language) applied by dependency-free `docs/i18n.js`; `npm run test:docs` checks locale parity, labels, DOM behavior, fetch failures, and selection logic.
+
+To add a language, add its entry to `LOCALES` in `docs/i18n.js`, add the same code to the pre-paint `codes` roster in `docs/index.html`, and create `docs/i18n/<code>.json` with exactly the English catalog's keys. Run `npm run test:docs`; roster/key parity and the duplicated pre-paint matcher are enforced by the suite.
 
 Status: spec + shopping list + software ready — see the [project brief](https://nikolays.github.io/samogrow/), [SPEC](spec/SPEC.md), and [shopping list](spec/SHOPPING-LIST.md).
 

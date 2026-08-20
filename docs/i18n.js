@@ -53,7 +53,8 @@
   /* stored: value from localStorage (manual choice; wins if valid).
    * requested: navigator.languages-style array, in preference order. */
   function chooseLocale(stored, requested) {
-    if (stored && CODES.indexOf(String(stored)) >= 0) return String(stored);
+    var storedMatch = matchLocale(stored);
+    if (storedMatch) return storedMatch;
     var list = requested || [];
     for (var i = 0; i < list.length; i++) {
       var m = matchLocale(list[i]);
@@ -87,6 +88,14 @@
 
   var dictCache = {}; // code -> promise of dict
   var current = DEFAULT_LOCALE;
+  var requestSeq = 0;
+  var ALLOWED_TRANSLATED_ATTRS = {
+    alt: true,
+    title: true,
+    "aria-label": true,
+    placeholder: true,
+    content: true
+  };
 
   function findLocale(code) {
     for (var i = 0; i < LOCALES.length; i++) if (LOCALES[i].code === code) return LOCALES[i];
@@ -109,6 +118,10 @@
   }
 
   function reveal() {
+    if (root.__samogrowI18nTimer) {
+      root.clearTimeout(root.__samogrowI18nTimer);
+      root.__samogrowI18nTimer = null;
+    }
     document.documentElement.classList.remove("i18n-pending");
   }
 
@@ -135,6 +148,7 @@
         if (sep < 0) continue;
         var attr = pairs[k].slice(0, sep).trim();
         var akey = pairs[k].slice(sep + 1).trim();
+        if (!ALLOWED_TRANSLATED_ATTRS[attr]) continue;
         if (Object.prototype.hasOwnProperty.call(dict, akey)) attrNodes[j].setAttribute(attr, dict[akey]);
       }
     }
@@ -144,13 +158,20 @@
   }
 
   function setLocale(code, persist) {
-    if (persist) {
-      try { localStorage.setItem(STORAGE_KEY, code); } catch (e) {}
-    }
-    loadDict(code).then(function (dict) {
-      applyDict(code, dict);
+    var canonical = matchLocale(code) || DEFAULT_LOCALE;
+    var requestId = ++requestSeq;
+    loadDict(canonical).then(function (dict) {
+      if (requestId !== requestSeq) return; // A newer language choice won.
+      applyDict(canonical, dict);
+      if (persist) {
+        try { localStorage.setItem(STORAGE_KEY, canonical); } catch (e) {}
+      }
     }, function (err) {
+      if (requestId !== requestSeq) return;
       // Locale failed to load: never leave the page hidden or half-applied.
+      if (persist) {
+        try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+      }
       reveal();
       if (root.console && console.warn) console.warn("samogrow i18n:", err);
     });
@@ -171,9 +192,10 @@
 
   function closeMenu(focusBtn) {
     if (menu.hidden) return;
+    var hadMenuFocus = menu.contains(document.activeElement);
     menu.hidden = true;
     btn.setAttribute("aria-expanded", "false");
-    if (focusBtn) btn.focus();
+    if (focusBtn || hadMenuFocus) btn.focus();
   }
 
   function openMenu() {
@@ -255,9 +277,12 @@
 
   function init() {
     buildSwitcher();
-    var initial = chooseLocale(getStored(), navigator.languages && navigator.languages.length
-      ? navigator.languages
-      : [navigator.language || DEFAULT_LOCALE]);
+    var initial = matchLocale(document.documentElement.getAttribute("data-i18n-initial"));
+    if (!initial) {
+      initial = chooseLocale(getStored(), navigator.languages && navigator.languages.length
+        ? navigator.languages
+        : [navigator.language || DEFAULT_LOCALE]);
+    }
     if (initial === DEFAULT_LOCALE) {
       reveal(); // page is already English
       updateSwitcher();
@@ -267,7 +292,7 @@
   }
 
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", init);
+    document.addEventListener("DOMContentLoaded", init, { once: true });
   } else {
     init();
   }

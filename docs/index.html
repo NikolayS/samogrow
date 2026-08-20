@@ -396,29 +396,34 @@
 </style>
 <script>
   // i18n bootstrap: pick the locale before first paint so a non-English visit
-  // doesn't flash English. Keep the code list in sync with LOCALES in i18n.js
-  // (the test suite enforces parity).
+  // doesn't flash English. This matcher intentionally mirrors matchLocale() in
+  // i18n.js; the test suite runs both over the same cases and enforces roster
+  // parity. Baked-in English remains the fallback if a locale cannot load.
   (function () {
     var codes = ["en","es","fr","de","it","pt","nl","pl","ru","uk","tr","ar","hi","bn","id","vi","th","ja","ko","zh"];
+    function match(tag) {
+      var normalized = String(tag || "").toLowerCase();
+      if (codes.indexOf(normalized) >= 0) return normalized;
+      var base = normalized.split("-")[0];
+      return codes.indexOf(base) >= 0 ? base : null;
+    }
     var pick = null;
     try { pick = localStorage.getItem("samogrow-lang"); } catch (e) {}
-    if (codes.indexOf(pick) < 0) pick = null;
+    pick = match(pick);
     if (!pick) {
       var prefs = (navigator.languages && navigator.languages.length) ? navigator.languages : [navigator.language || "en"];
       for (var i = 0; i < prefs.length && !pick; i++) {
-        var tag = String(prefs[i] || "").toLowerCase();
-        if (codes.indexOf(tag) >= 0) { pick = tag; }
-        else {
-          var base = tag.split("-")[0];
-          if (codes.indexOf(base) >= 0) pick = base;
-        }
+        pick = match(prefs[i]);
       }
     }
     document.documentElement.setAttribute("data-i18n-initial", pick || "en");
     if (pick && pick !== "en") {
       document.documentElement.classList.add("i18n-pending");
       // Safety valve: never keep the page hidden if the locale fails to load.
-      setTimeout(function () { document.documentElement.classList.remove("i18n-pending"); }, 2000);
+      window.__samogrowI18nTimer = setTimeout(function () {
+        document.documentElement.classList.remove("i18n-pending");
+        window.__samogrowI18nTimer = null;
+      }, 2000);
     }
   })();
 </script>
@@ -435,7 +440,7 @@
         <a href="https://github.com/NikolayS/samogrow" data-i18n="nav.github">GitHub ↗</a>
       </nav>
       <div class="lang" id="lang-switcher">
-        <button type="button" class="lang-btn" id="lang-btn" aria-haspopup="listbox" aria-expanded="false"
+        <button type="button" class="lang-btn" id="lang-btn" aria-haspopup="listbox" aria-controls="lang-menu" aria-expanded="false"
                 aria-label="Language" data-i18n-attrs="aria-label:lang.switcher">
           <svg class="lang-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
             <circle cx="12" cy="12" r="9"></circle>
