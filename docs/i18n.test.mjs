@@ -208,7 +208,7 @@ const usedKeys = new Set(
     )
   )
 );
-for (const key of ["inc.title", "inc.sub", "inc.readmore"]) usedKeys.add(key);
+for (const key of ["inc.title", "inc.eyebrow", "inc.sub", "inc.readmore"]) usedKeys.add(key);
 for (const incident of ["i1", "i3", "i5", "i6"]) {
   for (const part of ["title", "story", "impact", "lesson", "alt", "cap"]) {
     usedKeys.add(`inc.${incident}.${part}`);
@@ -659,6 +659,7 @@ test("blog.js executes the index and renders four correctly wired cards", () => 
     assert.equal(card.querySelector("p").dataset.i18n, `inc.${inc.key}.story`);
   }
   assert.equal(dom.window.document.querySelector('[data-i18n="inc.sub"]').textContent.trim(), en["inc.sub"]);
+  assert.equal(dom.window.document.querySelector('[data-i18n="inc.eyebrow"]').textContent.trim(), en["inc.eyebrow"]);
 });
 
 test("blog.js executes every incident page and renders the selected post", () => {
@@ -728,6 +729,9 @@ test("incident evidence images exist locally (no remote image runtime dependency
 });
 
 test("each incident has translated title/story/impact/lesson/alt/caption in every locale", () => {
+  for (const [code, dict] of Object.entries(dicts)) {
+    assert.ok((dict["inc.eyebrow"] || "").trim(), `${code}.json inc.eyebrow empty`);
+  }
   for (const inc of INCIDENTS) {
     for (const part of ["title", "story", "impact", "lesson", "alt", "cap"]) {
       const key = `inc.${inc.key}.${part}`;

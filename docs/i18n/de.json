@@ -194,6 +194,7 @@
   "pl.basket": "Ein grober <b>vollständiger</b> Äquivalenzkorb landet bei rund <b>~$190–260</b>, sobald lokal beschaffte Nährstoffe, LECA, Samen, pH-Zubehör, Adapter und eine Box dazukommen — eine Ableitung, <b>kein Kassenpreis</b> und kein garantiert gleichwertiger Ersatz für den USA-Aufbau.",
   "pl.caveats": "Versand, VAT/Zoll, Händlervarianten und Aktionen, Netzspannung, Steckertyp, RTSP-Unterstützung der Kamera, Protokoll-/API-Kompatibilität der smarten Steckdosen, Garantie und lokale Beschaffung verändern das Ergebnis alle — prüfe jedes Angebot vor dem Bestellen. Und ein harter Software-Vorbehalt: samogrow steuert derzeit <b>Kasa-Steckdosen (KLAP) und Tapo-RTSP-Kameras</b>; generische Steckdosen und Kameras im Tuya-Stil <b>funktionieren mit der aktuellen Software nicht ohne Adapter-Arbeit</b>.",
   "inc.title": "Der Vorfall-Blog",
+  "inc.eyebrow": "Feldnotizen",
   "inc.sub": "Echte Gärten produzieren echte Vorfälle, und wir behandeln sie wie Produktionsausfälle: datiert, mit Schweregrad versehen, ohne Schuldzuweisungen und öffentlich aufgeschrieben.",
   "inc.readmore": "Vollständiger Bericht &amp; RCA auf GitHub →",
   "inc.i1.title": "Der ×10-Vorfall — eine zehnfache Nährstoff-Überdosis",

@@ -194,6 +194,7 @@
   "pl.basket": "Keranjang setara yang <b>lengkap</b> secara kasar jatuh di sekitar <b>~$190–260</b> setelah ditambah nutrisi, LECA, benih, perlengkapan pH, adaptor, dan tote dari sumber lokal — ini inferensi, <b>bukan harga di kasir</b> dan bukan jaminan pengganti setara persis untuk rakitan A.S.",
   "pl.caveats": "Ongkos kirim, VAT/bea cukai, varian penjual dan promo, tegangan listrik, tipe colokan, dukungan RTSP kamera, kompatibilitas protokol/API colokan pintar, garansi, dan pengadaan lokal semuanya mengubah hasilnya — verifikasi setiap listing sebelum memesan. Dan satu peringatan keras di sisi perangkat lunak: samogrow saat ini menggerakkan <b>colokan Kasa (KLAP) dan kamera Tapo RTSP</b>; colokan dan kamera gaya Tuya generik <b>tidak berfungsi dengan perangkat lunak saat ini tanpa kerja adapter tambahan</b>.",
   "inc.title": "Blog insiden",
+  "inc.eyebrow": "Catatan lapangan",
   "inc.sub": "Kebun sungguhan menghasilkan insiden sungguhan, dan kami menanganinya layaknya gangguan produksi: bertanggal, berlabel tingkat keparahan, tanpa saling menyalahkan, dan ditulis terbuka.",
   "inc.readmore": "Tulisan lengkap &amp; RCA di GitHub →",
   "inc.i1.title": "Insiden ×10 — overdosis nutrisi sepuluh kali lipat",
