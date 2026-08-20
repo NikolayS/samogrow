@@ -31,6 +31,11 @@ On a timer during light hours, the brain pulls a camera snapshot, asks Claude fo
 - `research/` — market and parts research (commercial analogs, hydroponics methods, electronics, software stack)
 - `spec/` — the build spec (samospec-style): goal, architecture, BOM with prices, assembly plan, sprint plan
 - `software/` — the brain: control loop, camera + AI vision analysis, Telegram bot
+- `docs/` — the [project site](https://nikolays.github.io/samogrow/) (static GitHub Pages, no build step)
+
+## Website languages
+
+The site is available in 20 languages: English, Spanish, French, German, Italian, Portuguese, Dutch, Polish, Russian, Ukrainian, Turkish, Arabic, Hindi, Bengali, Indonesian, Vietnamese, Thai, Japanese, Korean, and Chinese. The language is auto-detected from the browser (`navigator.languages`, falling back to English); a manual pick in the topbar switcher is remembered in `localStorage` and wins over auto-detection. Translations live in `docs/i18n/*.json` (one flat key→string file per language) applied by dependency-free `docs/i18n.js`; `node --test docs/i18n.test.mjs` checks locale parity, labels, and the selection logic.
 
 Status: spec + shopping list + software ready — see the [project brief](https://nikolays.github.io/samogrow/), [SPEC](spec/SPEC.md), and [shopping list](spec/SHOPPING-LIST.md).
 
