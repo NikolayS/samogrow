@@ -17,6 +17,7 @@ const { LOCALES, CODES, chooseLocale, matchLocale, queryLocale, optionLabel, STO
 
 const indexHtml = readFileSync(join(docs, "index.html"), "utf8");
 const i18nJs = readFileSync(join(docs, "i18n.js"), "utf8");
+const readme = readFileSync(join(docs, "..", "README.md"), "utf8");
 const localeFiles = readdirSync(join(docs, "i18n")).filter((f) => f.endsWith(".json")).sort();
 const dicts = Object.fromEntries(
   localeFiles.map((f) => [f.replace(/\.json$/, ""), JSON.parse(readFileSync(join(docs, "i18n", f), "utf8"))])
@@ -283,6 +284,12 @@ test("persistence uses a stable storage key wired into the runtime", () => {
   assert.equal(STORAGE_KEY, "samogrow-lang");
   assert.match(i18nJs, /localStorage\.setItem\(STORAGE_KEY/);
   assert.match(indexHtml, /localStorage\.getItem\("samogrow-lang"\)/);
+});
+
+test("README documents URL-first locale precedence and a shareable example", () => {
+  assert.match(readme, /Locale precedence is a shareable `\?lang=<code>` URL parameter/);
+  assert.match(readme, /https:\/\/samogrow\.dev\/\?lang=uk#incidents/);
+  assert.match(readme, /without reloading or losing other query parameters or the page anchor/);
 });
 
 // ---------- executable browser-runtime coverage ----------
