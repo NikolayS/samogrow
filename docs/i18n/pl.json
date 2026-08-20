@@ -18,6 +18,8 @@
   "spec.eyebrow": "W skrócie",
   "spec.allin.label": "Cały sprzęt",
   "spec.allin.value": "~$232–311 (USA, warianty)",
+  "spec.eu.label": "Przykład Polska / UE",
+  "spec.eu.value": "~$190–260 (USD, szacunek)",
   "spec.appliance.label": "Strona urządzeń",
   "spec.appliance.value": "$33–68",
   "spec.grow.label": "Strona uprawy",

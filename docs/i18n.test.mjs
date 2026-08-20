@@ -17,6 +17,8 @@ const { LOCALES, CODES, chooseLocale, matchLocale, queryLocale, optionLabel, STO
 
 const indexHtml = readFileSync(join(docs, "index.html"), "utf8");
 const i18nJs = readFileSync(join(docs, "i18n.js"), "utf8");
+const blogHtml = readFileSync(join(docs, "blog.html"), "utf8");
+const blogJs = readFileSync(join(docs, "blog.js"), "utf8");
 const readme = readFileSync(join(docs, "..", "README.md"), "utf8");
 const localeFiles = readdirSync(join(docs, "i18n")).filter((f) => f.endsWith(".json")).sort();
 const dicts = Object.fromEntries(
@@ -42,6 +44,11 @@ test("required locales present: en, ru, uk", () => {
 test("locale codes are unique lowercase language subtags", () => {
   assert.equal(new Set(CODES).size, 20);
   for (const code of CODES) assert.match(code, /^[a-z]{2,3}$/);
+});
+
+test("language switcher is alphabetically ordered by its visible abbreviation", () => {
+  const abbrs = LOCALES.map((l) => l.abbr);
+  assert.deepEqual(abbrs, [...abbrs].sort((a, b) => a.localeCompare(b, "en")));
 });
 
 test("switcher labels are unique 2–3 letter abbreviations (no flags)", () => {
@@ -206,7 +213,7 @@ test("every data-i18n key in index.html exists in en.json", () => {
 test("every en.json key is used by index.html or the JS runtime", () => {
   const jsApplied = new Set(["meta.title", "meta.description"]);
   for (const k of Object.keys(en)) {
-    assert.ok(usedKeys.has(k) || jsApplied.has(k), `unused key ${k}`);
+    assert.ok(usedKeys.has(k) || jsApplied.has(k) || (k.startsWith("inc.") && blogJs.includes("inc.")), `unused key ${k}`);
   }
 });
 
@@ -300,6 +307,7 @@ const minimalPage = (initial = "en") => `<!doctype html>
 <body>
   <button id="lang-btn" aria-expanded="false" aria-controls="lang-menu"><span id="lang-current">EN</span></button>
   <ul id="lang-menu" hidden></ul>
+  <a data-lang-link href="blog.html">Blog</a>
   <h2 data-i18n="sample">English sample</h2>
   <img data-i18n-attrs="alt:sample.alt,src:sample.src,constructor:sample.src" alt="English alt" src="safe.png">
 </body></html>`;
@@ -360,7 +368,7 @@ test("switcher executes click and keyboard interactions with abbreviation-only o
   document.activeElement.dispatchEvent(new KeyboardEvent("keydown", { key: "End", bubbles: true }));
   assert.equal(document.activeElement.dataset.code, "zh");
   document.activeElement.dispatchEvent(new KeyboardEvent("keydown", { key: "Home", bubbles: true }));
-  assert.equal(document.activeElement.dataset.code, "en");
+  assert.equal(document.activeElement.dataset.code, "ar");
   document.activeElement.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
   assert.equal(menu.hidden, true);
   assert.equal(document.activeElement, button);
@@ -408,6 +416,7 @@ test("manual switch updates the shareable URL without dropping query parameters 
   assert.equal(dom.window.location.search, "?ref=newsletter&lang=uk");
   assert.equal(dom.window.location.hash, "#incidents");
   assert.equal(dom.window.localStorage.getItem(STORAGE_KEY), "uk");
+  assert.equal(dom.window.document.querySelector('a[data-lang-link]').getAttribute("href"), "blog.html?lang=uk");
 });
 
 test("auto-detected locale is added to the URL for sharing", async () => {
@@ -600,17 +609,16 @@ const INCIDENTS = [
     img: "img/incidents/2026-08-18-neem-burn-basil.jpeg", key: "i6" },
 ];
 
-test("incident section exists, is in the nav, and carries all four dated incidents", () => {
+test("incident blog and every post have separate language-preserving pages", () => {
   assert.match(indexHtml, /<section id="incidents">/);
-  assert.match(indexHtml, /<a href="#incidents" data-i18n="nav.incidents">/);
-  const section = indexHtml.slice(indexHtml.indexOf('<section id="incidents">'), indexHtml.indexOf("<!-- MEME WALL"));
-  assert.equal((section.match(/class="inc-card"/g) || []).length, 4);
+  assert.match(indexHtml, /<a href="blog\.html" data-lang-link data-i18n="nav\.incidents">/);
+  assert.match(blogHtml, /id="blog-content"/);
   for (const inc of INCIDENTS) {
-    assert.ok(section.includes(`<span class="inc-id">${inc.id}</span>`), `${inc.id} chip missing`);
-    assert.ok(section.includes(`<span class="inc-date">${inc.date}</span>`), `${inc.id} date wrong`);
-    assert.ok(section.includes(`<span class="inc-sev">${inc.sev}</span>`), `${inc.id} severity wrong`);
-    assert.ok(section.includes(`href="${inc.issue}"`), `${inc.id} issue link missing`);
-    assert.ok(section.includes(`src="${inc.img}"`), `${inc.id} image not local`);
+    const page = readFileSync(join(docs, `incident-${inc.key}.html`), "utf8");
+    assert.match(page, new RegExp(`data-post="${inc.key}"`), `${inc.id} dedicated page missing`);
+    assert.ok(blogJs.includes(`file: "incident-${inc.key}.html"`), `${inc.id} blog link missing`);
+    assert.ok(blogJs.includes(`issue: "${inc.issue}"`), `${inc.id} issue link missing`);
+    assert.ok(blogJs.includes(`image: "${inc.img}"`), `${inc.id} image not local`);
   }
   // I-6 narrative carries the full incident timeline.
   for (const d of ["2026-08-15", "2026-08-18", "2026-08-20"]) {
@@ -639,7 +647,7 @@ test("each incident has translated title/story/impact/lesson/alt/caption in ever
         assert.ok((dict[key] || "").trim().length > 0, `${code}.json ${key} empty`);
       }
     }
-    assert.ok(indexHtml.includes(`data-i18n-attrs="alt:inc.${inc.key}.alt"`), `alt wiring missing for ${inc.id}`);
+    assert.ok(blogJs.includes(`data-i18n-attrs="alt:inc.' + item.key + '.alt"`), `alt wiring missing for ${inc.id}`);
   }
 });
 
@@ -649,6 +657,9 @@ test("U.S. baseline labeling is explicit on every price frame", () => {
   assert.ok(en["cost.sub"].includes("U.S. mid-2026 baseline"), "cost.sub not labeled U.S. baseline");
   assert.ok(/not a quote/.test(en["cost.sub"]), "cost.sub must disclaim quote status");
   assert.ok(en["spec.allin.value"].includes("U.S."), "spec-card all-in value not U.S.-labeled");
+  assert.ok(en["spec.eu.value"].includes("~$190–260") && en["spec.eu.value"].includes("rough"),
+    "spec-card must show the rough non-U.S. estimate immediately");
+  assert.match(indexHtml, /data-i18n="spec\.eu\.value"/);
   assert.ok(en["parts.fine"].includes("U.S. mid-2026"), "parts fine print not U.S.-labeled");
   assert.ok(en["cost.us.note"].includes("USD") && en["cost.us.note"].includes("U.S. mid-2026"),
     "cost.us.note must state USD + U.S. mid-2026");

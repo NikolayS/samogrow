@@ -18,6 +18,8 @@
   "spec.eyebrow": "一览",
   "spec.allin.label": "硬件全套",
   "spec.allin.value": "~$232–311（美国，按配置）",
+  "spec.eu.label": "波兰 / 欧盟示例",
+  "spec.eu.value": "~$190–260（USD，粗略估算）",
   "spec.appliance.label": "设备侧",
   "spec.appliance.value": "$33–68",
   "spec.grow.label": "种植侧",

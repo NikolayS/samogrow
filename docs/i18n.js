@@ -16,25 +16,25 @@
   "use strict";
 
   var LOCALES = [
+    { code: "ar", abbr: "AR", name: "العربية", dir: "rtl" },
+    { code: "bn", abbr: "BN", name: "বাংলা", dir: "ltr" },
+    { code: "de", abbr: "DE", name: "Deutsch", dir: "ltr" },
     { code: "en", abbr: "EN", name: "English", dir: "ltr" },
     { code: "es", abbr: "ES", name: "Español", dir: "ltr" },
     { code: "fr", abbr: "FR", name: "Français", dir: "ltr" },
-    { code: "de", abbr: "DE", name: "Deutsch", dir: "ltr" },
-    { code: "it", abbr: "IT", name: "Italiano", dir: "ltr" },
-    { code: "pt", abbr: "PT", name: "Português", dir: "ltr" },
-    { code: "nl", abbr: "NL", name: "Nederlands", dir: "ltr" },
-    { code: "pl", abbr: "PL", name: "Polski", dir: "ltr" },
-    { code: "ru", abbr: "RU", name: "Русский", dir: "ltr" },
-    { code: "uk", abbr: "UK", name: "Українська", dir: "ltr" },
-    { code: "tr", abbr: "TR", name: "Türkçe", dir: "ltr" },
-    { code: "ar", abbr: "AR", name: "العربية", dir: "rtl" },
     { code: "hi", abbr: "HI", name: "हिन्दी", dir: "ltr" },
-    { code: "bn", abbr: "BN", name: "বাংলা", dir: "ltr" },
     { code: "id", abbr: "ID", name: "Bahasa Indonesia", dir: "ltr" },
-    { code: "vi", abbr: "VI", name: "Tiếng Việt", dir: "ltr" },
-    { code: "th", abbr: "TH", name: "ไทย", dir: "ltr" },
+    { code: "it", abbr: "IT", name: "Italiano", dir: "ltr" },
     { code: "ja", abbr: "JA", name: "日本語", dir: "ltr" },
     { code: "ko", abbr: "KO", name: "한국어", dir: "ltr" },
+    { code: "nl", abbr: "NL", name: "Nederlands", dir: "ltr" },
+    { code: "pl", abbr: "PL", name: "Polski", dir: "ltr" },
+    { code: "pt", abbr: "PT", name: "Português", dir: "ltr" },
+    { code: "ru", abbr: "RU", name: "Русский", dir: "ltr" },
+    { code: "th", abbr: "TH", name: "ไทย", dir: "ltr" },
+    { code: "tr", abbr: "TR", name: "Türkçe", dir: "ltr" },
+    { code: "uk", abbr: "UK", name: "Українська", dir: "ltr" },
+    { code: "vi", abbr: "VI", name: "Tiếng Việt", dir: "ltr" },
     { code: "zh", abbr: "ZH", name: "中文", dir: "ltr" }
   ];
 
@@ -125,6 +125,17 @@
     } catch (e) {}
   }
 
+  function syncLangLinks(code) {
+    var links = document.querySelectorAll("a[data-lang-link]");
+    for (var i = 0; i < links.length; i++) {
+      try {
+        var url = new URL(links[i].getAttribute("href"), root.location.href);
+        url.searchParams.set("lang", code);
+        links[i].setAttribute("href", url.pathname.split("/").pop() + url.search + url.hash);
+      } catch (e) {}
+    }
+  }
+
   function loadDict(code) {
     if (!dictCache[code]) {
       dictCache[code] = fetch("i18n/" + code + ".json").then(function (r) {
@@ -174,6 +185,7 @@
     current = code;
     updateSwitcher();
     syncUrl(code);
+    syncLangLinks(code);
     reveal();
   }
 
@@ -305,6 +317,7 @@
     }
     if (initial === DEFAULT_LOCALE) {
       syncUrl(initial);
+      syncLangLinks(initial);
       reveal(); // page is already English
       updateSwitcher();
     } else {

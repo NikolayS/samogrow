@@ -18,6 +18,8 @@
   "spec.eyebrow": "A colpo d'occhio",
   "spec.allin.label": "Hardware totale",
   "spec.allin.value": "~$232–311 (USA, varianti)",
+  "spec.eu.label": "Esempio Polonia / UE",
+  "spec.eu.value": "~$190–260 (USD, stima)",
   "spec.appliance.label": "Lato apparecchi",
   "spec.appliance.value": "$33–68",
   "spec.grow.label": "Lato coltivazione",

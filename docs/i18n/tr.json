@@ -18,6 +18,8 @@
   "spec.eyebrow": "Bir bakışta",
   "spec.allin.label": "Tüm donanım",
   "spec.allin.value": "~$232–311 (ABD, varyantlar)",
+  "spec.eu.label": "Polonya / AB örneği",
+  "spec.eu.value": "~$190–260 (USD, yaklaşık)",
   "spec.appliance.label": "Cihaz tarafı",
   "spec.appliance.value": "$33–68",
   "spec.grow.label": "Yetiştirme tarafı",

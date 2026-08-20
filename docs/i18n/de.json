@@ -18,6 +18,8 @@
   "spec.eyebrow": "Auf einen Blick",
   "spec.allin.label": "Hardware gesamt",
   "spec.allin.value": "~$232–311 (USA, Varianten)",
+  "spec.eu.label": "Beispiel Polen / EU",
+  "spec.eu.value": "~$190–260 (USD, grob)",
   "spec.appliance.label": "Geräteseite",
   "spec.appliance.value": "$33–68",
   "spec.grow.label": "Anbauseite",

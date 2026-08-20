@@ -18,6 +18,8 @@
   "spec.eyebrow": "لمحة سريعة",
   "spec.allin.label": "العتاد كاملًا",
   "spec.allin.value": "~$232–311 (الولايات المتحدة، حسب النسخة)",
+  "spec.eu.label": "مثال بولندا / الاتحاد الأوروبي",
+  "spec.eu.value": "~$190–260 (دولار، تقديري)",
   "spec.appliance.label": "جانب الأجهزة",
   "spec.appliance.value": "$33–68",
   "spec.grow.label": "جانب الزراعة",

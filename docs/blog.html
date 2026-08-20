@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Field notes and incident reports from the samogrow indoor herb garden.">
+  <title>samogrow incident blog</title>
+  <link rel="stylesheet" href="blog.css">
+  <script defer src="blog.js"></script>
+  <script defer src="i18n.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a class="brand" data-lang-link href="index.html">samo<b>grow</b> 🌿</a>
+      <a class="home" data-lang-link href="index.html">← samogrow.dev</a>
+      <div class="lang" id="lang-switcher">
+        <button type="button" class="lang-btn" id="lang-btn" aria-haspopup="listbox" aria-controls="lang-menu" aria-expanded="false"
+                aria-label="Language" data-i18n-attrs="aria-label:lang.switcher">
+          <svg class="lang-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <circle cx="12" cy="12" r="9"></circle><ellipse cx="12" cy="12" rx="4" ry="9"></ellipse><path d="M3.6 9h16.8M3.6 15h16.8"></path>
+          </svg>
+          <span id="lang-current">EN</span> ▾
+        </button>
+        <ul class="lang-menu" id="lang-menu" role="listbox" aria-label="Choose language"
+            data-i18n-attrs="aria-label:lang.listbox" hidden></ul>
+      </div>
+    </div>
+  </header>
+  <main id="blog-content"></main>
+</body>
+</html>
+

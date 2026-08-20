@@ -18,6 +18,8 @@
   "spec.eyebrow": "En un coup d'œil",
   "spec.allin.label": "Matériel tout compris",
   "spec.allin.value": "~$232–311 (États-Unis, selon variante)",
+  "spec.eu.label": "Exemple Pologne / UE",
+  "spec.eu.value": "~$190–260 (USD, estimation)",
   "spec.appliance.label": "Côté appareils",
   "spec.appliance.value": "$33–68",
   "spec.grow.label": "Côté culture",

@@ -18,6 +18,8 @@
   "spec.eyebrow": "สรุปย่อ",
   "spec.allin.label": "ฮาร์ดแวร์ทั้งหมด",
   "spec.allin.value": "~$232–311 (สหรัฐฯ ตามรุ่นที่เลือก)",
+  "spec.eu.label": "ตัวอย่างโปแลนด์ / สหภาพยุโรป",
+  "spec.eu.value": "~$190–260 (USD, โดยประมาณ)",
   "spec.appliance.label": "ฝั่งอุปกรณ์",
   "spec.appliance.value": "$33–68",
   "spec.grow.label": "ฝั่งการปลูก",

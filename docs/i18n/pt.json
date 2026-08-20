@@ -18,6 +18,8 @@
   "spec.eyebrow": "Em resumo",
   "spec.allin.label": "Hardware completo",
   "spec.allin.value": "~$232–311 (EUA, variantes)",
+  "spec.eu.label": "Exemplo Polónia / UE",
+  "spec.eu.value": "~$190–260 (USD, estimativa)",
   "spec.appliance.label": "Lado dos aparelhos",
   "spec.appliance.value": "$33–68",
   "spec.grow.label": "Lado do cultivo",

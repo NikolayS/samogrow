@@ -18,6 +18,8 @@
   "spec.eyebrow": "Коротко о главном",
   "spec.allin.label": "Всё железо",
   "spec.allin.value": "~$232–311 (США, варианты)",
+  "spec.eu.label": "Пример для Польши / ЕС",
+  "spec.eu.value": "~$190–260 (USD, грубо)",
   "spec.appliance.label": "Умная часть",
   "spec.appliance.value": "$33–68",
   "spec.grow.label": "Растительная часть",

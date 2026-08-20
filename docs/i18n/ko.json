@@ -18,6 +18,8 @@
   "spec.eyebrow": "한눈에 보기",
   "spec.allin.label": "하드웨어 총액",
   "spec.allin.value": "~$232–311 (미국, 구성별)",
+  "spec.eu.label": "폴란드 / EU 예시",
+  "spec.eu.value": "~$190–260 (USD, 추정)",
   "spec.appliance.label": "어플라이언스 쪽",
   "spec.appliance.value": "$33–68",
   "spec.grow.label": "재배 쪽",

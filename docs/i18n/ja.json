@@ -18,6 +18,8 @@
   "spec.eyebrow": "ひと目でわかる",
   "spec.allin.label": "ハードウェア総額",
   "spec.allin.value": "~$232–311（米国・構成による）",
+  "spec.eu.label": "ポーランド / EU の例",
+  "spec.eu.value": "~$190–260（USD、概算）",
   "spec.appliance.label": "アプライアンス側",
   "spec.appliance.value": "$33–68",
   "spec.grow.label": "栽培側",
