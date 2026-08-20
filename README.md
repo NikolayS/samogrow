@@ -31,7 +31,7 @@ On a timer during light hours, the brain pulls a camera snapshot, asks Claude fo
 - `research/` — market and parts research (commercial analogs, hydroponics methods, electronics, software stack)
 - `spec/` — the build spec (samospec-style): goal, architecture, BOM with prices, assembly plan, sprint plan
 - `software/` — the brain: control loop, camera + AI vision analysis, Telegram bot
-- `docs/` — the [project site](https://nikolays.github.io/samogrow/) (static GitHub Pages, no build step)
+- `docs/` — the [project site](https://nikolays.github.io/samogrow/) (static GitHub Pages, no deployment build step; npm is used only for tests)
 
 ## Website languages
 

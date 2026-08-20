@@ -286,7 +286,7 @@ const minimalPage = (initial = "en") => `<!doctype html>
   <button id="lang-btn" aria-expanded="false" aria-controls="lang-menu"><span id="lang-current">EN</span></button>
   <ul id="lang-menu" hidden></ul>
   <h2 data-i18n="sample">English sample</h2>
-  <img data-i18n-attrs="alt:sample.alt,src:sample.src" alt="English alt" src="safe.png">
+  <img data-i18n-attrs="alt:sample.alt,src:sample.src,constructor:sample.src" alt="English alt" src="safe.png">
 </body></html>`;
 
 const sampleDict = (code) => ({
@@ -350,7 +350,12 @@ test("switcher executes click and keyboard interactions with abbreviation-only o
   assert.equal(document.activeElement, button);
 
   button.click();
-  document.activeElement.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab", bubbles: true }));
+  document.activeElement.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab", bubbles: true, cancelable: true }));
+  assert.equal(menu.hidden, true);
+  assert.equal(document.activeElement, button);
+
+  button.click();
+  document.activeElement.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab", shiftKey: true, bubbles: true, cancelable: true }));
   assert.equal(menu.hidden, true);
   assert.equal(document.activeElement, button);
 
@@ -376,10 +381,11 @@ test("runtime applies translated DOM, metadata, attributes, and RTL direction", 
   assert.equal(document.querySelector("[data-i18n=sample]").textContent, "ar sample");
   assert.equal(document.querySelector("img").alt, "ar alt");
   assert.equal(document.querySelector("img").getAttribute("src"), "safe.png", "src is not an allowed translated attribute");
+  assert.equal(document.querySelector("img").getAttribute("constructor"), null, "prototype properties are not allowed attributes");
   assert.equal(document.documentElement.classList.contains("i18n-pending"), false);
 });
 
-test("failed fetch reveals English, forgets a manual choice, and evicts the cache", async () => {
+test("failed fetch reveals English, does not persist the failed choice, and evicts the cache", async () => {
   let calls = 0;
   const dom = runtimeDom({
     fetchImpl: async () => {
@@ -397,6 +403,22 @@ test("failed fetch reveals English, forgets a manual choice, and evicts the cach
   ru.click();
   await flush();
   assert.equal(calls, 2, "a rejected locale fetch must be evicted from the cache");
+  assert.equal(dom.window.document.documentElement.lang, "ru");
+  assert.equal(dom.window.localStorage.getItem(STORAGE_KEY), "ru");
+});
+
+test("failed manual switch preserves the last known-good saved preference", async () => {
+  const dom = runtimeDom({
+    initial: "ru",
+    stored: "ru",
+    fetchImpl: async (url) => {
+      if (url.endsWith("/ar.json")) throw new Error("offline");
+      return { ok: true, json: async () => sampleDict("ru") };
+    }
+  });
+  await flush();
+  dom.window.document.querySelector('[data-code="ar"]').click();
+  await flush();
   assert.equal(dom.window.document.documentElement.lang, "ru");
   assert.equal(dom.window.localStorage.getItem(STORAGE_KEY), "ru");
 });
@@ -448,10 +470,14 @@ function runBootstrap({ stored, languages = ["en-US"], storageThrows = false } =
   } else if (stored !== undefined) {
     dom.window.localStorage.setItem(STORAGE_KEY, stored);
   }
-  let timer;
-  dom.window.setTimeout = (callback) => { timer = callback; return 1; };
+  let timer, delay;
+  dom.window.setTimeout = (callback, milliseconds) => {
+    timer = callback;
+    delay = milliseconds;
+    return 1;
+  };
   dom.window.eval(bootstrapScript);
-  return { dom, timer };
+  return { dom, timer, delay };
 }
 
 test("pre-paint bootstrap and runtime matcher choose the same locale", () => {
@@ -487,8 +513,9 @@ test("loading-document branch initializes once on DOMContentLoaded", async () =>
   assert.equal(dom.window.document.querySelectorAll("[role=option]").length, 20);
 });
 
-test("pre-paint bootstrap safety timer reveals baked-in English", () => {
-  const { dom, timer } = runBootstrap({ languages: ["uk-UA"] });
+test("pre-paint bootstrap safety timer reveals baked-in English after 2000 ms", () => {
+  const { dom, timer, delay } = runBootstrap({ languages: ["uk-UA"] });
+  assert.equal(delay, 2000);
   assert.equal(dom.window.document.documentElement.classList.contains("i18n-pending"), true);
   timer();
   assert.equal(dom.window.document.documentElement.classList.contains("i18n-pending"), false);

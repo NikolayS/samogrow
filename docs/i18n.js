@@ -148,7 +148,7 @@
         if (sep < 0) continue;
         var attr = pairs[k].slice(0, sep).trim();
         var akey = pairs[k].slice(sep + 1).trim();
-        if (!ALLOWED_TRANSLATED_ATTRS[attr]) continue;
+        if (!Object.prototype.hasOwnProperty.call(ALLOWED_TRANSLATED_ATTRS, attr)) continue;
         if (Object.prototype.hasOwnProperty.call(dict, akey)) attrNodes[j].setAttribute(attr, dict[akey]);
       }
     }
@@ -169,9 +169,6 @@
     }, function (err) {
       if (requestId !== requestSeq) return;
       // Locale failed to load: never leave the page hidden or half-applied.
-      if (persist) {
-        try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
-      }
       reveal();
       if (root.console && console.warn) console.warn("samogrow i18n:", err);
     });
@@ -241,16 +238,17 @@
           setLocale(locale.code, true);
         } else if (e.key === "ArrowDown") {
           e.preventDefault();
-          (opts[Math.min(idx + 1, opts.length - 1)] || opts[0]).focus();
+          opts[Math.min(idx + 1, opts.length - 1)].focus();
         } else if (e.key === "ArrowUp") {
           e.preventDefault();
-          (opts[Math.max(idx - 1, 0)] || opts[0]).focus();
+          opts[Math.max(idx - 1, 0)].focus();
         } else if (e.key === "Home") {
           e.preventDefault(); opts[0].focus();
         } else if (e.key === "End") {
           e.preventDefault(); opts[opts.length - 1].focus();
         } else if (e.key === "Escape" || e.key === "Tab") {
-          closeMenu(e.key === "Escape");
+          e.preventDefault();
+          closeMenu(true);
         }
       });
       menu.appendChild(li);
