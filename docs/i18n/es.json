@@ -80,6 +80,7 @@
   "cmp.th.total": "Total 2 años",
   "cmp.yes": "sí",
   "cmp.no": "no",
+  "cmp.auk.note": "*Estimación de Auk, no un precio de caja: se incluyen nutrientes para los primeros ~6 meses y coco para un cultivo. El intervalo añade 2–3 recargas (usando el precio actual de Auk Mini porque aún no se han publicado los precios de recarga de Mini 2) y $12–48 de electricidad. Sin suscripción ni cápsulas propietarias; en EE. UU./Canadá el impuesto se añade al pagar, mientras que en Europa se incluyen IVA/impuestos y entrega.",
   "cost.note": "Aquí nada es una caja negra: semillas corrientes, código que puedes bifurcar y ningún fabricante que pueda jubilar tu huerto o poner la IA tras un muro de pago — como les pasó a los <b>dueños de AeroGarden, que se quedaron tirados</b> cuando la empresa cerró y la app y las cápsulas se fueron con ella. La cuenta a dos años es simplemente el recibo: ~$470 todo incluido, unos $1,245 por debajo de Gardyn (la única unidad comercial con cámara + IA de verdad) y por debajo incluso de un Click &amp; Grow.",
   "cost.ongoing.1": "/ año — plantas o semillas nuevas, recargas de pH. Las bolas de arcilla se reutilizan; un kit de nutrientes &amp; una bolsa de bolas duran años / ~10 montajes.",
   "cost.ongoing.2": "/ mes — visión con Claude Haiku, ~24–48 fotos al día.",

@@ -80,6 +80,7 @@
   "cmp.th.total": "Tổng 2 năm",
   "cmp.yes": "có",
   "cmp.no": "không",
+  "cmp.auk.note": "*Ước tính cho Auk, không phải giá lúc thanh toán: đã gồm dinh dưỡng cho ~6 tháng đầu và xơ dừa cho một vụ trồng. Khoảng này cộng 2–3 lần nạp lại (dùng giá Auk Mini hiện tại vì giá nạp lại Mini 2 chưa được công bố) và $12–48 tiền điện. Không có thuê bao hay viên trồng độc quyền; Mỹ/Canada cộng thuế khi thanh toán, còn châu Âu đã gồm VAT/thuế và giao hàng.",
   "cost.note": "Ở đây không có gì là hộp đen: hạt giống phổ thông, mã nguồn bạn fork được, và không có nhà cung cấp nào có thể khai tử khu vườn của bạn hay nhốt AI sau bức tường phí — như cách <b>người dùng AeroGarden bị bỏ rơi</b> khi công ty đóng cửa và ứng dụng cùng viên trồng biến mất theo. Phép tính hai năm chỉ là tờ hóa đơn: ~$470 tất tần tật, rẻ hơn Gardyn (máy thương mại duy nhất có camera + AI thực thụ) khoảng $1,245, và còn thấp hơn cả Click &amp; Grow.",
   "cost.ongoing.1": "/ năm — cây hoặc hạt giống mới, dung dịch pH châm thêm. Sỏi dùng lại được; một bộ dinh dưỡng &amp; một bao sỏi dùng nhiều năm / ~10 bộ lắp.",
   "cost.ongoing.2": "/ tháng — thị giác Claude Haiku, ~24–48 ảnh mỗi ngày.",

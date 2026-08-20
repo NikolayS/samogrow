@@ -766,6 +766,17 @@ test("Poland example caveats cover the compatibility and cost traps", () => {
   assert.ok(c.includes("Kasa") && c.includes("Tapo"), "must name the actually-supported hardware");
 });
 
+test("Auk comparison includes realistic recurring costs and capacity context", () => {
+  assert.match(indexHtml, /samogrow · 12 sites/);
+  assert.match(indexHtml, /Auk Mini 2 · 4 pots/);
+  assert.match(indexHtml, /~\$80–160\*/);
+  assert.match(indexHtml, /~\$310–390\*/);
+  const note = en["cmp.auk.note"];
+  for (const fact of ["~6 months", "2–3 refills", "$12–48", "not published", "No subscription", "tax", "VAT"]) {
+    assert.ok(note.includes(fact), `Auk caveat missing: ${fact}`);
+  }
+});
+
 test("new pricing/incident strings keep prices and links intact across all 20 locales", () => {
   // Covered structurally by the global parity tests; assert the new keys are present everywhere.
   const newKeys = Object.keys(en).filter((k) => k.startsWith("pl.") || k.startsWith("inc.") || k === "cost.us.note" || k === "nav.incidents");
