@@ -22,6 +22,7 @@ const blogJs = readFileSync(join(docs, "blog.js"), "utf8");
 const bootstrapJs = readFileSync(join(docs, "i18n-bootstrap.js"), "utf8");
 const blogPageFiles = ["blog.html", "incident-i1.html", "incident-i3.html", "incident-i5.html", "incident-i6.html"];
 const readme = readFileSync(join(docs, "..", "README.md"), "utf8");
+const spec = readFileSync(join(docs, "..", "spec", "SPEC.md"), "utf8");
 const localeFiles = readdirSync(join(docs, "i18n")).filter((f) => f.endsWith(".json")).sort();
 const dicts = Object.fromEntries(
   localeFiles.map((f) => [f.replace(/\.json$/, ""), JSON.parse(readFileSync(join(docs, "i18n", f), "utf8"))])
@@ -309,6 +310,7 @@ test("README documents URL-first locale precedence and a shareable example", () 
   assert.match(readme, /Locale precedence is a shareable `\?lang=<code>` URL parameter/);
   assert.match(readme, /https:\/\/samogrow\.dev\/\?lang=uk#incidents/);
   assert.match(readme, /without reloading or losing other query parameters or the page anchor/);
+  assert.match(readme, /pre-paint `codes` roster in `docs\/i18n-bootstrap\.js`/);
 });
 
 // ---------- executable browser-runtime coverage ----------
@@ -321,6 +323,7 @@ const minimalPage = (initial = "en") => `<!doctype html>
   <ul id="lang-menu" hidden></ul>
   <a data-lang-link href="blog.html">Blog</a>
   <a data-lang-link href="notes/post.html#evidence">Nested post</a>
+  <a data-lang-link href="https://example.com/vendor">External vendor</a>
   <h2 data-i18n="sample">English sample</h2>
   <img data-i18n-attrs="alt:sample.alt,src:sample.src,constructor:sample.src" alt="English alt" src="safe.png">
 </body></html>`;
@@ -430,7 +433,7 @@ test("manual switch updates the shareable URL without dropping query parameters 
   assert.equal(dom.window.location.hash, "#incidents");
   assert.equal(dom.window.localStorage.getItem(STORAGE_KEY), "uk");
   const links = [...dom.window.document.querySelectorAll('a[data-lang-link]')].map((a) => a.getAttribute("href"));
-  assert.deepEqual(links, ["/blog.html?lang=uk", "/notes/post.html?lang=uk#evidence"]);
+  assert.deepEqual(links, ["/blog.html?lang=uk", "/notes/post.html?lang=uk#evidence", "https://example.com/vendor"]);
 });
 
 test("auto-detected locale is added to the URL for sharing", async () => {
@@ -439,6 +442,21 @@ test("auto-detected locale is added to the URL for sharing", async () => {
   assert.equal(dom.window.document.documentElement.lang, "ru");
   assert.equal(dom.window.location.search, "?lang=ru");
   assert.equal(dom.window.location.hash, "#how");
+});
+
+test("default English and invalid-query fallback are reflected in the share URL", async () => {
+  const english = runtimeDom({ initial: null, languages: ["xx-ZZ"], url: "https://samogrow.test/#how" });
+  await flush();
+  assert.equal(english.window.document.documentElement.lang, "en");
+  assert.equal(english.window.location.search, "?lang=en");
+  assert.equal(english.window.location.hash, "#how");
+
+  const stored = runtimeDom({ initial: null, stored: "fr", languages: ["es-ES"],
+    url: "https://samogrow.test/?campaign=launch&lang=bogus#cost" });
+  await flush();
+  assert.equal(stored.window.document.documentElement.lang, "fr");
+  assert.equal(stored.window.location.search, "?campaign=launch&lang=fr");
+  assert.equal(stored.window.location.hash, "#cost");
 });
 
 test("runtime applies translated DOM, metadata, attributes, and RTL direction", async () => {
@@ -792,6 +810,11 @@ test("Auk comparison includes realistic recurring costs and capacity context", (
       assert.ok(dict["cmp.auk.note"].includes(fact), `${code} Auk caveat missing: ${fact}`);
     }
     assert.match(dict["cmp.auk.note"], /Mini[- ]2/, `${code} Auk caveat missing Mini 2`);
+  }
+  assert.match(spec, /Auk Mini 2 \| ~\$229 \| ~\$80–120 .*\| \*\*~\$310–350\*\*/,
+    "SPEC Auk comparison must match the website range");
+  for (const fact of ["$0.5–2/month", "~$12–48", "~$320–400", "Electricity is excluded from every row"]) {
+    assert.ok(spec.includes(fact), `SPEC Auk caveat missing: ${fact}`);
   }
 });
 

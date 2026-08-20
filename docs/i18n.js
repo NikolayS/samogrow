@@ -130,6 +130,7 @@
     for (var i = 0; i < links.length; i++) {
       try {
         var url = new URL(links[i].getAttribute("href"), root.location.href);
+        if (url.origin !== root.location.origin) continue;
         url.searchParams.set("lang", code);
         links[i].setAttribute("href", url.pathname + url.search + url.hash);
       } catch (e) {}
@@ -318,6 +319,10 @@
         : [navigator.language || DEFAULT_LOCALE]);
     }
     if (initial === DEFAULT_LOCALE) {
+      var locale = findLocale(initial);
+      document.documentElement.lang = initial;
+      document.documentElement.dir = locale.dir;
+      current = initial;
       syncUrl(initial);
       syncLangLinks(initial);
       reveal(); // page is already English
