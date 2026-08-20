@@ -423,39 +423,7 @@
   .d1{animation-delay:.05s}.d2{animation-delay:.15s}.d3{animation-delay:.28s}.d4{animation-delay:.4s}
   @media (prefers-reduced-motion: reduce) { .fade { animation: none; opacity: 1; transform: none; } }
 </style>
-<script>
-  // i18n bootstrap: pick the locale before first paint so a non-English visit
-  // doesn't flash English. This matcher intentionally mirrors matchLocale() in
-  // i18n.js; the test suite runs both over the same cases and enforces roster
-  // parity. Baked-in English remains the fallback if a locale cannot load.
-  (function () {
-    var codes = ["en","es","fr","de","it","pt","nl","pl","ru","uk","tr","ar","hi","bn","id","vi","th","ja","ko","zh"];
-    function match(tag) {
-      var normalized = String(tag || "").toLowerCase();
-      if (codes.indexOf(normalized) >= 0) return normalized;
-      var base = normalized.split("-")[0];
-      return codes.indexOf(base) >= 0 ? base : null;
-    }
-    var pick = null;
-    try { pick = localStorage.getItem("samogrow-lang"); } catch (e) {}
-    pick = match(pick);
-    if (!pick) {
-      var prefs = (navigator.languages && navigator.languages.length) ? navigator.languages : [navigator.language || "en"];
-      for (var i = 0; i < prefs.length && !pick; i++) {
-        pick = match(prefs[i]);
-      }
-    }
-    document.documentElement.setAttribute("data-i18n-initial", pick || "en");
-    if (pick && pick !== "en") {
-      document.documentElement.classList.add("i18n-pending");
-      // Safety valve: never keep the page hidden if the locale fails to load.
-      window.__samogrowI18nTimer = setTimeout(function () {
-        document.documentElement.classList.remove("i18n-pending");
-        window.__samogrowI18nTimer = null;
-      }, 2000);
-    }
-  })();
-</script>
+<script src="i18n-bootstrap.js"></script>
 
 <div class="wrap">
   <div class="topbar">
@@ -466,7 +434,7 @@
         <a href="#cost" data-i18n="nav.cost">Cost</a>
         <a href="#features" data-i18n="nav.features">Features</a>
         <a href="#start" data-i18n="nav.start">Quickstart</a>
-        <a href="#incidents" data-i18n="nav.incidents">Incidents</a>
+        <a href="blog.html" data-lang-link data-i18n="nav.incidents">Incidents</a>
         <a href="https://github.com/NikolayS/samogrow" data-i18n="nav.github">GitHub ↗</a>
       </nav>
       <div class="lang" id="lang-switcher">
@@ -514,6 +482,7 @@
         <aside class="spec-card fade d4">
           <span class="eyebrow" data-i18n="spec.eyebrow">At a glance</span>
           <div class="spec-row"><span data-i18n="spec.allin.label">All-in hardware</span><span class="hi" data-i18n="spec.allin.value">~$232–311 (U.S., variants)</span></div>
+          <div class="spec-row"><span data-i18n="spec.eu.label">Poland / EU example</span><span class="hi" data-i18n="spec.eu.value">~$190–260 (USD, rough)</span></div>
           <div class="spec-row"><span data-i18n="spec.appliance.label">Appliance side</span><span data-i18n="spec.appliance.value">$33–68</span></div>
           <div class="spec-row"><span data-i18n="spec.grow.label">Grow side</span><span data-i18n="spec.grow.value">$205–211</span></div>
           <div class="spec-row"><span data-i18n="spec.consumables.label">Consumables</span><span data-i18n="spec.consumables.value">~$35 / yr</span></div>
@@ -658,13 +627,14 @@
                 <tr><th data-i18n="cmp.th.system">System</th><th data-i18n="cmp.th.hardware">Hardware</th><th data-i18n="cmp.th.extras">2-yr extras</th><th data-i18n="cmp.th.ai">AI</th><th data-i18n="cmp.th.total">2-yr total</th></tr>
               </thead>
               <tbody>
-                <tr class="us"><td>samogrow</td><td>$280</td><td>$190</td><td class="yes" data-i18n="cmp.yes">yes</td><td>~$470</td></tr>
-                <tr><td>Gardyn Home 4</td><td>$899</td><td>$816</td><td class="yes" data-i18n="cmp.yes">yes</td><td>~$1,715</td></tr>
-                <tr><td>Click &amp; Grow SG9</td><td>$200</td><td>$400</td><td class="no" data-i18n="cmp.no">no</td><td>~$600</td></tr>
-                <tr><td>Auk Mini 2</td><td>$229</td><td>$0</td><td class="no" data-i18n="cmp.no">no</td><td>~$229</td></tr>
+                <tr class="us"><td>samogrow · 6 <span data-i18n="cmp.sites">sites</span></td><td>$280</td><td>$70 + $120 <span data-i18n="cmp.th.ai">AI</span></td><td class="yes" data-i18n="cmp.yes">yes</td><td>~$470</td></tr>
+                <tr><td>Gardyn Home 4 · 30 <span data-i18n="cmp.sites">sites</span></td><td>$899</td><td>$816</td><td class="yes" data-i18n="cmp.yes">yes</td><td>~$1,715</td></tr>
+                <tr><td>Click &amp; Grow SG9 · 9 <span data-i18n="cmp.sites">sites</span></td><td>$200</td><td>$400</td><td class="no" data-i18n="cmp.no">no</td><td>~$600</td></tr>
+                <tr><td>Auk Mini 2 · 4 <span data-i18n="cmp.pots">pots</span></td><td>$229</td><td>~$80–120*</td><td class="no" data-i18n="cmp.no">no</td><td>~$310–350*</td></tr>
               </tbody>
             </table>
           </div>
+          <p class="fine" data-i18n="cmp.auk.note">*Auk estimate, not a checkout quote: the first ~6 months of nutrients and one crop's coco are included. The range adds 2–3 refills using current Auk Mini pricing because Mini 2 refill prices are not published. Electricity is excluded from every table row; Auk publishes $0.5–2/month (~$12–48 over two years), putting its power-inclusive total around ~$320–400. No subscription or proprietary pods; U.S./Canada tax is added at checkout, while European VAT/taxes and delivery are included.</p>
           <p class="cmp-note" data-i18n="cost.note">
             Nothing here is a black box: commodity seeds, code you can fork, and no vendor who can
             deprecate your garden or move the AI behind a paywall — the way <b>AeroGarden owners were
@@ -863,87 +833,9 @@
       </div>
       <p class="sec-sub" data-i18n="inc.sub">
         Real gardens produce real incidents, and we run them like production outages: dated,
-        severity-tagged, blameless, and written up in public. These four are from the first
-        physical V1 build — each links to the full story and root-cause analysis on GitHub.
+        severity-tagged, blameless, and written up in public.
       </p>
-
-      <div class="inc-grid">
-        <article class="inc-card">
-          <figure>
-            <img src="img/incidents/2026-07-13-reservoir-128x10.jpeg" loading="lazy" width="1600" height="880"
-                 alt="Evidence photo from incident I-1: a handheld TDS meter held over the DWC reservoir reads 128 with the small ×10 multiplier flag lit — the reading that revealed the tenfold nutrient overdose."
-                 data-i18n-attrs="alt:inc.i1.alt">
-            <figcaption class="inc-cap" data-i18n="inc.i1.cap">The smoking gun: 128 on the display, ×10 flag lit — 1,280 ppm in the reservoir.</figcaption>
-          </figure>
-          <div class="inc-body">
-            <div class="inc-meta"><span class="inc-id">I-1</span><span class="inc-date">2026-07-13</span><span class="inc-sev">SEV-2</span></div>
-            <h3 data-i18n="inc.i1.title">The ×10 incident — a tenfold nutrient overdose</h3>
-            <p class="inc-story" data-i18n="inc.i1.story">The cheap TDS pen showed “115” and nobody noticed the tiny <span class="code">×10</span> flag next to it. The reservoir was dosed as if the water were ten times cleaner than it was, and the salt concentration burned the plants within days.</p>
-            <ul class="inc-facts">
-              <li data-i18n="inc.i1.impact"><b>Impact:</b> salt burn across the tote — necrotic mint, declining parsley; the most expensive lesson of the field test.</li>
-              <li data-i18n="inc.i1.lesson"><b>Lesson:</b> always read the multiplier flag and relay true ppm; a units-validation step now guards every reported reading.</li>
-            </ul>
-            <p class="inc-link"><a href="https://github.com/NikolayS/samogrow/issues/3" target="_blank" rel="noopener" data-i18n="inc.readmore">Full write-up &amp; RCA on GitHub →</a></p>
-          </div>
-        </article>
-
-        <article class="inc-card">
-          <figure>
-            <img src="img/incidents/2026-07-24-pest-frass-macro.jpeg" loading="lazy" width="1600" height="862"
-                 alt="Evidence photo from incident I-3: macro shot of black frass pellets — caterpillar droppings — scattered on the yellow reservoir lid, the clue that finally revealed the hidden leafroller."
-                 data-i18n-attrs="alt:inc.i3.alt">
-            <figcaption class="inc-cap" data-i18n="inc.i3.cap">Not soil: frass on the lid — the droppings that gave the nocturnal caterpillar away.</figcaption>
-          </figure>
-          <div class="inc-body">
-            <div class="inc-meta"><span class="inc-id">I-3</span><span class="inc-date">2026-07-24</span><span class="inc-sev">SEV-3</span></div>
-            <h3 data-i18n="inc.i3.title">The leafroller — a stowaway on a transplant</h3>
-            <p class="inc-story" data-i18n="inc.i3.story">A caterpillar hitchhiked in on a garden-center transplant and spent two weeks eating mint by night, hiding in a silked rolled leaf by day. It was never seen in the act — the case was cracked from its droppings accumulating on the lid.</p>
-            <ul class="inc-facts">
-              <li data-i18n="inc.i3.impact"><b>Impact:</b> one mint stem stripped bare, chewed mint and basil leaves; no plant lost.</li>
-              <li data-i18n="inc.i3.lesson"><b>Lesson:</b> transplants import pests — inspect and quarantine new plants, and treat frass as a first-class alarm signal.</li>
-            </ul>
-            <p class="inc-link"><a href="https://github.com/NikolayS/samogrow/issues/6" target="_blank" rel="noopener" data-i18n="inc.readmore">Full write-up &amp; RCA on GitHub →</a></p>
-          </div>
-        </article>
-
-        <article class="inc-card">
-          <figure>
-            <img src="img/incidents/2026-08-12-aphids-parsley.jpeg" loading="lazy" width="1500" height="1275"
-                 alt="Evidence photo from incident I-5: close-up of grey-green aphids clustered along parsley stems and leaves, with fine pale stippling on the foliage."
-                 data-i18n-attrs="alt:inc.i5.alt">
-            <figcaption class="inc-cap" data-i18n="inc.i5.cap">Aphid clusters on the parsley — invisible to the overhead camera, obvious in the hand.</figcaption>
-          </figure>
-          <div class="inc-body">
-            <div class="inc-meta"><span class="inc-id">I-5</span><span class="inc-date">2026-08-12</span><span class="inc-sev">SEV-3</span></div>
-            <h3 data-i18n="inc.i5.title">Aphids the camera never saw</h3>
-            <p class="inc-story" data-i18n="inc.i5.story">Sap-sucking aphids colonized the parsley and basil, cupping the basil's new growth. The automated camera checks are blind to pests this small — a hands-on leaf inspection found them, days after an early warning (“a few small flies”) went unacted-on.</p>
-            <ul class="inc-facts">
-              <li data-i18n="inc.i5.impact"><b>Impact:</b> distorted basil growth and stippled parsley; recoverable, no plant lost.</li>
-              <li data-i18n="inc.i5.lesson"><b>Lesson:</b> the camera is not a pest sensor — schedule human leaf checks, and act on small anomalies instead of filing them away.</li>
-            </ul>
-            <p class="inc-link"><a href="https://github.com/NikolayS/samogrow/issues/10" target="_blank" rel="noopener" data-i18n="inc.readmore">Full write-up &amp; RCA on GitHub →</a></p>
-          </div>
-        </article>
-
-        <article class="inc-card">
-          <figure>
-            <img src="img/incidents/2026-08-18-neem-burn-basil.jpeg" loading="lazy" width="1500" height="1200"
-                 alt="Evidence photo from incident I-6: basil leaves with large bronze-brown necrotic scorch patches across the leaf surfaces — oil phototoxicity damage from a neem spray applied under the grow light."
-                 data-i18n-attrs="alt:inc.i6.alt">
-            <figcaption class="inc-cap" data-i18n="inc.i6.cap">Bronze scorch on the basil, three days after a neem spray under a lit grow light.</figcaption>
-          </figure>
-          <div class="inc-body">
-            <div class="inc-meta"><span class="inc-id">I-6</span><span class="inc-date">2026-08-15</span><span class="inc-sev">SEV-3</span></div>
-            <h3 data-i18n="inc.i6.title">Neem under the light — the self-inflicted burn</h3>
-            <p class="inc-story" data-i18n="inc.i6.story">Treating the aphids, we sprayed neem oil once (~2026-08-15) with the grow light ON. Neem is phototoxic: oil film plus radiant light scorched the basil and mint. Damage surfaced 2026-08-18; the RCA landed 2026-08-20. The pest treatment worked — and caused the next incident.</p>
-            <ul class="inc-facts">
-              <li data-i18n="inc.i6.impact"><b>Impact:</b> bronze necrotic patches on basil (worst) and mint; leaf-level only, recovering.</li>
-              <li data-i18n="inc.i6.lesson"><b>Lesson:</b> lights OFF before spraying any oil — a hard precondition now written into the treatment guidance, not a footnote.</li>
-            </ul>
-            <p class="inc-link"><a href="https://github.com/NikolayS/samogrow/issues/11" target="_blank" rel="noopener" data-i18n="inc.readmore">Full write-up &amp; RCA on GitHub →</a></p>
-          </div>
-        </article>
-      </div>
+      <p class="inc-link"><a data-lang-link href="blog.html" data-i18n="inc.title">The incident blog</a> →</p>
     </div>
   </section>
 

@@ -13,10 +13,16 @@ const docs = dirname(fileURLToPath(import.meta.url));
 const require = createRequire(import.meta.url);
 const I18N = require(join(docs, "i18n.js"));
 
-const { LOCALES, CODES, chooseLocale, matchLocale, optionLabel, STORAGE_KEY } = I18N;
+const { LOCALES, CODES, chooseLocale, matchLocale, queryLocale, optionLabel, STORAGE_KEY } = I18N;
 
 const indexHtml = readFileSync(join(docs, "index.html"), "utf8");
 const i18nJs = readFileSync(join(docs, "i18n.js"), "utf8");
+const blogHtml = readFileSync(join(docs, "blog.html"), "utf8");
+const blogJs = readFileSync(join(docs, "blog.js"), "utf8");
+const bootstrapJs = readFileSync(join(docs, "i18n-bootstrap.js"), "utf8");
+const blogPageFiles = ["blog.html", "incident-i1.html", "incident-i3.html", "incident-i5.html", "incident-i6.html"];
+const readme = readFileSync(join(docs, "..", "README.md"), "utf8");
+const spec = readFileSync(join(docs, "..", "spec", "SPEC.md"), "utf8");
 const localeFiles = readdirSync(join(docs, "i18n")).filter((f) => f.endsWith(".json")).sort();
 const dicts = Object.fromEntries(
   localeFiles.map((f) => [f.replace(/\.json$/, ""), JSON.parse(readFileSync(join(docs, "i18n", f), "utf8"))])
@@ -41,6 +47,11 @@ test("required locales present: en, ru, uk", () => {
 test("locale codes are unique lowercase language subtags", () => {
   assert.equal(new Set(CODES).size, 20);
   for (const code of CODES) assert.match(code, /^[a-z]{2,3}$/);
+});
+
+test("language switcher is alphabetically ordered by its visible abbreviation", () => {
+  const abbrs = LOCALES.map((l) => l.abbr);
+  assert.deepEqual(abbrs, [...abbrs].sort((a, b) => a.localeCompare(b, "en")));
 });
 
 test("switcher labels are unique 2–3 letter abbreviations (no flags)", () => {
@@ -197,6 +208,12 @@ const usedKeys = new Set(
     )
   )
 );
+for (const key of ["inc.title", "inc.eyebrow", "inc.sub", "inc.readmore"]) usedKeys.add(key);
+for (const incident of ["i1", "i3", "i5", "i6"]) {
+  for (const part of ["title", "story", "impact", "lesson", "alt", "cap"]) {
+    usedKeys.add(`inc.${incident}.${part}`);
+  }
+}
 
 test("every data-i18n key in index.html exists in en.json", () => {
   for (const k of usedKeys) assert.ok(k in en, `index.html references missing key ${k}`);
@@ -209,11 +226,15 @@ test("every en.json key is used by index.html or the JS runtime", () => {
   }
 });
 
-test("bootstrap code list in index.html matches LOCALES in i18n.js", () => {
-  const m = indexHtml.match(/var codes = \[([^\]]+)\]/);
-  assert.ok(m, "bootstrap codes array not found in index.html");
+test("shared bootstrap code list matches LOCALES and is loaded by every page", () => {
+  const m = bootstrapJs.match(/var codes = \[([^\]]+)\]/);
+  assert.ok(m, "bootstrap codes array not found");
   const bootCodes = m[1].split(",").map((s) => s.trim().replace(/"/g, ""));
   assert.deepEqual(bootCodes, CODES);
+  for (const file of ["index.html", ...blogPageFiles]) {
+    const html = file === "index.html" ? indexHtml : readFileSync(join(docs, file), "utf8");
+    assert.match(html, /<script src="i18n-bootstrap\.js"><\/script>/, `${file} missing pre-paint bootstrap`);
+  }
 });
 
 test("English defaults baked into index.html match en.json (no drift)", () => {
@@ -265,6 +286,14 @@ test("first matching navigator language wins, in order", () => {
   assert.equal(chooseLocale(null, ["ar-EG", "en"]), "ar");
 });
 
+test("lang query parameter accepts exact and regional locale tags", () => {
+  assert.equal(queryLocale("?lang=ru"), "ru");
+  assert.equal(queryLocale("?campaign=launch&lang=pt-BR"), "pt");
+  assert.equal(queryLocale("?lang=UK"), "uk");
+  assert.equal(queryLocale("?lang=xx"), null);
+  assert.equal(queryLocale(""), null);
+});
+
 test("falls back to English when nothing matches", () => {
   assert.equal(chooseLocale(null, ["eo", "tlh"]), "en");
   assert.equal(chooseLocale(null, []), "en");
@@ -274,7 +303,14 @@ test("falls back to English when nothing matches", () => {
 test("persistence uses a stable storage key wired into the runtime", () => {
   assert.equal(STORAGE_KEY, "samogrow-lang");
   assert.match(i18nJs, /localStorage\.setItem\(STORAGE_KEY/);
-  assert.match(indexHtml, /localStorage\.getItem\("samogrow-lang"\)/);
+  assert.match(bootstrapJs, /localStorage\.getItem\("samogrow-lang"\)/);
+});
+
+test("README documents URL-first locale precedence and a shareable example", () => {
+  assert.match(readme, /Locale precedence is a shareable `\?lang=<code>` URL parameter/);
+  assert.match(readme, /https:\/\/samogrow\.dev\/\?lang=uk#incidents/);
+  assert.match(readme, /without reloading or losing other query parameters or the page anchor/);
+  assert.match(readme, /pre-paint `codes` roster in `docs\/i18n-bootstrap\.js`/);
 });
 
 // ---------- executable browser-runtime coverage ----------
@@ -285,6 +321,9 @@ const minimalPage = (initial = "en") => `<!doctype html>
 <body>
   <button id="lang-btn" aria-expanded="false" aria-controls="lang-menu"><span id="lang-current">EN</span></button>
   <ul id="lang-menu" hidden></ul>
+  <a data-lang-link href="blog.html">Blog</a>
+  <a data-lang-link href="notes/post.html#evidence">Nested post</a>
+  <a data-lang-link href="https://example.com/vendor">External vendor</a>
   <h2 data-i18n="sample">English sample</h2>
   <img data-i18n-attrs="alt:sample.alt,src:sample.src,constructor:sample.src" alt="English alt" src="safe.png">
 </body></html>`;
@@ -302,9 +341,10 @@ const flush = async () => {
   await new Promise((resolve) => setTimeout(resolve, 0));
 };
 
-function runtimeDom({ initial = "en", languages = ["en-US"], stored, storageThrows = false, fetchImpl } = {}) {
+function runtimeDom({ initial = "en", languages = ["en-US"], stored, storageThrows = false, fetchImpl,
+  url = "https://samogrow.test/" } = {}) {
   const dom = new JSDOM(minimalPage(initial), {
-    url: "https://samogrow.test/",
+    url,
     runScripts: "outside-only",
     pretendToBeVisual: true
   });
@@ -344,7 +384,7 @@ test("switcher executes click and keyboard interactions with abbreviation-only o
   document.activeElement.dispatchEvent(new KeyboardEvent("keydown", { key: "End", bubbles: true }));
   assert.equal(document.activeElement.dataset.code, "zh");
   document.activeElement.dispatchEvent(new KeyboardEvent("keydown", { key: "Home", bubbles: true }));
-  assert.equal(document.activeElement.dataset.code, "en");
+  assert.equal(document.activeElement.dataset.code, "ar");
   document.activeElement.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
   assert.equal(menu.hidden, true);
   assert.equal(document.activeElement, button);
@@ -367,7 +407,56 @@ test("switcher executes click and keyboard interactions with abbreviation-only o
   assert.equal(document.documentElement.lang, "ru");
   assert.equal(document.querySelector("#lang-current").textContent, "RU");
   assert.equal(dom.window.localStorage.getItem(STORAGE_KEY), "ru");
+  assert.equal(dom.window.location.search, "?lang=ru");
   assert.equal(options.find((option) => option.dataset.code === "ru").getAttribute("aria-selected"), "true");
+});
+
+test("URL locale overrides stored and browser choices and is canonicalized", async () => {
+  const dom = runtimeDom({
+    initial: "de",
+    stored: "fr",
+    languages: ["es-ES"],
+    url: "https://samogrow.test/?campaign=launch&lang=pt-BR#cost"
+  });
+  await flush();
+  assert.equal(dom.window.document.documentElement.lang, "pt");
+  assert.equal(dom.window.location.search, "?campaign=launch&lang=pt");
+  assert.equal(dom.window.location.hash, "#cost");
+  assert.equal(dom.window.localStorage.getItem(STORAGE_KEY), "fr", "URL selection must not overwrite the saved manual preference");
+});
+
+test("manual switch updates the shareable URL without dropping query parameters or hash", async () => {
+  const dom = runtimeDom({ url: "https://samogrow.test/?ref=newsletter#incidents" });
+  dom.window.document.querySelector('[data-code="uk"]').click();
+  await flush();
+  assert.equal(dom.window.location.search, "?ref=newsletter&lang=uk");
+  assert.equal(dom.window.location.hash, "#incidents");
+  assert.equal(dom.window.localStorage.getItem(STORAGE_KEY), "uk");
+  const links = [...dom.window.document.querySelectorAll('a[data-lang-link]')].map((a) => a.getAttribute("href"));
+  assert.deepEqual(links, ["/blog.html?lang=uk", "/notes/post.html?lang=uk#evidence", "https://example.com/vendor"]);
+});
+
+test("auto-detected locale is added to the URL for sharing", async () => {
+  const dom = runtimeDom({ initial: null, languages: ["ru-RU"], url: "https://samogrow.test/#how" });
+  await flush();
+  assert.equal(dom.window.document.documentElement.lang, "ru");
+  assert.equal(dom.window.location.search, "?lang=ru");
+  assert.equal(dom.window.location.hash, "#how");
+});
+
+test("default English and invalid-query fallback are reflected in the share URL", async () => {
+  const english = runtimeDom({ initial: null, languages: ["xx-ZZ"], url: "https://samogrow.test/#how" });
+  await flush();
+  assert.equal(english.window.document.documentElement.lang, "en");
+  assert.equal(english.window.location.search, "?lang=en");
+  assert.equal(english.window.location.hash, "#how");
+
+  const stored = runtimeDom({ initial: null, stored: "fr", languages: ["es-ES"],
+    url: "https://samogrow.test/?campaign=launch&lang=bogus#cost" });
+  await flush();
+  assert.equal(stored.window.document.documentElement.lang, "fr");
+  assert.equal(stored.window.location.search, "?campaign=launch&lang=fr");
+  assert.equal(stored.window.location.hash, "#cost");
 });
 
 test("runtime applies translated DOM, metadata, attributes, and RTL direction", async () => {
@@ -424,11 +513,17 @@ test("failed manual switch preserves the last known-good saved preference", asyn
 });
 
 test("non-ok locale response takes the same safe fallback path", async () => {
-  const dom = runtimeDom({ initial: "uk", fetchImpl: async () => ({ ok: false, status: 404 }) });
+  const dom = runtimeDom({
+    initial: "uk",
+    url: "https://samogrow.test/?lang=uk#how",
+    fetchImpl: async () => ({ ok: false, status: 404 })
+  });
   await flush();
   assert.equal(dom.window.document.documentElement.lang, "");
   assert.equal(dom.window.document.querySelector("#lang-current").textContent, "EN");
   assert.equal(dom.window.document.documentElement.classList.contains("i18n-pending"), false);
+  assert.equal(dom.window.location.search, "?lang=en", "failed locale must not leave a misleading share URL");
+  assert.equal(dom.window.location.hash, "#how");
 });
 
 test("a stale fetch cannot overwrite a newer locale selection", async () => {
@@ -456,11 +551,12 @@ test("disabled localStorage falls back to navigator language without throwing", 
   assert.equal(dom.window.document.querySelector("#lang-current").textContent, "UK");
 });
 
-const bootstrapScript = indexHtml.match(/<script>\s*(\/\/ i18n bootstrap[\s\S]*?)<\/script>/)?.[1];
+const bootstrapScript = bootstrapJs;
 
-function runBootstrap({ stored, languages = ["en-US"], storageThrows = false } = {}) {
+function runBootstrap({ stored, languages = ["en-US"], storageThrows = false,
+  url = "https://samogrow.test/" } = {}) {
   const dom = new JSDOM("<!doctype html><html><body></body></html>", {
-    url: "https://samogrow.test/",
+    url,
     runScripts: "outside-only"
   });
   Object.defineProperty(dom.window.navigator, "languages", { value: languages, configurable: true });
@@ -498,6 +594,16 @@ test("pre-paint bootstrap and runtime matcher choose the same locale", () => {
   }
 });
 
+test("pre-paint bootstrap gives ?lang= precedence over storage and browser settings", () => {
+  const { dom } = runBootstrap({
+    stored: "de",
+    languages: ["fr-FR"],
+    url: "https://samogrow.test/?lang=uk#incidents"
+  });
+  assert.equal(dom.window.document.documentElement.dataset.i18nInitial, "uk");
+  assert.equal(dom.window.document.documentElement.classList.contains("i18n-pending"), true);
+});
+
 test("loading-document branch initializes once on DOMContentLoaded", async () => {
   const dom = new JSDOM(minimalPage("en"), {
     url: "https://samogrow.test/",
@@ -525,27 +631,84 @@ test("pre-paint bootstrap safety timer reveals baked-in English after 2000 ms", 
 // ---------- incident blog ----------
 
 const INCIDENTS = [
-  { id: "I-1", date: "2026-07-13", sev: "SEV-2", issue: "https://github.com/NikolayS/samogrow/issues/3",
+  { id: "I-1", date: "2026-07-13", sev: "SEV-2", file: "incident-i1.html", issue: "https://github.com/NikolayS/samogrow/issues/3",
     img: "img/incidents/2026-07-13-reservoir-128x10.jpeg", key: "i1" },
-  { id: "I-3", date: "2026-07-24", sev: "SEV-3", issue: "https://github.com/NikolayS/samogrow/issues/6",
+  { id: "I-3", date: "2026-07-24", sev: "SEV-3", file: "incident-i3.html", issue: "https://github.com/NikolayS/samogrow/issues/6",
     img: "img/incidents/2026-07-24-pest-frass-macro.jpeg", key: "i3" },
-  { id: "I-5", date: "2026-08-12", sev: "SEV-3", issue: "https://github.com/NikolayS/samogrow/issues/10",
+  { id: "I-5", date: "2026-08-12", sev: "SEV-3", file: "incident-i5.html", issue: "https://github.com/NikolayS/samogrow/issues/10",
     img: "img/incidents/2026-08-12-aphids-parsley.jpeg", key: "i5" },
-  { id: "I-6", date: "2026-08-15", sev: "SEV-3", issue: "https://github.com/NikolayS/samogrow/issues/11",
+  { id: "I-6", date: "2026-08-15", sev: "SEV-3", file: "incident-i6.html", issue: "https://github.com/NikolayS/samogrow/issues/11",
     img: "img/incidents/2026-08-18-neem-burn-basil.jpeg", key: "i6" },
 ];
 
-test("incident section exists, is in the nav, and carries all four dated incidents", () => {
-  assert.match(indexHtml, /<section id="incidents">/);
-  assert.match(indexHtml, /<a href="#incidents" data-i18n="nav.incidents">/);
-  const section = indexHtml.slice(indexHtml.indexOf('<section id="incidents">'), indexHtml.indexOf("<!-- MEME WALL"));
-  assert.equal((section.match(/class="inc-card"/g) || []).length, 4);
+function runBlog(file = "blog.html", url = `https://samogrow.test/${file}`) {
+  const dom = new JSDOM(readFileSync(join(docs, file), "utf8"), { url, runScripts: "outside-only" });
+  dom.window.eval(blogJs);
+  return dom;
+}
+
+test("blog.js executes the index and renders four correctly wired cards", () => {
+  const dom = runBlog();
+  const cards = [...dom.window.document.querySelectorAll(".post-card")];
+  assert.equal(cards.length, 4);
+  for (const [index, inc] of INCIDENTS.entries()) {
+    const card = cards[index];
+    assert.equal(card.getAttribute("href"), inc.file);
+    assert.equal(card.querySelector("img").getAttribute("src"), inc.img);
+    assert.equal(card.querySelector("h2").dataset.i18n, `inc.${inc.key}.title`);
+    assert.equal(card.querySelector("p").dataset.i18n, `inc.${inc.key}.story`);
+  }
+  assert.equal(dom.window.document.querySelector('[data-i18n="inc.sub"]').textContent.trim(), en["inc.sub"]);
+  assert.equal(dom.window.document.querySelector('[data-i18n="inc.eyebrow"]').textContent.trim(), en["inc.eyebrow"]);
+});
+
+test("blog.js executes every incident page and renders the selected post", () => {
   for (const inc of INCIDENTS) {
-    assert.ok(section.includes(`<span class="inc-id">${inc.id}</span>`), `${inc.id} chip missing`);
-    assert.ok(section.includes(`<span class="inc-date">${inc.date}</span>`), `${inc.id} date wrong`);
-    assert.ok(section.includes(`<span class="inc-sev">${inc.sev}</span>`), `${inc.id} severity wrong`);
-    assert.ok(section.includes(`href="${inc.issue}"`), `${inc.id} issue link missing`);
-    assert.ok(section.includes(`src="${inc.img}"`), `${inc.id} image not local`);
+    const dom = runBlog(inc.file);
+    const article = dom.window.document.querySelector("article.post");
+    assert.ok(article, `${inc.file} did not render an article`);
+    assert.equal(article.querySelector("h1").dataset.i18n, `inc.${inc.key}.title`);
+    assert.equal(article.querySelector("img").dataset.i18nAttrs, `alt:inc.${inc.key}.alt`);
+    assert.equal(article.querySelector("img").getAttribute("src"), inc.img);
+    assert.equal(article.querySelector('a[target="_blank"]').getAttribute("href"), inc.issue);
+  }
+});
+
+test("unknown incident key safely falls back to the blog index", () => {
+  const html = readFileSync(join(docs, "incident-i1.html"), "utf8").replace('data-post="i1"', 'data-post="unknown"');
+  const dom = new JSDOM(html, { url: "https://samogrow.test/incident-unknown.html", runScripts: "outside-only" });
+  dom.window.eval(blogJs);
+  assert.equal(dom.window.document.querySelectorAll(".post-card").length, 4);
+});
+
+test("blog rendering is translated with page-scoped metadata and language-preserving links", async () => {
+  const dom = runBlog("incident-i1.html", "https://samogrow.test/incident-i1.html?lang=uk");
+  Object.defineProperty(dom.window.document, "readyState", { value: "complete", configurable: true });
+  dom.window.fetch = async (url) => {
+    const code = /\/([a-z]{2,3})\.json$/.exec(url)?.[1] || "en";
+    return { ok: true, json: async () => dicts[code] };
+  };
+  dom.window.eval(i18nJs);
+  await flush();
+  const { document } = dom.window;
+  assert.equal(document.documentElement.lang, "uk");
+  assert.equal(document.querySelector("h1").innerHTML, dicts.uk["inc.i1.title"]);
+  assert.equal(document.title, dicts.uk["inc.i1.title"]);
+  assert.equal(document.querySelector('meta[name="description"]').content,
+    dicts.uk["inc.i1.story"].replace(/<[^>]+>/g, ""));
+  assert.equal(document.querySelector('a[href^="/blog.html"]').getAttribute("href"), "/blog.html?lang=uk");
+});
+
+test("incident blog and every post have separate language-preserving pages", () => {
+  assert.match(indexHtml, /<section id="incidents">/);
+  assert.match(indexHtml, /<a href="blog\.html" data-lang-link data-i18n="nav\.incidents">/);
+  assert.match(blogHtml, /id="blog-content"/);
+  for (const inc of INCIDENTS) {
+    const page = readFileSync(join(docs, inc.file), "utf8");
+    assert.match(page, new RegExp(`data-post="${inc.key}"`), `${inc.id} dedicated page missing`);
+    assert.ok(blogJs.includes(`file: "incident-${inc.key}.html"`), `${inc.id} blog link missing`);
+    assert.ok(blogJs.includes(`issue: "${inc.issue}"`), `${inc.id} issue link missing`);
+    assert.ok(blogJs.includes(`image: "${inc.img}"`), `${inc.id} image not local`);
   }
   // I-6 narrative carries the full incident timeline.
   for (const d of ["2026-08-15", "2026-08-18", "2026-08-20"]) {
@@ -566,6 +729,9 @@ test("incident evidence images exist locally (no remote image runtime dependency
 });
 
 test("each incident has translated title/story/impact/lesson/alt/caption in every locale", () => {
+  for (const [code, dict] of Object.entries(dicts)) {
+    assert.ok((dict["inc.eyebrow"] || "").trim(), `${code}.json inc.eyebrow empty`);
+  }
   for (const inc of INCIDENTS) {
     for (const part of ["title", "story", "impact", "lesson", "alt", "cap"]) {
       const key = `inc.${inc.key}.${part}`;
@@ -574,7 +740,8 @@ test("each incident has translated title/story/impact/lesson/alt/caption in ever
         assert.ok((dict[key] || "").trim().length > 0, `${code}.json ${key} empty`);
       }
     }
-    assert.ok(indexHtml.includes(`data-i18n-attrs="alt:inc.${inc.key}.alt"`), `alt wiring missing for ${inc.id}`);
+    const dom = runBlog(inc.file);
+    assert.equal(dom.window.document.querySelector("img").dataset.i18nAttrs, `alt:inc.${inc.key}.alt`);
   }
 });
 
@@ -584,6 +751,9 @@ test("U.S. baseline labeling is explicit on every price frame", () => {
   assert.ok(en["cost.sub"].includes("U.S. mid-2026 baseline"), "cost.sub not labeled U.S. baseline");
   assert.ok(/not a quote/.test(en["cost.sub"]), "cost.sub must disclaim quote status");
   assert.ok(en["spec.allin.value"].includes("U.S."), "spec-card all-in value not U.S.-labeled");
+  assert.ok(en["spec.eu.value"].includes("~$190–260") && en["spec.eu.value"].includes("rough"),
+    "spec-card must show the rough non-U.S. estimate immediately");
+  assert.match(indexHtml, /data-i18n="spec\.eu\.value"/);
   assert.ok(en["parts.fine"].includes("U.S. mid-2026"), "parts fine print not U.S.-labeled");
   assert.ok(en["cost.us.note"].includes("USD") && en["cost.us.note"].includes("U.S. mid-2026"),
     "cost.us.note must state USD + U.S. mid-2026");
@@ -616,6 +786,40 @@ test("Poland example caveats cover the compatibility and cost traps", () => {
   assert.ok(c.includes("Tuya") && c.includes("adapter work"),
     "must warn generic Tuya gear needs adapter work with current software");
   assert.ok(c.includes("Kasa") && c.includes("Tapo"), "must name the actually-supported hardware");
+});
+
+test("Auk comparison includes realistic recurring costs and capacity context", () => {
+  const table = new JSDOM(indexHtml).window.document.querySelector("table.cmp");
+  const rows = [...table.querySelectorAll("tbody tr")].map((row) =>
+    [...row.querySelectorAll("td")].map((cell) => cell.textContent.trim())
+  );
+  assert.deepEqual(rows, [
+    ["samogrow · 6 sites", "$280", "$70 + $120 AI", "yes", "~$470"],
+    ["Gardyn Home 4 · 30 sites", "$899", "$816", "yes", "~$1,715"],
+    ["Click & Grow SG9 · 9 sites", "$200", "$400", "no", "~$600"],
+    ["Auk Mini 2 · 4 pots", "$229", "~$80–120*", "no", "~$310–350*"],
+  ]);
+  const amounts = (value) => [...value.matchAll(/\$(\d+(?:,\d+)?)/g)].map((match) => Number(match[1].replace(",", "")));
+  assert.equal(amounts(rows[0][1])[0] + amounts(rows[0][2]).reduce((a, b) => a + b), amounts(rows[0][4])[0],
+    "samogrow total must equal rendered hardware + grow + AI");
+  const aukRange = amounts(rows[3][2]).map((extra) => Math.round((amounts(rows[3][1])[0] + extra) / 10) * 10);
+  assert.deepEqual(aukRange, amounts(rows[3][4]), "Auk rendered total must equal rendered hardware + extras rounded to tens");
+  const note = en["cmp.auk.note"];
+  for (const fact of ["~6 months", "2–3 refills", "$0.5–2", "$12–48", "~$320–400", "excluded from every", "not published", "No subscription", "tax", "VAT"]) {
+    assert.ok(note.includes(fact), `Auk caveat missing: ${fact}`);
+  }
+  for (const [code, dict] of Object.entries(dicts)) {
+    assert.ok(dict["cmp.sites"] && dict["cmp.pots"], `${code} missing translated capacity labels`);
+    for (const fact of ["$12–48", "Auk Mini"]) {
+      assert.ok(dict["cmp.auk.note"].includes(fact), `${code} Auk caveat missing: ${fact}`);
+    }
+    assert.match(dict["cmp.auk.note"], /Mini[- ]2/, `${code} Auk caveat missing Mini 2`);
+  }
+  assert.match(spec, /Auk Mini 2 \| ~\$229 \| ~\$80–120 .*\| \*\*~\$310–350\*\*/,
+    "SPEC Auk comparison must match the website range");
+  for (const fact of ["$0.5–2/month", "~$12–48", "~$320–400", "Electricity is excluded from every row"]) {
+    assert.ok(spec.includes(fact), `SPEC Auk caveat missing: ${fact}`);
+  }
 });
 
 test("new pricing/incident strings keep prices and links intact across all 20 locales", () => {

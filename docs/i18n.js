@@ -4,35 +4,37 @@
  * values may carry inline HTML that must be preserved by translations).
  * English is baked into index.html, so the first paint in English costs nothing.
  *
- * Locale choice: localStorage (manual pick) → navigator.languages (exact tag,
- * then base subtag, e.g. "pt-BR" → "pt") → "en".
+ * Locale choice: ?lang= URL parameter → localStorage (manual pick) →
+ * navigator.languages (exact tag, then base subtag, e.g. "pt-BR" → "pt") →
+ * "en". The active locale is always reflected back into ?lang= so the current
+ * page, query string, and anchor can be copied as a shareable language link.
  *
- * The pure parts (LOCALES, matchLocale, chooseLocale, optionLabel) are exported
- * for the Node test suite; the DOM section only runs in a browser.
+ * The pure parts (LOCALES, matchLocale, chooseLocale, queryLocale, optionLabel)
+ * are exported for the Node test suite; the DOM section only runs in a browser.
  */
 (function (root) {
   "use strict";
 
   var LOCALES = [
+    { code: "ar", abbr: "AR", name: "العربية", dir: "rtl" },
+    { code: "bn", abbr: "BN", name: "বাংলা", dir: "ltr" },
+    { code: "de", abbr: "DE", name: "Deutsch", dir: "ltr" },
     { code: "en", abbr: "EN", name: "English", dir: "ltr" },
     { code: "es", abbr: "ES", name: "Español", dir: "ltr" },
     { code: "fr", abbr: "FR", name: "Français", dir: "ltr" },
-    { code: "de", abbr: "DE", name: "Deutsch", dir: "ltr" },
-    { code: "it", abbr: "IT", name: "Italiano", dir: "ltr" },
-    { code: "pt", abbr: "PT", name: "Português", dir: "ltr" },
-    { code: "nl", abbr: "NL", name: "Nederlands", dir: "ltr" },
-    { code: "pl", abbr: "PL", name: "Polski", dir: "ltr" },
-    { code: "ru", abbr: "RU", name: "Русский", dir: "ltr" },
-    { code: "uk", abbr: "UK", name: "Українська", dir: "ltr" },
-    { code: "tr", abbr: "TR", name: "Türkçe", dir: "ltr" },
-    { code: "ar", abbr: "AR", name: "العربية", dir: "rtl" },
     { code: "hi", abbr: "HI", name: "हिन्दी", dir: "ltr" },
-    { code: "bn", abbr: "BN", name: "বাংলা", dir: "ltr" },
     { code: "id", abbr: "ID", name: "Bahasa Indonesia", dir: "ltr" },
-    { code: "vi", abbr: "VI", name: "Tiếng Việt", dir: "ltr" },
-    { code: "th", abbr: "TH", name: "ไทย", dir: "ltr" },
+    { code: "it", abbr: "IT", name: "Italiano", dir: "ltr" },
     { code: "ja", abbr: "JA", name: "日本語", dir: "ltr" },
     { code: "ko", abbr: "KO", name: "한국어", dir: "ltr" },
+    { code: "nl", abbr: "NL", name: "Nederlands", dir: "ltr" },
+    { code: "pl", abbr: "PL", name: "Polski", dir: "ltr" },
+    { code: "pt", abbr: "PT", name: "Português", dir: "ltr" },
+    { code: "ru", abbr: "RU", name: "Русский", dir: "ltr" },
+    { code: "th", abbr: "TH", name: "ไทย", dir: "ltr" },
+    { code: "tr", abbr: "TR", name: "Türkçe", dir: "ltr" },
+    { code: "uk", abbr: "UK", name: "Українська", dir: "ltr" },
+    { code: "vi", abbr: "VI", name: "Tiếng Việt", dir: "ltr" },
     { code: "zh", abbr: "ZH", name: "中文", dir: "ltr" }
   ];
 
@@ -63,6 +65,14 @@
     return DEFAULT_LOCALE;
   }
 
+  function queryLocale(search) {
+    try {
+      return matchLocale(new URLSearchParams(String(search || "")).get("lang"));
+    } catch (e) {
+      return null;
+    }
+  }
+
   /* Switcher option labeling: the VISIBLE text is the abbreviation only;
    * the native language name is exposed to assistive tech via aria-label. */
   function optionLabel(locale) {
@@ -76,6 +86,7 @@
     STORAGE_KEY: STORAGE_KEY,
     matchLocale: matchLocale,
     chooseLocale: chooseLocale,
+    queryLocale: queryLocale,
     optionLabel: optionLabel
   };
 
@@ -106,6 +117,26 @@
     try { return localStorage.getItem(STORAGE_KEY); } catch (e) { return null; }
   }
 
+  function syncUrl(code) {
+    try {
+      var url = new URL(root.location.href);
+      url.searchParams.set("lang", code);
+      root.history.replaceState(root.history.state, "", url.href);
+    } catch (e) {}
+  }
+
+  function syncLangLinks(code) {
+    var links = document.querySelectorAll("a[data-lang-link]");
+    for (var i = 0; i < links.length; i++) {
+      try {
+        var url = new URL(links[i].getAttribute("href"), root.location.href);
+        if (url.origin !== root.location.origin) continue;
+        url.searchParams.set("lang", code);
+        links[i].setAttribute("href", url.pathname + url.search + url.hash);
+      } catch (e) {}
+    }
+  }
+
   function loadDict(code) {
     if (!dictCache[code]) {
       dictCache[code] = fetch("i18n/" + code + ".json").then(function (r) {
@@ -131,9 +162,11 @@
     html.lang = code;
     html.dir = locale.dir;
 
-    if (dict["meta.title"]) document.title = dict["meta.title"];
+    var titleKey = html.getAttribute("data-i18n-title") || "meta.title";
+    var descriptionKey = html.getAttribute("data-i18n-description") || "meta.description";
+    if (dict[titleKey]) document.title = dict[titleKey].replace(/<[^>]+>/g, "");
     var meta = document.querySelector('meta[name="description"]');
-    if (meta && dict["meta.description"]) meta.setAttribute("content", dict["meta.description"]);
+    if (meta && dict[descriptionKey]) meta.setAttribute("content", dict[descriptionKey].replace(/<[^>]+>/g, ""));
 
     var nodes = document.querySelectorAll("[data-i18n]");
     for (var i = 0; i < nodes.length; i++) {
@@ -154,6 +187,8 @@
     }
     current = code;
     updateSwitcher();
+    syncUrl(code);
+    syncLangLinks(code);
     reveal();
   }
 
@@ -169,6 +204,7 @@
     }, function (err) {
       if (requestId !== requestSeq) return;
       // Locale failed to load: never leave the page hidden or half-applied.
+      syncUrl(current);
       reveal();
       if (root.console && console.warn) console.warn("samogrow i18n:", err);
     });
@@ -275,13 +311,20 @@
 
   function init() {
     buildSwitcher();
-    var initial = matchLocale(document.documentElement.getAttribute("data-i18n-initial"));
+    var initial = queryLocale(root.location && root.location.search);
+    if (!initial) initial = matchLocale(document.documentElement.getAttribute("data-i18n-initial"));
     if (!initial) {
       initial = chooseLocale(getStored(), navigator.languages && navigator.languages.length
         ? navigator.languages
         : [navigator.language || DEFAULT_LOCALE]);
     }
     if (initial === DEFAULT_LOCALE) {
+      var locale = findLocale(initial);
+      document.documentElement.lang = initial;
+      document.documentElement.dir = locale.dir;
+      current = initial;
+      syncUrl(initial);
+      syncLangLinks(initial);
       reveal(); // page is already English
       updateSwitcher();
     } else {

@@ -444,8 +444,9 @@ cycle (§4.0a).
 **Auk consumable economics (good news, per `research/01-commercial-analogs.md`):** unlike
 Click & Grow, the Auk has **no proprietary pods and no subscription** — you plant **your
 own seeds** in coco-fibre pots, so it runs on the same open, commodity seed the DIY unit
-does. The only recurring cost is cheap coco-fibre pot refills; a fair A/B on consumables,
-not a rigged razor-and-blades unit. (Its one real limit as a test bed is **capacity — just
+does. The recurring costs are nutrient and coco-fibre refills, estimated above from the
+current Auk Mini refill price until Mini 2 refill pricing is published; a fair A/B on
+consumables, not a rigged razor-and-blades unit. (Its one real limit as a test bed is **capacity — just
 4 pots**, versus the DIY unit's ~6 and a 12-pod kit, so it's a smaller sample.)
 
 **What the AI *can* do on either V4a or V4b:** pull the camera snapshot, analyze plant
@@ -510,7 +511,14 @@ after you know you want the interlock or the CSI camera.
 | **samogrow — V2 (auto)** | ~$256 | ~$70 consumables + ~$120 Claude API ($5/mo) | **Yes** | **~$446** |
 | Gardyn Home 4 | ~$899 | ~$816 (Kelby AI $34/mo) | Yes | **~$1,715** |
 | Click & Grow SG9 | ~$200 | ~$400 (pods + sub) | No | **~$600** |
-| Auk Mini 2 | ~$229 | ~$0 (bring your own seeds) | No (scheduling only) | **~$229** |
+| Auk Mini 2 | ~$229 | ~$80–120 (2–3 nutrient + coco refills; Mini 1 pricing proxy) | No (scheduling only) | **~$310–350** |
+
+Electricity is excluded from every row for a like-for-like comparison. Auk Mini 2
+includes about six months of nutrients and coco for one crop; Mini 2 refill pricing
+is not published yet, so the range above uses current Auk Mini refill pricing as a
+proxy. Auk publishes power at $0.5–2/month (~$12–48 over two years), putting its
+power-inclusive two-year total around **~$320–400**. It still has no subscription or
+proprietary-pod lock-in.
 
 **The pop:** samogrow lands in the same one-time price bracket as the *no-AI*
 countertop units (~$200–256) while delivering the camera+AI capability that
