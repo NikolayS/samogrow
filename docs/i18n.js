@@ -189,6 +189,7 @@
     updateSwitcher();
     syncUrl(code);
     syncLangLinks(code);
+    document.dispatchEvent(new CustomEvent("samogrow:locale-applied", { detail: { code: code } }));
     reveal();
   }
 

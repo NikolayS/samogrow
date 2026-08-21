@@ -69,7 +69,7 @@
       '<figcaption data-i18n="inc.' + item.key + '.cap">' + item.caption + '</figcaption></figure>' +
       '<ul class="facts"><li data-i18n="inc.' + item.key + '.impact">' + item.impact + '</li>' +
       '<li data-i18n="inc.' + item.key + '.lesson">' + item.lesson + '</li></ul>' +
-      '<div class="actions"><a data-lang-link href="blog.html">← <span data-i18n="inc.title">The incident blog</span></a>' +
+      '<div class="actions"><a data-lang-link href="blog.html">← <span data-i18n="inc.title">Blog</span></a>' +
       '<a href="' + item.issue + '" target="_blank" rel="noopener" data-i18n="inc.readmore">Full write-up &amp; RCA on GitHub →</a></div></article>';
   }
 
@@ -84,6 +84,6 @@
     }
   }
   root.innerHTML = '<header class="hero shell"><span class="eyebrow" data-i18n="inc.eyebrow">Field notes</span>' +
-    '<h1 data-i18n="inc.title">The incident blog</h1><p class="lede" data-i18n="inc.sub">Real gardens produce real incidents, and we run them like production outages: dated, severity-tagged, blameless, and written up in public.</p></header>' +
+    '<h1 data-i18n="inc.title">Blog</h1><p class="lede" data-i18n="inc.sub">Real gardens produce real incidents, and we run them like production outages: dated, severity-tagged, blameless, and written up in public.</p></header>' +
     '<div class="post-grid shell">' + incidents.map(card).join("") + '</div>';
 })();

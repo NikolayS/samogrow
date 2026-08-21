@@ -12,17 +12,18 @@ import { JSDOM } from "jsdom";
 const docs = dirname(fileURLToPath(import.meta.url));
 const require = createRequire(import.meta.url);
 const I18N = require(join(docs, "i18n.js"));
+const MARKET = require(join(docs, "market.js"));
 
 const { LOCALES, CODES, chooseLocale, matchLocale, queryLocale, optionLabel, STORAGE_KEY } = I18N;
 
 const indexHtml = readFileSync(join(docs, "index.html"), "utf8");
 const i18nJs = readFileSync(join(docs, "i18n.js"), "utf8");
+const marketJs = readFileSync(join(docs, "market.js"), "utf8");
 const blogHtml = readFileSync(join(docs, "blog.html"), "utf8");
 const blogJs = readFileSync(join(docs, "blog.js"), "utf8");
 const bootstrapJs = readFileSync(join(docs, "i18n-bootstrap.js"), "utf8");
 const blogPageFiles = ["blog.html", "incident-i1.html", "incident-i3.html", "incident-i5.html", "incident-i6.html"];
 const readme = readFileSync(join(docs, "..", "README.md"), "utf8");
-const spec = readFileSync(join(docs, "..", "spec", "SPEC.md"), "utf8");
 const localeFiles = readdirSync(join(docs, "i18n")).filter((f) => f.endsWith(".json")).sort();
 const dicts = Object.fromEntries(
   localeFiles.map((f) => [f.replace(/\.json$/, ""), JSON.parse(readFileSync(join(docs, "i18n", f), "utf8"))])
@@ -747,17 +748,16 @@ test("each incident has translated title/story/impact/lesson/alt/caption in ever
 
 // ---------- pricing context ----------
 
-test("U.S. baseline labeling is explicit on every price frame", () => {
-  assert.ok(en["cost.sub"].includes("U.S. mid-2026 baseline"), "cost.sub not labeled U.S. baseline");
-  assert.ok(/not a quote/.test(en["cost.sub"]), "cost.sub must disclaim quote status");
+test("pricing frames identify their market, currency, and exclusions", () => {
+  assert.ok(en["cost.sub"].includes("rough USD estimates"), "cost.sub must frame prices as estimates");
+  assert.ok(en["cost.sub"].includes("excluding electricity") && en["cost.sub"].includes("AI/API"),
+    "cost.sub must state the comparison exclusions");
   assert.ok(en["spec.allin.value"].includes("U.S."), "spec-card all-in value not U.S.-labeled");
   assert.ok(en["spec.eu.value"].includes("~$190–260") && en["spec.eu.value"].includes("rough"),
     "spec-card must show the rough non-U.S. estimate immediately");
   assert.match(indexHtml, /data-i18n="spec\.eu\.value"/);
   assert.ok(en["parts.fine"].includes("U.S. mid-2026"), "parts fine print not U.S.-labeled");
-  assert.ok(en["cost.us.note"].includes("USD") && en["cost.us.note"].includes("U.S. mid-2026"),
-    "cost.us.note must state USD + U.S. mid-2026");
-  assert.match(indexHtml, /data-i18n="cost.us.note"/);
+  assert.ok(en["market.us.note"].includes("U.S. retail baseline"), "U.S. tab must identify its baseline");
 });
 
 test("Poland / EU example: snapshot date, items, sources, subtotal arithmetic", () => {
@@ -788,44 +788,69 @@ test("Poland example caveats cover the compatibility and cost traps", () => {
   assert.ok(c.includes("Kasa") && c.includes("Tapo"), "must name the actually-supported hardware");
 });
 
-test("Auk comparison includes realistic recurring costs and capacity context", () => {
+test("market switcher is shareable, persistent, locale-aware, and keyboard wired", () => {
+  assert.deepEqual(MARKET.MARKETS, ["us", "eu", "aliexpress"]);
+  assert.equal(MARKET.queryMarket("?lang=uk&market=eu"), "eu");
+  assert.equal(MARKET.queryMarket("?market=bogus"), null);
+  assert.equal(MARKET.chooseMarket("?market=aliexpress", "eu", ["de-DE"]), "aliexpress");
+  assert.equal(MARKET.chooseMarket("", "eu", ["en-US"]), "eu");
+  assert.equal(MARKET.inferMarket(["de-DE"]), "eu");
+  assert.equal(MARKET.inferMarket(["fr-CA"]), "us");
+  assert.equal(MARKET.inferMarket(["uk-UA"]), "us");
+  const dom = new JSDOM(indexHtml);
+  const tabs = [...dom.window.document.querySelectorAll("[data-market-tab]")];
+  assert.deepEqual(tabs.map((tab) => tab.dataset.marketTab), MARKET.MARKETS);
+  assert.ok(tabs.every((tab) => tab.getAttribute("role") === "tab"));
+  for (const behavior of ["searchParams.set(\"market\", market)", "localStorage.setItem(STORAGE_KEY, market)", "ArrowLeft", "ArrowRight"]) {
+    assert.ok(marketJs.includes(behavior), `market runtime missing ${behavior}`);
+  }
+});
+
+test("each sourcing market has a complete and internally consistent SamoGrow estimate", () => {
+  const number = (value) => Number((value.match(/\d+/) || ["0"])[0]);
+  for (const market of MARKET.MARKETS) {
+    const row = MARKET.DATA[market].rows.samo;
+    assert.equal(row.length, 4, `${market} row must have four values`);
+    assert.ok(row.every(Boolean), `${market} SamoGrow values must all be present`);
+    const spots = 6;
+    const totalLow = number(row[2]);
+    const perSpotLow = number(row[3]);
+    assert.ok(Math.abs(Math.round(totalLow / spots) - perSpotLow) <= 1,
+      `${market} per-spot low end must match total / six spots`);
+  }
+  assert.equal(MARKET.DATA.eu.rows.gardyn[0], "unavailable");
+  assert.ok(MARKET.DATA.aliexpress.rows.auk.every((value) => value === null),
+    "AliExpress must not reuse commercial-system prices");
+});
+
+test("cost table excludes AI and normalizes every verified total per spot", () => {
   const table = new JSDOM(indexHtml).window.document.querySelector("table.cmp");
   const rows = [...table.querySelectorAll("tbody tr")].map((row) =>
     [...row.querySelectorAll("td")].map((cell) => cell.textContent.trim())
   );
   assert.deepEqual(rows, [
-    ["samogrow · 6 sites", "$280", "$70 + $120 AI", "yes", "~$470"],
-    ["Gardyn Home 4 · 30 sites", "$899", "$816", "yes", "~$1,715"],
-    ["Click & Grow SG9 · 9 sites", "$200", "$400", "no", "~$600"],
-    ["Auk Mini 2 · 4 pots", "$229", "~$80–120*", "no", "~$310–350*"],
+    ["samogrow · 6 sites", "$256", "~$70", "~$326", "~$54"],
+    ["Auk Mini 2 · 4 pots", "$229", "~$80–120*", "~$309–349*", "~$77–87*"],
+    ["Click & Grow SG9 · 9 sites", "$200", "~$400", "~$600", "~$67"],
+    ["Gardyn Home 4 · 30 sites", "$899", "Not verified", "Not verified", "Not verified"],
   ]);
-  const amounts = (value) => [...value.matchAll(/\$(\d+(?:,\d+)?)/g)].map((match) => Number(match[1].replace(",", "")));
-  assert.equal(amounts(rows[0][1])[0] + amounts(rows[0][2]).reduce((a, b) => a + b), amounts(rows[0][4])[0],
-    "samogrow total must equal rendered hardware + grow + AI");
-  const aukRange = amounts(rows[3][2]).map((extra) => Math.round((amounts(rows[3][1])[0] + extra) / 10) * 10);
-  assert.deepEqual(aukRange, amounts(rows[3][4]), "Auk rendered total must equal rendered hardware + extras rounded to tens");
+  assert.ok(!table.textContent.includes("$120 AI"), "AI cost must not appear in comparison table");
+  assert.ok(en["cmp.market.note"].includes("optional AI/API usage") && en["cmp.market.note"].includes("Electricity"));
   const note = en["cmp.auk.note"];
-  for (const fact of ["~6 months", "2–3 refills", "$0.5–2", "$12–48", "~$320–400", "excluded from every", "not published", "No subscription", "tax", "VAT"]) {
+  for (const fact of ["six months", "2–3 refills", "€35", "not yet priced", "six full nine-pod restarts per year"]) {
     assert.ok(note.includes(fact), `Auk caveat missing: ${fact}`);
   }
   for (const [code, dict] of Object.entries(dicts)) {
     assert.ok(dict["cmp.sites"] && dict["cmp.pots"], `${code} missing translated capacity labels`);
-    for (const fact of ["$12–48", "Auk Mini"]) {
-      assert.ok(dict["cmp.auk.note"].includes(fact), `${code} Auk caveat missing: ${fact}`);
-    }
-    assert.match(dict["cmp.auk.note"], /Mini[- ]2/, `${code} Auk caveat missing Mini 2`);
-  }
-  assert.match(spec, /Auk Mini 2 \| ~\$229 \| ~\$80–120 .*\| \*\*~\$310–350\*\*/,
-    "SPEC Auk comparison must match the website range");
-  for (const fact of ["$0.5–2/month", "~$12–48", "~$320–400", "Electricity is excluded from every row"]) {
-    assert.ok(spec.includes(fact), `SPEC Auk caveat missing: ${fact}`);
+    assert.ok(dict["cmp.auk.note"].includes("€35"), `${code} Auk caveat missing refill price`);
+    assert.match(dict["cmp.auk.note"], /Mini 2/, `${code} Auk caveat missing Mini 2`);
   }
 });
 
 test("new pricing/incident strings keep prices and links intact across all 20 locales", () => {
   // Covered structurally by the global parity tests; assert the new keys are present everywhere.
-  const newKeys = Object.keys(en).filter((k) => k.startsWith("pl.") || k.startsWith("inc.") || k === "cost.us.note" || k === "nav.incidents");
-  assert.ok(newKeys.length >= 45, "expected the new key families to exist");
+  const newKeys = Object.keys(en).filter((k) => k.startsWith("pl.") || k.startsWith("inc.") || k.startsWith("market.") || k.startsWith("cap.") || k === "cmp.market.note" || k === "nav.incidents");
+  assert.ok(newKeys.length >= 60, "expected the new key families to exist");
   for (const [code, dict] of Object.entries(dicts)) {
     for (const k of newKeys) assert.ok(k in dict, `${code}.json missing ${k}`);
   }
