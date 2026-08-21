@@ -1,6 +1,6 @@
 {
   "meta.title": "samogrow by Nombox — vườn rau thơm AI tự lắp",
-  "meta.description": "samogrow by Nombox — vườn rau thơm trong nhà do AI vận hành, mã nguồn mở (MIT), tự lắp từ linh kiện phổ thông. Khởi điểm ~$255 (bản thủ công), ~$280 cho lõi tự động, đến ~$335 với các phụ kiện bổ sung. Camera theo dõi cây, ổ cắm thông minh điều khiển đèn và nước, còn Telegram báo cáo mọi thứ. Không thuê bao nhà cung cấp, không viên trồng độc quyền; chi phí định kỳ là $3–7/tháng tiền gọi API Claude cộng ~$35/năm vật tư tiêu hao phổ thông. Chạy trên chiếc máy bạn vốn đã để bật sẵn; thử ngay ở chế độ mock mà không cần chút phần cứng nào.",
+  "meta.description": "samogrow của Nombox — vườn rau thơm trong nhà mã nguồn mở (MIT) bạn tự lắp từ linh kiện phổ thông. Camera quan sát cây, ổ cắm thông minh lo ánh sáng và nước, báo cáo gửi qua Telegram. Không thuê bao nhà cung cấp, không viên trồng độc quyền; việc dùng AI/API là tùy chọn và không tính vào phép so sánh mua sắm — trang hiển thị giá sơ bộ theo từng thị trường. Dùng thử ở chế độ mock, không cần phần cứng.",
   "lang.switcher": "Ngôn ngữ",
   "lang.listbox": "Chọn ngôn ngữ",
   "nav.how": "Kiến trúc",

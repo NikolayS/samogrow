@@ -1,6 +1,6 @@
 {
   "meta.title": "samogrow by Nombox — kebun herba AI rakitan sendiri",
-  "meta.description": "samogrow by Nombox — kebun herba dalam ruangan yang dijalankan AI, open source (MIT), dirakit sendiri dari komponen pasaran. Mulai dari ~$255 (manual), ~$280 untuk inti otomatis, sampai ~$335 dengan aksesori tambahan. Kamera memantau tanaman, colokan pintar mengatur lampu dan air, dan Telegram melaporkan semuanya. Tanpa langganan vendor dan tanpa pod eksklusif; biaya rutinnya $3–7/bln untuk panggilan API Claude plus ~$35/thn untuk bahan habis pakai pasaran. Berjalan di mesin yang memang sudah Anda nyalakan terus; coba dulu dalam mode mock tanpa perangkat keras sama sekali.",
+  "meta.description": "samogrow dari Nombox — kebun herba dalam ruangan open source (MIT) yang Anda rakit sendiri dari komponen pasaran. Kamera mengamati tanaman, colokan pintar mengatur cahaya dan air, dan laporan masuk lewat Telegram. Tanpa langganan vendor dan tanpa pod eksklusif; pemakaian AI/API bersifat opsional dan tidak masuk perbandingan belanja — halaman menampilkan harga kasar per pasar. Coba dalam mode mock tanpa perangkat keras sama sekali.",
   "lang.switcher": "Bahasa",
   "lang.listbox": "Pilih bahasa",
   "nav.how": "Arsitektur",

@@ -1,6 +1,6 @@
 {
   "meta.title": "samogrow by Nombox — orto di erbe aromatiche DIY con IA",
-  "meta.description": "samogrow by Nombox — un orto di erbe aromatiche da interno open source (MIT), gestito da un'IA, che monti da solo con componenti di uso comune. Si parte da ~$255 (manuale), ~$280 per il nucleo automatizzato, fino a ~$335 con gli extra. Una telecamera controlla le piante, due prese smart comandano luce e acqua, e Telegram fa rapporto. Nessun abbonamento al produttore e nessuna capsula proprietaria; il costo ricorrente è di $3–7/mese in chiamate all'API di Claude più ~$35/anno di consumabili di uso comune. Gira su una macchina che tieni già accesa; provalo in modalità mock senza alcun hardware.",
+  "meta.description": "samogrow di Nombox — un giardino di erbe da interno open source (MIT) da costruire con componenti di uso comune. Una telecamera osserva le piante, le prese smart gestiscono luce e acqua, e i report arrivano su Telegram. Nessun abbonamento al produttore né capsule proprietarie; l'uso di IA/API è opzionale ed escluso dal confronto d'acquisto — la pagina mostra prezzi indicativi per mercato. Provalo in modalità mock senza alcun hardware.",
   "lang.switcher": "Lingua",
   "lang.listbox": "Scegli la lingua",
   "nav.how": "Architettura",

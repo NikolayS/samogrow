@@ -1,6 +1,6 @@
 {
   "meta.title": "samogrow by Nombox — huerto de hierbas DIY con IA",
-  "meta.description": "samogrow by Nombox — un huerto de hierbas de interior open source (MIT), gestionado por IA, que montas tú mismo con piezas de consumo corrientes. Desde ~$255 (manual), ~$280 el núcleo automatizado, hasta ~$335 con los extras. Una cámara revisa las plantas, dos enchufes inteligentes controlan luz y agua, y Telegram te informa. Sin suscripción de fabricante y sin cápsulas propietarias; el coste recurrente es de $3–7/mes en llamadas a la API de Claude más ~$35/año en consumibles corrientes. Corre en una máquina que ya tienes encendida; pruébalo en modo mock sin ningún hardware.",
+  "meta.description": "samogrow de Nombox — un huerto de hierbas de interior open source (MIT) que montas tú mismo con piezas corrientes. Una cámara vigila las plantas, enchufes inteligentes controlan luz y riego, y Telegram envía los informes. Sin suscripción del fabricante ni cápsulas propietarias; el uso de IA/API es opcional y queda fuera de la comparativa de compra — la página muestra precios orientativos por mercado. Pruébalo en modo simulado sin ningún hardware.",
   "lang.switcher": "Idioma",
   "lang.listbox": "Elegir idioma",
   "nav.how": "Arquitectura",

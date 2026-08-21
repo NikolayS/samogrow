@@ -1,6 +1,6 @@
 {
   "meta.title": "samogrow by Nombox — ziołowy ogródek DIY prowadzony przez AI",
-  "meta.description": "samogrow by Nombox — otwartoźródłowy (MIT), prowadzony przez AI domowy ogródek ziołowy, który składasz z ogólnodostępnych części. Start od ~$255 (wersja ręczna), ~$280 za zautomatyzowany rdzeń, do ~$335 z dodatkami. Kamera dogląda roślin, inteligentne wtyczki sterują światłem i wodą, a Telegram raportuje. Bez abonamentu u producenta i bez zamkniętych kapsułek; koszt stały to $3–7/mies. za wywołania API Claude plus ~$35/rok na zwykłe materiały eksploatacyjne. Działa na maszynie, którą i tak trzymasz włączoną; wypróbuj w trybie mock bez żadnego sprzętu.",
+  "meta.description": "samogrow od Nombox — otwartoźródłowy (MIT) domowy ogródek ziołowy do samodzielnego złożenia ze zwykłych części. Kamera obserwuje rośliny, inteligentne wtyczki sterują światłem i wodą, a raporty przychodzą na Telegramie. Bez abonamentu producenta i zamkniętych kapsułek; użycie AI/API jest opcjonalne i wyłączone z porównania zakupów — na stronie są przybliżone ceny dla każdego rynku. Wypróbuj w trybie symulacji, bez żadnego sprzętu.",
   "lang.switcher": "Język",
   "lang.listbox": "Wybierz język",
   "nav.how": "Architektura",

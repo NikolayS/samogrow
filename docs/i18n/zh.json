@@ -1,6 +1,6 @@
 {
   "meta.title": "samogrow by Nombox — DIY AI 香草花园",
-  "meta.description": "samogrow by Nombox — 一套开源（MIT）、由 AI 打理的室内香草花园，用现成通用零件自行搭建。手动版约 ~$255 起步，自动化核心约 ~$280，加装配件最高约 ~$335。摄像头负责查看植物，智能插座控制灯光与浇水，Telegram 负责汇报。没有厂商订阅，也没有专有种植舱；持续开销只有每月 $3–7 的 Claude API 调用费，外加每年约 ~$35 的通用耗材。跑在你本来就常开的机器上；用模拟模式零硬件即可试玩。",
+  "meta.description": "Nombox 出品的 samogrow — 用通用配件自己动手搭建的开源（MIT）室内香草花园。摄像头观察植物，智能插座管灯光和浇水，报告发到 Telegram。无厂商订阅、无专有种植舱；AI/API 属可选项，不计入采购比较 — 页面按市场给出粗略价格。可在 mock 模式下零硬件试用。",
   "lang.switcher": "语言",
   "lang.listbox": "选择语言",
   "nav.how": "架构",

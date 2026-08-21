@@ -1,6 +1,6 @@
 {
   "meta.title": "samogrow by Nombox — DIY-Kräutergarten mit KI",
-  "meta.description": "samogrow by Nombox — ein Open-Source-Kräutergarten (MIT) für drinnen, geführt von einer KI und gebaut aus handelsüblichen Teilen. Ab ~$255 (manuell), ~$280 für den automatisierten Kern, bis ~$335 mit Extras. Eine Kamera schaut nach den Pflanzen, smarte Steckdosen schalten Licht und Wasser, und Telegram berichtet. Kein Hersteller-Abo und keine proprietären Kapseln; die laufenden Kosten sind $3–7/Monat für Claude-API-Aufrufe plus ~$35/Jahr für gewöhnliche Verbrauchsmaterialien. Läuft auf einem Rechner, der ohnehin an ist; im Mock-Modus ganz ohne Hardware ausprobierbar.",
+  "meta.description": "samogrow von Nombox — ein quelloffener (MIT) Indoor-Kräutergarten zum Selberbauen aus handelsüblichen Teilen. Eine Kamera beobachtet die Pflanzen, Smart-Plugs steuern Licht und Wasser, berichtet wird per Telegram. Kein Hersteller-Abo, keine proprietären Kapseln; die KI-/API-Nutzung ist optional und aus dem Marktvergleich ausgeklammert — grobe Preise je Markt stehen auf der Seite. Im Mock-Modus ganz ohne Hardware ausprobierbar.",
   "lang.switcher": "Sprache",
   "lang.listbox": "Sprache wählen",
   "nav.how": "Architektur",

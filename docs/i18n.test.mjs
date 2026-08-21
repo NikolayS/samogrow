@@ -245,6 +245,15 @@ test("English defaults baked into index.html match en.json (no drift)", () => {
   }
 });
 
+test("metadata descriptions do not advertise stale fixed build prices", () => {
+  const stale = /~?\$\s*(255|280|335)|\$3[\u2013-]7|~?\$35/;
+  for (const [code, dict] of Object.entries(dicts)) {
+    assert.doesNotMatch(dict["meta.description"], stale, `${code} metadata contains stale pricing`);
+  }
+  const staticDescription = new JSDOM(indexHtml).window.document.querySelector('meta[name="description"]').content;
+  assert.equal(staticDescription, en["meta.description"]);
+});
+
 test("switcher markup is present, accessible, sticky-topbar hosted", () => {
   assert.match(indexHtml, /id="lang-switcher"/);
   assert.match(indexHtml, /aria-haspopup="listbox"/);
@@ -795,8 +804,11 @@ test("market switcher is shareable, persistent, locale-aware, and keyboard wired
   assert.equal(MARKET.chooseMarket("?market=aliexpress", "eu", ["de-DE"]), "aliexpress");
   assert.equal(MARKET.chooseMarket("", "eu", ["en-US"]), "eu");
   assert.equal(MARKET.inferMarket(["de-DE"]), "eu");
+  assert.equal(MARKET.inferMarket(["de"]), "eu");
+  assert.equal(MARKET.inferMarket(["en-GB"]), "eu");
+  assert.equal(MARKET.inferMarket(["de-CH"]), "eu");
   assert.equal(MARKET.inferMarket(["fr-CA"]), "us");
-  assert.equal(MARKET.inferMarket(["uk-UA"]), "us");
+  assert.equal(MARKET.inferMarket(["uk-UA"]), "eu");
   const dom = new JSDOM(indexHtml);
   const tabs = [...dom.window.document.querySelectorAll("[data-market-tab]")];
   assert.deepEqual(tabs.map((tab) => tab.dataset.marketTab), MARKET.MARKETS);
@@ -845,6 +857,17 @@ test("cost table excludes AI and normalizes every verified total per spot", () =
     assert.ok(dict["cmp.auk.note"].includes("€35"), `${code} Auk caveat missing refill price`);
     assert.match(dict["cmp.auk.note"], /Mini 2/, `${code} Auk caveat missing Mini 2`);
   }
+});
+
+test("market rendering styles unknown values and hides commercial footnotes for AliExpress", () => {
+  for (const behavior of [
+    'classList.toggle("status", value === null || value === "unavailable")',
+    'commercialNotes[m].hidden = market === "aliexpress"'
+  ]) {
+    assert.ok(marketJs.includes(behavior), `market runtime missing ${behavior}`);
+  }
+  const note = new JSDOM(indexHtml).window.document.querySelector("[data-market-commercial-note]");
+  assert.ok(note && note.dataset.i18n === "cmp.auk.note");
 });
 
 test("new pricing/incident strings keep prices and links intact across all 20 locales", () => {

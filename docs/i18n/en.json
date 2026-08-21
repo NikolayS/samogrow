@@ -1,6 +1,6 @@
 {
   "meta.title": "samogrow by Nombox — DIY AI herb garden",
-  "meta.description": "samogrow by Nombox — an open-source (MIT), AI-run indoor herb garden you build from commodity parts. Starts at ~$255 (manual), ~$280 automated core, to ~$335 with add-ons. A camera checks the plants, smart plugs control light and water, and Telegram reports. No vendor subscription and no proprietary pods; recurring cost is $3–7/mo in Claude API calls plus ~$35/yr in commodity consumables. Runs on a machine you already keep on; try it in mock mode with zero hardware.",
+  "meta.description": "samogrow by Nombox — an open-source (MIT) DIY indoor herb garden built from commodity parts. A camera watches the plants while smart plugs run light and water, with reports on Telegram. No vendor subscription and no proprietary pods; AI/API use is optional and excluded from the sourcing comparison — the page shows rough prices per market. Try it in mock mode with zero hardware.",
   "lang.switcher": "Language",
   "lang.listbox": "Choose language",
   "nav.how": "Architecture",

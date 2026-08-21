@@ -1,6 +1,6 @@
 {
   "meta.title": "samogrow by Nombox — yapay zekâlı DIY aromatik bitki bahçesi",
-  "meta.description": "samogrow by Nombox — sıradan parçalardan kendinizin kurduğu, açık kaynak (MIT), yapay zekânın yürüttüğü bir iç mekân aromatik bitki bahçesi. Başlangıç ~$255 (manuel), otomatik çekirdek ~$280, eklentilerle ~$335'e kadar. Bir kamera bitkileri kontrol eder, akıllı prizler ışığı ve suyu yönetir, Telegram da rapor verir. Üretici aboneliği yok, tescilli kapsül yok; süregelen maliyet Claude API çağrıları için ayda $3–7 artı yılda ~$35 kadar sıradan sarf malzemesi. Zaten açık tuttuğunuz bir makinede çalışır; mock modunda sıfır donanımla deneyin.",
+  "meta.description": "Nombox'tan samogrow — sıradan parçalardan kendinizin kurduğu açık kaynaklı (MIT) bir iç mekân şifalı ot bahçesi. Kamera bitkileri izler, akıllı fişler ışık ve suyu yönetir, raporlar Telegram'a düşer. Üretici aboneliği ve tescilli kapsül yok; AI/API kullanımı isteğe bağlıdır ve tedarik karşılaştırmasının dışındadır — sayfa pazar pazar kaba fiyatlar gösterir. Hiç donanım olmadan mock modunda deneyin.",
   "lang.switcher": "Dil",
   "lang.listbox": "Dil seçin",
   "nav.how": "Mimari",

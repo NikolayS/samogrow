@@ -1,6 +1,6 @@
 {
   "meta.title": "samogrow by Nombox — DIY AI-kruidentuin",
-  "meta.description": "samogrow by Nombox — een open-source (MIT), door AI gerunde kruidentuin voor binnen die je zelf bouwt uit gangbare onderdelen. Vanaf ~$255 (handmatig), ~$280 voor de geautomatiseerde kern, tot ~$335 met uitbreidingen. Een camera houdt de planten in de gaten, slimme stekkers schakelen licht en water, en Telegram rapporteert. Geen leveranciersabonnement en geen eigen cupjes; de terugkerende kosten zijn $3–7/mnd aan Claude API-calls plus ~$35/jr aan gangbare verbruiksartikelen. Draait op een machine die je toch al aan laat staan; probeer het in mock-modus zonder enige hardware.",
+  "meta.description": "samogrow van Nombox — een open source (MIT) kruidentuin voor binnen die je zelf bouwt uit gangbare onderdelen. Een camera houdt de planten in de gaten, slimme stekkers regelen licht en water, en Telegram rapporteert. Geen leveranciersabonnement en geen eigen cupjes; AI/API-gebruik is optioneel en valt buiten de inkoopvergelijking — de pagina toont ruwe prijzen per markt. Probeer het in mockmodus, zonder hardware.",
   "lang.switcher": "Taal",
   "lang.listbox": "Kies een taal",
   "nav.how": "Architectuur",

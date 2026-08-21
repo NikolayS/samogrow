@@ -8,7 +8,12 @@
   var EU_REGIONS = [
     "AT", "BE", "BG", "HR", "CY", "CZ", "DE", "DK", "EE", "ES", "FI",
     "FR", "GR", "HU", "IE", "IT", "LT", "LU", "LV", "MT", "NL", "PL",
-    "PT", "RO", "SE", "SI", "SK", "IS", "LI", "NO"
+    "PT", "RO", "SE", "SI", "SK", "IS", "LI", "NO", "CH", "GB", "UA"
+  ];
+  var EU_LANGUAGES = [
+    "bg", "cs", "da", "de", "el", "es", "et", "fi", "fr", "ga", "hr",
+    "hu", "is", "it", "lt", "lv", "mt", "nl", "no", "pl", "pt", "ro",
+    "sk", "sl", "sv", "uk"
   ];
 
   var DATA = {
@@ -66,6 +71,10 @@
       if (region === "US" || region === "CA") return "us";
       if (EU_REGIONS.indexOf(region) >= 0) return "eu";
     }
+    for (var j = 0; j < list.length; j++) {
+      var language = String(list[j] || "").replace(/_/g, "-").split("-")[0].toLowerCase();
+      if (EU_LANGUAGES.indexOf(language) >= 0) return "eu";
+    }
     return DEFAULT_MARKET;
   }
 
@@ -121,6 +130,7 @@
         var cell = document.querySelector('[data-market-cell="' + row + '.' + column + '"]');
         if (!cell) return;
         var value = values[index];
+        cell.classList.toggle("status", value === null || value === "unavailable");
         if (value === null) cell.innerHTML = translatedStatus("notVerified");
         else if (value === "unavailable") cell.innerHTML = translatedStatus("unavailable");
         else cell.textContent = value;
@@ -140,6 +150,10 @@
     var details = document.querySelectorAll("[data-market-detail]");
     for (var k = 0; k < details.length; k++) {
       details[k].hidden = details[k].getAttribute("data-market-detail") !== market;
+    }
+    var commercialNotes = document.querySelectorAll("[data-market-commercial-note]");
+    for (var m = 0; m < commercialNotes.length; m++) {
+      commercialNotes[m].hidden = market === "aliexpress";
     }
 
     syncUrl(market);

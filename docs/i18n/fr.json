@@ -1,6 +1,6 @@
 {
   "meta.title": "samogrow by Nombox — potager d'aromates DIY piloté par IA",
-  "meta.description": "samogrow by Nombox — un potager d'aromates d'intérieur open source (MIT), piloté par IA, que vous assemblez à partir de pièces du commerce. À partir de ~$255 (manuel), ~$280 pour le cœur automatisé, jusqu'à ~$335 avec les options. Une caméra surveille les plantes, des prises connectées pilotent lumière et eau, et Telegram fait le rapport. Pas d'abonnement fabricant ni de capsules propriétaires ; le coût récurrent est de $3–7/mois d'appels à l'API Claude plus ~$35/an de consommables ordinaires. Tourne sur une machine que vous laissez déjà allumée ; essayez-le en mode mock, sans le moindre matériel.",
+  "meta.description": "samogrow par Nombox — un jardin d'herbes d'intérieur open source (MIT) à monter soi-même à partir de pièces du commerce. Une caméra surveille les plantes, des prises connectées gèrent lumière et arrosage, et Telegram fait les rapports. Sans abonnement fournisseur ni capsules propriétaires ; l'usage de l'IA/API est optionnel et exclu du comparatif d'achat — la page affiche des prix indicatifs par marché. Essayez-le en mode simulation, sans aucun matériel.",
   "lang.switcher": "Langue",
   "lang.listbox": "Choisir la langue",
   "nav.how": "Architecture",
