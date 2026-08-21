@@ -515,7 +515,7 @@ These are the U.S.-retail figures; the website's `?market=eu` and
 | **samogrow — V2 (auto), 6 sites** | ~$256 | ~$70 | **~$326** | **~$54** |
 | Auk Mini 2, 4 pots | $229 | ~$80–120\* | **~$309–349**\* | **~$77–87**\* |
 | Click & Grow SG9, 9 sites | ~$200 | ~$400 | **~$600** | **~$67** |
-| Gardyn Home 4, 30 sites | ~$899 | not verified | not verified | not verified |
+| Gardyn Home 4, 30 sites | ~$899 | Not verified | Not verified | Not verified |
 
 *Auk Mini 2 includes about six months of nutrients and coco for one crop. Mini 2
 refill pricing is not published yet, so the range uses 2–3 refills at the current

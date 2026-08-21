@@ -829,12 +829,17 @@ test("market switcher is shareable, persistent, locale-aware, and keyboard wired
   }
 });
 
-function marketRuntimeDom({ url = "https://samogrow.test/?lang=en&market=us#cost", languages = ["en-US"], stored } = {}) {
+function marketRuntimeDom({ url = "https://samogrow.test/?lang=en&market=us#cost", languages = ["en-US"], stored,
+  storageThrows = false } = {}) {
   const dom = new JSDOM(indexHtml, { url, runScripts: "outside-only", pretendToBeVisual: true });
   Object.defineProperty(dom.window.document, "readyState", { value: "complete", configurable: true });
   Object.defineProperty(dom.window.navigator, "languages", { value: languages, configurable: true });
   Object.defineProperty(dom.window.navigator, "language", { value: languages[0] || "en", configurable: true });
-  if (stored !== undefined) dom.window.localStorage.setItem(MARKET.STORAGE_KEY, stored);
+  if (storageThrows) {
+    Object.defineProperty(dom.window, "localStorage", { get() { throw new Error("storage disabled"); } });
+  } else if (stored !== undefined) {
+    dom.window.localStorage.setItem(MARKET.STORAGE_KEY, stored);
+  }
   dom.window.eval(marketJs);
   return dom;
 }
@@ -859,9 +864,11 @@ test("market runtime executes tab, keyboard, URL, storage, status, and popstate 
   assert.equal(auk.classList.contains("status"), true);
   assert.ok(auk.querySelector(".code"));
   assert.equal(document.querySelector("[data-market-commercial-note]").hidden, true);
+  assert.equal(document.querySelector('[data-market-detail="aliexpress"]').hidden, false);
 
   tabs[2].dispatchEvent(new KeyboardEvent("keydown", { key: "Home", bubbles: true }));
   assert.equal(activeMarket(), "us");
+  assert.equal(document.querySelector('[data-market-detail="aliexpress"]').hidden, true);
   tabs[0].dispatchEvent(new KeyboardEvent("keydown", { key: "End", bubbles: true }));
   assert.equal(activeMarket(), "aliexpress");
   tabs[2].dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft", bubbles: true }));
@@ -871,6 +878,20 @@ test("market runtime executes tab, keyboard, URL, storage, status, and popstate 
   dom.window.dispatchEvent(new PopStateEvent("popstate"));
   assert.equal(activeMarket(), "us");
   assert.equal(new URL(dom.window.location.href).searchParams.get("market"), "us");
+});
+
+test("market runtime degrades safely when localStorage is unavailable", () => {
+  const dom = marketRuntimeDom({
+    storageThrows: true,
+    languages: ["de-DE"],
+    url: "https://samogrow.test/?lang=en#cost"
+  });
+  const eu = dom.window.document.querySelector('[data-market-tab="eu"]');
+  assert.equal(eu.getAttribute("aria-selected"), "true");
+  const ali = dom.window.document.querySelector('[data-market-tab="aliexpress"]');
+  assert.doesNotThrow(() => ali.click());
+  assert.equal(ali.getAttribute("aria-selected"), "true");
+  assert.equal(new URL(dom.window.location.href).searchParams.get("market"), "aliexpress");
 });
 
 test("each sourcing market has a complete and internally consistent SamoGrow estimate", () => {
