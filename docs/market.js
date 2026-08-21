@@ -70,9 +70,8 @@
       var region = regionOf(list[i]);
       if (region === "US" || region === "CA") return "us";
       if (EU_REGIONS.indexOf(region) >= 0) return "eu";
-    }
-    for (var j = 0; j < list.length; j++) {
-      var language = String(list[j] || "").replace(/_/g, "-").split("-")[0].toLowerCase();
+      if (region) return DEFAULT_MARKET;
+      var language = String(list[i] || "").replace(/_/g, "-").split("-")[0].toLowerCase();
       if (EU_LANGUAGES.indexOf(language) >= 0) return "eu";
     }
     return DEFAULT_MARKET;
@@ -115,7 +114,7 @@
     return source ? source.innerHTML : (status === "unavailable" ? "Unavailable" : "Not verified");
   }
 
-  function render(market, persist) {
+  function render(market, persist, sync) {
     var data = DATA[market];
     if (!data) return;
 
@@ -156,7 +155,7 @@
       commercialNotes[m].hidden = market === "aliexpress";
     }
 
-    syncUrl(market);
+    if (sync !== false) syncUrl(market);
     if (persist) {
       try { localStorage.setItem(STORAGE_KEY, market); } catch (e) {}
     }
@@ -187,6 +186,10 @@
     });
 
     render(current, false);
+    root.addEventListener("popstate", function () {
+      current = queryMarket(root.location.search) || inferMarket(languages);
+      render(current, false, false);
+    });
     document.addEventListener("samogrow:locale-applied", function () { render(current, false); });
   }
 

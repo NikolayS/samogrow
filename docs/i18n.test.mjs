@@ -24,6 +24,7 @@ const blogJs = readFileSync(join(docs, "blog.js"), "utf8");
 const bootstrapJs = readFileSync(join(docs, "i18n-bootstrap.js"), "utf8");
 const blogPageFiles = ["blog.html", "incident-i1.html", "incident-i3.html", "incident-i5.html", "incident-i6.html"];
 const readme = readFileSync(join(docs, "..", "README.md"), "utf8");
+const spec = readFileSync(join(docs, "..", "spec", "SPEC.md"), "utf8");
 const localeFiles = readdirSync(join(docs, "i18n")).filter((f) => f.endsWith(".json")).sort();
 const dicts = Object.fromEntries(
   localeFiles.map((f) => [f.replace(/\.json$/, ""), JSON.parse(readFileSync(join(docs, "i18n", f), "utf8"))])
@@ -764,6 +765,8 @@ test("pricing frames identify their market, currency, and exclusions", () => {
   assert.ok(en["spec.allin.value"].includes("U.S."), "spec-card all-in value not U.S.-labeled");
   assert.ok(en["spec.eu.value"].includes("~$190–260") && en["spec.eu.value"].includes("rough"),
     "spec-card must show the rough non-U.S. estimate immediately");
+  assert.ok(en["spec.eu.label"].includes("AliExpress"),
+    "spec-card must identify ~$190–260 as the AliExpress sourcing estimate");
   assert.match(indexHtml, /data-i18n="spec\.eu\.value"/);
   assert.ok(en["parts.fine"].includes("U.S. mid-2026"), "parts fine print not U.S.-labeled");
   assert.ok(en["market.us.note"].includes("U.S. retail baseline"), "U.S. tab must identify its baseline");
@@ -809,13 +812,65 @@ test("market switcher is shareable, persistent, locale-aware, and keyboard wired
   assert.equal(MARKET.inferMarket(["de-CH"]), "eu");
   assert.equal(MARKET.inferMarket(["fr-CA"]), "us");
   assert.equal(MARKET.inferMarket(["uk-UA"]), "eu");
+  assert.equal(MARKET.inferMarket(["pt-BR"]), "us");
+  assert.equal(MARKET.inferMarket(["es-MX"]), "us");
+  assert.equal(MARKET.inferMarket(["pt", "en-US"]), "eu");
+  assert.equal(MARKET.inferMarket([]), "us");
+  assert.equal(MARKET.inferMarket(["xx-XX"]), "us");
+  assert.equal(MARKET.chooseMarket("", "not-a-market", ["de-DE"]), "eu");
   const dom = new JSDOM(indexHtml);
   const tabs = [...dom.window.document.querySelectorAll("[data-market-tab]")];
   assert.deepEqual(tabs.map((tab) => tab.dataset.marketTab), MARKET.MARKETS);
   assert.ok(tabs.every((tab) => tab.getAttribute("role") === "tab"));
-  for (const behavior of ["searchParams.set(\"market\", market)", "localStorage.setItem(STORAGE_KEY, market)", "ArrowLeft", "ArrowRight"]) {
-    assert.ok(marketJs.includes(behavior), `market runtime missing ${behavior}`);
+  for (const tab of tabs) {
+    const panel = dom.window.document.getElementById(tab.getAttribute("aria-controls"));
+    assert.equal(panel?.getAttribute("role"), "tabpanel");
+    assert.equal(panel?.getAttribute("aria-labelledby"), tab.id);
   }
+});
+
+function marketRuntimeDom({ url = "https://samogrow.test/?lang=en&market=us#cost", languages = ["en-US"], stored } = {}) {
+  const dom = new JSDOM(indexHtml, { url, runScripts: "outside-only", pretendToBeVisual: true });
+  Object.defineProperty(dom.window.document, "readyState", { value: "complete", configurable: true });
+  Object.defineProperty(dom.window.navigator, "languages", { value: languages, configurable: true });
+  Object.defineProperty(dom.window.navigator, "language", { value: languages[0] || "en", configurable: true });
+  if (stored !== undefined) dom.window.localStorage.setItem(MARKET.STORAGE_KEY, stored);
+  dom.window.eval(marketJs);
+  return dom;
+}
+
+test("market runtime executes tab, keyboard, URL, storage, status, and popstate behavior", () => {
+  const dom = marketRuntimeDom();
+  const { document, KeyboardEvent, PopStateEvent } = dom.window;
+  const tabs = [...document.querySelectorAll("[data-market-tab]")];
+  const activeMarket = () => document.querySelector('[data-market-tab][aria-selected="true"]').dataset.marketTab;
+
+  tabs[1].click();
+  assert.equal(activeMarket(), "eu");
+  assert.equal(document.querySelector('[data-market-panel="eu"]').hidden, false);
+  assert.equal(document.querySelector('[data-market-panel="us"]').hidden, true);
+  assert.equal(document.querySelector('[data-market-cell="samo.total"]').textContent, "~$365–460");
+  assert.equal(dom.window.localStorage.getItem(MARKET.STORAGE_KEY), "eu");
+  assert.equal(new URL(dom.window.location.href).searchParams.get("market"), "eu");
+
+  tabs[1].dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true }));
+  assert.equal(activeMarket(), "aliexpress");
+  const auk = document.querySelector('[data-market-cell="auk.hardware"]');
+  assert.equal(auk.classList.contains("status"), true);
+  assert.ok(auk.querySelector(".code"));
+  assert.equal(document.querySelector("[data-market-commercial-note]").hidden, true);
+
+  tabs[2].dispatchEvent(new KeyboardEvent("keydown", { key: "Home", bubbles: true }));
+  assert.equal(activeMarket(), "us");
+  tabs[0].dispatchEvent(new KeyboardEvent("keydown", { key: "End", bubbles: true }));
+  assert.equal(activeMarket(), "aliexpress");
+  tabs[2].dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft", bubbles: true }));
+  assert.equal(activeMarket(), "eu");
+
+  dom.window.history.replaceState(null, "", "?lang=en&market=us#cost");
+  dom.window.dispatchEvent(new PopStateEvent("popstate"));
+  assert.equal(activeMarket(), "us");
+  assert.equal(new URL(dom.window.location.href).searchParams.get("market"), "us");
 });
 
 test("each sourcing market has a complete and internally consistent SamoGrow estimate", () => {
@@ -859,15 +914,13 @@ test("cost table excludes AI and normalizes every verified total per spot", () =
   }
 });
 
-test("market rendering styles unknown values and hides commercial footnotes for AliExpress", () => {
-  for (const behavior of [
-    'classList.toggle("status", value === null || value === "unavailable")',
-    'commercialNotes[m].hidden = market === "aliexpress"'
-  ]) {
-    assert.ok(marketJs.includes(behavior), `market runtime missing ${behavior}`);
+test("SPEC cost comparison stays tied to the exported U.S. market data", () => {
+  const auk = MARKET.DATA.us.rows.auk;
+  const escaped = auk.map((value) => value.replace(/\*/g, "\\*") );
+  assert.ok(spec.includes(`| Auk Mini 2, 4 pots | ${escaped[0]} | ${escaped[1]} | **${escaped[2].replace(/\\\*$/, "")}**\\* | **${escaped[3].replace(/\\\*$/, "")}**\\* |`));
+  for (const fact of ["six months", "€35", "Mini 2", "not published", "optional AI/API usage"]) {
+    assert.ok(spec.includes(fact), `SPEC Auk methodology missing: ${fact}`);
   }
-  const note = new JSDOM(indexHtml).window.document.querySelector("[data-market-commercial-note]");
-  assert.ok(note && note.dataset.i18n === "cmp.auk.note");
 });
 
 test("new pricing/incident strings keep prices and links intact across all 20 locales", () => {

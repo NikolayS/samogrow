@@ -495,7 +495,7 @@
         <aside class="spec-card fade d4">
           <span class="eyebrow" data-i18n="spec.eyebrow">At a glance</span>
           <div class="spec-row"><span data-i18n="spec.allin.label">All-in hardware</span><span class="hi" data-i18n="spec.allin.value">~$232–311 (U.S., variants)</span></div>
-          <div class="spec-row"><span data-i18n="spec.eu.label">Poland / EU example</span><span class="hi" data-i18n="spec.eu.value">~$190–260 (USD, rough)</span></div>
+          <div class="spec-row"><span data-i18n="spec.eu.label">AliExpress budget example</span><span class="hi" data-i18n="spec.eu.value">~$190–260 (USD, rough)</span></div>
           <div class="spec-row"><span data-i18n="spec.appliance.label">Appliance side</span><span data-i18n="spec.appliance.value">$33–68</span></div>
           <div class="spec-row"><span data-i18n="spec.grow.label">Grow side</span><span data-i18n="spec.grow.value">$205–211</span></div>
           <div class="spec-row"><span data-i18n="spec.consumables.label">Consumables</span><span data-i18n="spec.consumables.value">~$35 / yr</span></div>
@@ -603,17 +603,17 @@
       <div class="market-picker">
         <span class="market-picker-label" id="market-picker-label" data-i18n="market.label">Sourcing market</span>
         <div class="market-tabs" role="tablist" aria-labelledby="market-picker-label">
-          <button class="market-tab" type="button" role="tab" aria-selected="true" data-market-tab="us" data-i18n="market.us">USA retail</button>
-          <button class="market-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-market-tab="eu" data-i18n="market.eu">EU retail</button>
-          <button class="market-tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-market-tab="aliexpress" data-i18n="market.aliexpress">AliExpress budget</button>
+          <button class="market-tab" id="market-tab-us" type="button" role="tab" aria-controls="market-panel-us" aria-selected="true" data-market-tab="us" data-i18n="market.us">USA retail</button>
+          <button class="market-tab" id="market-tab-eu" type="button" role="tab" aria-controls="market-panel-eu" aria-selected="false" tabindex="-1" data-market-tab="eu" data-i18n="market.eu">EU retail</button>
+          <button class="market-tab" id="market-tab-aliexpress" type="button" role="tab" aria-controls="market-panel-aliexpress" aria-selected="false" tabindex="-1" data-market-tab="aliexpress" data-i18n="market.aliexpress">AliExpress budget</button>
         </div>
       </div>
 
-      <p class="market-summary" data-market-panel="us" data-i18n="market.us.note">U.S. retail baseline from the documented build list. The automated V2 build is the comparison row; manual V1 and water-safety V3 remain visible as tiers.</p>
-      <p class="market-summary" data-market-panel="eu" data-i18n="market.eu.note" hidden>EU retail estimate using EU-plug equivalents and VAT-inclusive listings. AUK and Click &amp; Grow have verified EU storefront prices; Gardyn does not currently ship outside the U.S.</p>
-      <p class="market-summary" data-market-panel="aliexpress" data-i18n="market.aliexpress.note" hidden>Budget marketplace estimate using representative AliExpress listings plus locally sourced supplies. This is not a drop-in parts list: plug APIs, RTSP, voltage, warranty, and seller variants must be checked before ordering.</p>
-      <span class="market-copy" data-market-copy="cmp.notVerified" data-i18n="cmp.notVerified">Not verified</span>
-      <span class="market-copy" data-market-copy="cmp.unavailable" data-i18n="cmp.unavailable">Unavailable</span>
+      <p class="market-summary" id="market-panel-us" role="tabpanel" aria-labelledby="market-tab-us" data-market-panel="us" data-i18n="market.us.note">U.S. retail baseline from the documented build list. The automated V2 build is the comparison row; manual V1 and water-safety V3 remain visible as tiers.</p>
+      <p class="market-summary" id="market-panel-eu" role="tabpanel" aria-labelledby="market-tab-eu" data-market-panel="eu" data-i18n="market.eu.note" hidden>EU retail estimate using EU-plug equivalents and VAT-inclusive listings. AUK and Click &amp; Grow have verified EU storefront prices; Gardyn does not currently ship outside the U.S.</p>
+      <p class="market-summary" id="market-panel-aliexpress" role="tabpanel" aria-labelledby="market-tab-aliexpress" data-market-panel="aliexpress" data-i18n="market.aliexpress.note" hidden>Budget marketplace estimate using representative AliExpress listings plus locally sourced supplies. This is not a drop-in parts list: plug APIs, RTSP, voltage, warranty, and seller variants must be checked before ordering.</p>
+      <span class="market-copy" data-market-copy="cmp.notVerified" data-i18n="cmp.notVerified"><span class="code">Not verified</span></span>
+      <span class="market-copy" data-market-copy="cmp.unavailable" data-i18n="cmp.unavailable"><span class="code">Unavailable</span></span>
 
       <div class="cost-grid">
         <div>
@@ -649,10 +649,10 @@
                 <tr><th data-i18n="cmp.th.system">System</th><th data-i18n="cmp.th.hardware">Build / startup</th><th data-i18n="cmp.th.extras">2-yr garden consumables</th><th data-i18n="cmp.th.total">2-yr total</th><th data-i18n="cmp.th.perSpot">Total / spot</th></tr>
               </thead>
               <tbody>
-                <tr class="us"><td><a href="https://github.com/NikolayS/samogrow/blob/main/spec/SHOPPING-LIST.md">samogrow</a> · 6 <span data-i18n="cmp.sites">sites</span></td><td data-market-cell="samo.hardware">$256</td><td data-market-cell="samo.consumables">~$70</td><td data-market-cell="samo.total">~$326</td><td data-market-cell="samo.perSpot">~$54</td></tr>
+                <tr class="us"><td><a href="https://github.com/NikolayS/samogrow/blob/main/spec/SHOPPING-LIST.md" target="_blank" rel="noopener">samogrow</a> · 6 <span data-i18n="cmp.sites">sites</span></td><td data-market-cell="samo.hardware">$256</td><td data-market-cell="samo.consumables">~$70</td><td data-market-cell="samo.total">~$326</td><td data-market-cell="samo.perSpot">~$54</td></tr>
                 <tr><td><a href="https://www.auk.com/products/auk-mini-2" target="_blank" rel="noopener">Auk Mini 2</a> · 4 <span data-i18n="cmp.pots">pots</span></td><td data-market-cell="auk.hardware">$229</td><td data-market-cell="auk.consumables">~$80–120*</td><td data-market-cell="auk.total">~$309–349*</td><td data-market-cell="auk.perSpot">~$77–87*</td></tr>
                 <tr><td><a href="https://eu.clickandgrow.com/products/the-smart-garden-9" target="_blank" rel="noopener">Click &amp; Grow SG9</a> · 9 <span data-i18n="cmp.sites">sites</span></td><td data-market-cell="click.hardware">$200</td><td data-market-cell="click.consumables">~$400</td><td data-market-cell="click.total">~$600</td><td data-market-cell="click.perSpot">~$67</td></tr>
-                <tr><td><a href="https://mygardyn.com/products/gardyn-home-kit" target="_blank" rel="noopener">Gardyn Home 4</a> · 30 <span data-i18n="cmp.sites">sites</span></td><td data-market-cell="gardyn.hardware">$899</td><td class="status" data-market-cell="gardyn.consumables">Not verified</td><td class="status" data-market-cell="gardyn.total">Not verified</td><td class="status" data-market-cell="gardyn.perSpot">Not verified</td></tr>
+                <tr><td><a href="https://mygardyn.com/products/gardyn-home-kit" target="_blank" rel="noopener">Gardyn Home 4</a> · 30 <span data-i18n="cmp.sites">sites</span></td><td data-market-cell="gardyn.hardware">$899</td><td class="status" data-market-cell="gardyn.consumables"><span class="code">Not verified</span></td><td class="status" data-market-cell="gardyn.total"><span class="code">Not verified</span></td><td class="status" data-market-cell="gardyn.perSpot"><span class="code">Not verified</span></td></tr>
               </tbody>
             </table>
           </div>
@@ -686,8 +686,8 @@
       </p>
 
       <div class="pl-example variants" data-market-detail="aliexpress" hidden>
-        <div class="vcap" data-i18n="pl.cap">Poland / EU-plug example — marketplace snapshot in USD, observed 2026-08-20</div>
-        <p class="pl-note" data-i18n="pl.intro">The U.S. numbers above don't travel. Here is what the same idea looks like shopped from Poland with EU plugs, using representative AliExpress listings whose prices were observed via PriceArchive on 2026-08-20 — kept in USD for comparison.</p>
+        <div class="vcap" data-i18n="pl.cap">AliExpress / Poland example — marketplace snapshot in USD, observed 2026-08-20</div>
+        <p class="pl-note" data-i18n="pl.intro">One EU-plug AliExpress basket, shopped from Poland: representative listings whose prices were observed via PriceArchive on 2026-08-20 — kept in USD for comparison.</p>
         <div class="vt"><span><span data-i18n="pl.plugs.label">2 × EU Wi-Fi power-metering smart plugs</span><small data-i18n="pl.plugs.sub"><a href="https://www.aliexpress.com/w/wholesale-wifi-smart-plug-eu-power-meter.html" target="_blank" rel="noopener">AliExpress / PriceArchive search result</a> · ~$8.50 each · plug protocol/API compatibility unverified</small></span><span class="amt">~$17</span></div>
         <div class="vt"><span><span data-i18n="pl.camera.label">1080p Wi-Fi camera</span><small data-i18n="pl.camera.sub"><a href="https://www.aliexpress.com/item/1005010779026398.html" target="_blank" rel="noopener">PriceArchive item 1005010779026398</a> · RTSP support explicitly unverified</small></span><span class="amt">~$15</span></div>
         <div class="vt"><span><span data-i18n="pl.lamp.label">Full-spectrum grow lamp</span><small data-i18n="pl.lamp.sub"><a href="https://www.aliexpress.com/w/wholesale-full-spectrum-led-grow-light.html" target="_blank" rel="noopener">representative listing</a> · actual draw &amp; coverage must be verified</small></span><span class="amt">~$14</span></div>
