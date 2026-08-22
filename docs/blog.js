@@ -9,7 +9,8 @@
       file: "incident-i1.html", issue: "https://github.com/NikolayS/samogrow/issues/3",
       image: "img/incidents/2026-07-13-reservoir-128x10.jpeg", width: 1600, height: 880,
       title: "The ×10 incident — a tenfold nutrient overdose",
-      story: "The cheap TDS pen showed “115” and nobody noticed the tiny ×10 flag next to it. The reservoir was dosed as if the water were ten times cleaner than it was, and the salt concentration burned the plants within days.",
+      summary: "A tiny ×10 flag on a cheap TDS meter turned an ordinary nutrient check into a tenfold overdose—and the plants paid for it within days.",
+      story: "<p>The reading looked ordinary: 115. The cheap TDS pen was small, the reservoir routine was familiar, and nobody noticed the tiny <span class=\"code\">×10</span> indicator glowing beside the number. We mixed nutrients for 115 ppm water when the meter was actually reporting roughly 1,150 ppm.</p><p>The plants became the alarm. Mint leaf edges browned, parsley wilted, and the reservoir that had looked normal suddenly became the prime suspect. A second measurement showed 128 with the multiplier still lit: 1,280 ppm. What first looked like disease or heat stress was salt burn caused by our own bad reading.</p><p>We diluted the reservoir and removed the ambiguity from the operating procedure. Every TDS report now includes the multiplier and the computed ppm, and an implausible jump is treated as a units problem before it becomes a plant problem. The cheapest instrument in the system taught us the most expensive lesson.</p>",
       impact: "<b>Impact:</b> salt burn across the tote — necrotic mint, declining parsley; the most expensive lesson of the field test.",
       lesson: "<b>Lesson:</b> always read the multiplier flag and relay true ppm; a units-validation step now guards every reported reading.",
       alt: "Evidence photo from incident I-1: a handheld TDS meter held over the DWC reservoir reads 128 with the small ×10 multiplier flag lit — the reading that revealed the tenfold nutrient overdose.",
@@ -20,7 +21,8 @@
       file: "incident-i3.html", issue: "https://github.com/NikolayS/samogrow/issues/6",
       image: "img/incidents/2026-07-24-pest-frass-macro.jpeg", width: 1600, height: 862,
       title: "The leafroller — a stowaway on a transplant",
-      story: "A caterpillar hitchhiked in on a garden-center transplant and spent two weeks eating mint by night, hiding in a silked rolled leaf by day. It was never seen in the act — the case was cracked from its droppings accumulating on the lid.",
+      summary: "A caterpillar arrived inside a garden-center transplant, ate at night, and hid so well that its droppings solved the case.",
+      story: "<p>The new mint looked healthy when it joined the garden. Then leaves began disappearing. The damage was irregular and always seemed worse in the morning, but daytime inspections found no insect—only a stem being stripped a little further each night.</p><p>The breakthrough was on the yellow reservoir lid: scattered black pellets that were too consistent to be soil. They were frass. Following that trail led to a leaf folded and stitched with silk, with the caterpillar tucked inside for the day. It had arrived as a stowaway on the garden-center transplant and fed unnoticed for about two weeks.</p><p>We removed it before the damage spread beyond mint and basil, but the incident changed intake procedure. New transplants now get a close inspection and quarantine instead of immediate trust. Frass, webbing, and rolled leaves are first-class pest signals—even when the pest itself never poses for the camera.</p>",
       impact: "<b>Impact:</b> one mint stem stripped bare, chewed mint and basil leaves; no plant lost.",
       lesson: "<b>Lesson:</b> transplants import pests — inspect and quarantine new plants, and treat frass as a first-class alarm signal.",
       alt: "Evidence photo from incident I-3: macro shot of black frass pellets — caterpillar droppings — scattered on the yellow reservoir lid, the clue that finally revealed the hidden leafroller.",
@@ -31,7 +33,8 @@
       file: "incident-i5.html", issue: "https://github.com/NikolayS/samogrow/issues/10",
       image: "img/incidents/2026-08-12-aphids-parsley.jpeg", width: 1500, height: 1275,
       title: "Aphids the camera never saw",
-      story: "Sap-sucking aphids colonized the parsley and basil, cupping the basil's new growth. The automated camera checks are blind to pests this small — a hands-on leaf inspection found them, days after an early warning (“a few small flies”) went unacted-on.",
+      summary: "The overhead camera kept reporting a healthy garden while aphids colonized the parsley and curled the basil's newest leaves.",
+      story: "<p>From the overhead camera, the garden still looked green. There had been an early note about “a few small flies,” but nothing in the daily images looked urgent, so the observation sat unresolved while the basil's newest leaves slowly began to cup.</p><p>A hands-on inspection told a different story. Grey-green aphids were clustered along parsley stems and under leaves, with pale stippling and distorted basil growth around them. The camera had not failed technically; it was simply looking at a scale where individual pests disappear into the canopy.</p><p>The infestation was recoverable and no plant was lost, but the monitoring assumption was wrong. We now treat camera checks as broad condition monitoring, not pest detection, and schedule physical leaf inspections alongside them. Small anomalies are investigated while they are still small.</p>",
       impact: "<b>Impact:</b> distorted basil growth and stippled parsley; recoverable, no plant lost.",
       lesson: "<b>Lesson:</b> the camera is not a pest sensor — schedule human leaf checks, and act on small anomalies instead of filing them away.",
       alt: "Evidence photo from incident I-5: close-up of grey-green aphids clustered along parsley stems and leaves, with fine pale stippling on the foliage.",
@@ -42,7 +45,8 @@
       file: "incident-i6.html", issue: "https://github.com/NikolayS/samogrow/issues/11",
       image: "img/incidents/2026-08-18-neem-burn-basil.jpeg", width: 1500, height: 1200,
       title: "Neem under the light — the self-inflicted burn",
-      story: "Treating the aphids, we sprayed neem oil once (~2026-08-15) with the grow light ON. Neem is phototoxic: oil film plus radiant light scorched the basil and mint. Damage surfaced 2026-08-18; the RCA landed 2026-08-20. The pest treatment worked — and caused the next incident.",
+      summary: "The aphid treatment worked, but spraying neem under the grow light scorched the basil and created the next incident.",
+      story: "<p>The aphids needed treatment, and neem oil looked like the gentle option. Around 2026-08-15 we sprayed once—but left the grow light on. The application appeared uneventful, and for a moment it looked like the pest problem had been handled cleanly.</p><p>Three days later, on 2026-08-18, bronze-brown patches spread across basil leaves and appeared on the mint. The timing and surface pattern pointed away from the aphids. Oil film under intense radiant light had made the leaves vulnerable to phototoxic burn. The treatment had worked against the pest and injured the plants at the same time.</p><p>The 2026-08-20 RCA made the procedure non-negotiable: lights off before any oil spray, with treatment timed for a dark period. The damaged leaves are recovering at plant level, but “neem is natural” was never a safety control. Turning the lights off is.</p>",
       impact: "<b>Impact:</b> bronze necrotic patches on basil (worst) and mint; leaf-level only, recovering.",
       lesson: "<b>Lesson:</b> lights OFF before spraying any oil — a hard precondition now written into the treatment guidance, not a footnote.",
       alt: "Evidence photo from incident I-6: basil leaves with large bronze-brown necrotic scorch patches across the leaf surfaces — oil phototoxicity damage from a neem spray applied under the grow light.",
@@ -58,18 +62,18 @@
     return '<a class="post-card" data-lang-link href="' + item.file + '">' +
       '<img src="' + item.image + '" width="' + item.width + '" height="' + item.height + '" loading="lazy" alt="' + item.alt + '" data-i18n-attrs="alt:inc.' + item.key + '.alt">' +
       '<div class="copy">' + meta(item) + '<h2 data-i18n="inc.' + item.key + '.title">' + item.title + '</h2>' +
-      '<p data-i18n="inc.' + item.key + '.story">' + item.story + '</p></div></a>';
+      '<p data-i18n="inc.' + item.key + '.summary">' + item.summary + '</p></div></a>';
   }
 
   function post(item) {
     return '<article class="post shell">' + meta(item) +
       '<h1 data-i18n="inc.' + item.key + '.title">' + item.title + '</h1>' +
-      '<p class="story" data-i18n="inc.' + item.key + '.story">' + item.story + '</p>' +
+      '<div class="story" data-i18n="inc.' + item.key + '.story">' + item.story + '</div>' +
       '<figure><img src="' + item.image + '" width="' + item.width + '" height="' + item.height + '" alt="' + item.alt + '" data-i18n-attrs="alt:inc.' + item.key + '.alt">' +
       '<figcaption data-i18n="inc.' + item.key + '.cap">' + item.caption + '</figcaption></figure>' +
       '<ul class="facts"><li data-i18n="inc.' + item.key + '.impact">' + item.impact + '</li>' +
       '<li data-i18n="inc.' + item.key + '.lesson">' + item.lesson + '</li></ul>' +
-      '<div class="actions"><a data-lang-link href="blog.html">← <span data-i18n="inc.title">The incident blog</span></a>' +
+      '<div class="actions"><a data-lang-link href="blog.html">← <span data-i18n="inc.title">Blog</span></a>' +
       '<a href="' + item.issue + '" target="_blank" rel="noopener" data-i18n="inc.readmore">Full write-up &amp; RCA on GitHub →</a></div></article>';
   }
 
@@ -84,6 +88,6 @@
     }
   }
   root.innerHTML = '<header class="hero shell"><span class="eyebrow" data-i18n="inc.eyebrow">Field notes</span>' +
-    '<h1 data-i18n="inc.title">The incident blog</h1><p class="lede" data-i18n="inc.sub">Real gardens produce real incidents, and we run them like production outages: dated, severity-tagged, blameless, and written up in public.</p></header>' +
+    '<h1 data-i18n="inc.title">Blog</h1><p class="lede" data-i18n="inc.sub">Real gardens produce real incidents, and we run them like production outages: dated, severity-tagged, blameless, and written up in public.</p></header>' +
     '<div class="post-grid shell">' + incidents.map(card).join("") + '</div>';
 })();

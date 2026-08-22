@@ -1,11 +1,11 @@
 :root {
-  --bg: #10140d;
-  --card: #171d12;
-  --ink: #f0ead8;
-  --soft: #aeb49e;
-  --line: #313927;
-  --leaf: #7ac66b;
-  --soil: #d69b61;
+  --bg: #f2ede0;
+  --card: #f7f3e8;
+  --ink: #1c2216;
+  --soft: #4a5340;
+  --line: #cdc4ac;
+  --leaf: #35722f;
+  --soil: #a8632a;
   --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --serif: Georgia, "Times New Roman", serif;
 }
@@ -26,7 +26,7 @@ a { color: var(--leaf); }
 .lang-menu { position: absolute; right: 0; top: calc(100% + 8px); width: 210px; max-height: 70vh; overflow: auto; margin: 0; padding: 6px; list-style: none; background: var(--card); border: 1px solid var(--line); }
 .lang-menu[hidden] { display: none; }
 .lang-menu li { padding: 9px 10px; cursor: pointer; font: .75rem var(--mono); }
-.lang-menu li:hover, .lang-menu li[aria-selected="true"] { color: var(--leaf); background: #20291a; }
+.lang-menu li:hover, .lang-menu li[aria-selected="true"] { color: var(--leaf); background: #e7e1d1; }
 .hero { padding: 72px 0 38px; }
 .eyebrow, .meta { color: var(--leaf); font: .7rem var(--mono); letter-spacing: .12em; text-transform: uppercase; }
 h1 { max-width: 850px; margin: 10px 0 16px; font: 400 clamp(2.3rem, 7vw, 5.2rem)/1.02 var(--serif); }
@@ -41,9 +41,10 @@ h1 { max-width: 850px; margin: 10px 0 16px; font: 400 clamp(2.3rem, 7vw, 5.2rem)
 .post { width: min(820px, 100%); padding: 64px 0 90px; }
 .post h1 { font-size: clamp(2.2rem, 6vw, 4.3rem); }
 .post figure { margin: 34px 0; }
-.post img { display: block; width: 100%; height: auto; border: 1px solid var(--line); }
+.post img { display: block; width: 100%; height: auto; max-height: min(62vh, 560px); object-fit: contain; background: var(--card); border: 1px solid var(--line); }
 .post figcaption { margin-top: 9px; color: var(--soft); font: .68rem var(--mono); }
 .post .story { color: var(--soft); font-size: 1.08rem; }
+.post .story p { margin: 0 0 1.15em; }
 .facts { list-style: none; padding: 0; display: grid; gap: 12px; }
 .facts li { padding: 14px 16px; border-left: 2px solid var(--leaf); background: var(--card); }
 .facts b { color: var(--ink); }
@@ -55,4 +56,5 @@ h1 { max-width: 850px; margin: 10px 0 16px; font: 400 clamp(2.3rem, 7vw, 5.2rem)
   .hero { padding-top: 48px; }
   .home { display: none; }
   .lang { position: absolute; right: 11px; top: 14px; }
+  .post img { max-height: 50vh; }
 }

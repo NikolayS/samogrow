@@ -4,6 +4,38 @@ Research compiled July 2026 for the SamoGrow DIY AI hydroponic herb garden proje
 Prices in USD unless noted. Items marked *(uncertain)* need confirmation before being
 used as hard design constraints.
 
+## Website market-switcher snapshot (2026-08-20)
+
+The website comparison deliberately excludes electricity and optional AI/API usage. It
+uses three **sourcing** views (AliExpress is a channel, not a region), keeps displayed
+figures in USD, and normalizes verified totals by growing position.
+
+- **USA retail:** samogrow V2 build/startup ~$256 + ~$70 two-year garden consumables
+  = ~$326 (~$54 per six spots). AUK Mini 2 $229 + an estimated 2–3 refills =
+  ~$309–349. Click & Grow SG9 $200 + roughly six full nine-pod restarts per year =
+  ~$600. Gardyn stays hardware-only because its membership bundles plants with Kelby AI;
+  inventing a consumables-only split would violate the comparison's AI exclusion.
+- **EU retail:** converted at the ECB's 2026-08-18 reference rate of
+  **€1 = $1.1576**. AUK Mini 2's live storefront price was €219 (~$253); 2–3 refills at
+  the published AUK Mini €35 price add ~$81–122. Click & Grow SG9 was €249.95 (~$289);
+  twelve €25.95 nine-pod subscription deliveries over two years add ~$360. Gardyn is
+  unavailable because its FAQ says it currently ships only within the United States.
+  The samogrow EU-plug equivalent remains a broad ~$295–380 build range because local
+  light, reservoir, nutrient, and safety-component prices vary materially.
+- **AliExpress budget:** the six observed marketplace lines total ~$129; a locally
+  completed startup basket remains the existing ~$190–260 inference. With ~$35–70 of
+  two-year refills, the displayed total is ~$225–330 (~$38–55 per spot). Commercial
+  systems are marked “Not verified” in this sourcing view rather than silently copying
+  U.S. prices. Generic plugs/cameras are not guaranteed compatible with the current
+  Kasa/KLAP + Tapo RTSP software.
+
+Primary/current sources: [AUK Mini 2](https://www.auk.com/products/auk-mini-2),
+[AUK refill reference](https://www.auk.com/products/auk-mini),
+[Click & Grow SG9 EU](https://eu.clickandgrow.com/products/the-smart-garden-9),
+[Click & Grow EU subscription](https://eu.clickandgrow.com/products/plant-subscription),
+[Gardyn shipping FAQ](https://mygardyn.com/pages/faq), and the
+[ECB EUR/USD reference rate](https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/index.en.html).
+
 ## Comparison table
 
 | Product | Hardware price | Consumables / subscription | Capacity | LED wattage | Watering | App / AI | Notable complaints |

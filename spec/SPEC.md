@@ -505,31 +505,33 @@ after you know you want the interlock or the CSI camera.
 
 ### 4i. Cost comparison over 2 years
 
-| System | Hardware | 2-yr subscription/consumables | AI? | 2-yr total |
-|---|---:|---:|:--:|---:|
-| **samogrow — V1 (manual)** | ~$232 | ~$70 consumables + ~$120 Claude API ($5/mo) | **Yes** | **~$422** |
-| **samogrow — V2 (auto)** | ~$256 | ~$70 consumables + ~$120 Claude API ($5/mo) | **Yes** | **~$446** |
-| Gardyn Home 4 | ~$899 | ~$816 (Kelby AI $34/mo) | Yes | **~$1,715** |
-| Click & Grow SG9 | ~$200 | ~$400 (pods + sub) | No | **~$600** |
-| Auk Mini 2 | ~$229 | ~$80–120 (2–3 nutrient + coco refills; Mini 1 pricing proxy) | No (scheduling only) | **~$310–350** |
+The website comparison separates cost from capability. Every total below excludes
+electricity and optional AI/API usage, and normalizes the result by growing position.
+These are the U.S.-retail figures; the website's `?market=eu` and
+`?market=aliexpress` views carry separate, explicitly rough sourcing estimates.
 
-Electricity is excluded from every row for a like-for-like comparison. Auk Mini 2
-includes about six months of nutrients and coco for one crop; Mini 2 refill pricing
-is not published yet, so the range above uses current Auk Mini refill pricing as a
-proxy. Auk publishes power at $0.5–2/month (~$12–48 over two years), putting its
-power-inclusive two-year total around **~$320–400**. It still has no subscription or
-proprietary-pod lock-in.
+| System | Build / startup | 2-yr garden consumables | 2-yr total | Total / spot |
+|---|---:|---:|---:|---:|
+| **samogrow — V2 (auto), 6 sites** | ~$256 | ~$70 | **~$326** | **~$54** |
+| Auk Mini 2, 4 pots | $229 | ~$80–120\* | **~$309–349**\* | **~$77–87**\* |
+| Click & Grow SG9, 9 sites | ~$200 | ~$400 | **~$600** | **~$67** |
+| Gardyn Home 4, 30 sites | ~$899 | Not verified | Not verified | Not verified |
 
-**The pop:** samogrow lands in the same one-time price bracket as the *no-AI*
-countertop units (~$200–256) while delivering the camera+AI capability that
-otherwise **only exists on the $899 Gardyn with a ~$408/yr subscription.** Starting at
-**V1 that gap widens** — ~$422 all-in over two years, **roughly $1,290 cheaper than
-Gardyn**, and *below the no-AI Click & Grow's* 2-year cost while adding AI monitoring,
-more plants, and open consumables with no lock-in. Upgrading to V2's automation adds
-just ~$25 (the pump plug was already bought in the V1 2-pack). The DIY "premium" over the
-cheapest timer units is small; the AI-tier savings are enormous. (Running the whole
-five-variant program is a one-time ~$530 of hardware — ~$670 if V4 is the premium Auk,
-§4.0a — still under a single Gardyn.)
+*Auk Mini 2 includes about six months of nutrients and coco for one crop. Mini 2
+refill pricing is not published yet, so the range uses 2–3 refills at the current
+Auk Mini price of €35 as a proxy. Gardyn stays unpriced beyond hardware because its
+membership bundles plants with AI; inventing a consumables-only split would be less
+honest. Optional camera/AI checks remain a capability advantage for samogrow, but
+their provider- and cadence-dependent API cost does not belong in this table.
+
+**The pop:** samogrow's automated six-site build has the lowest verified two-year
+cost per growing position in the U.S. view while retaining optional camera/AI checks,
+remote alerts, open-source software, and commodity consumables. The manual V1 lowers
+startup hardware to ~$232; upgrading to V2's automation adds only ~$24 because the pump
+plug was already bought in the V1 two-pack. The capability table, not speculative API
+arithmetic, explains the DIY premium over timer-only appliances. (Running the whole
+five-variant program remains a separate one-time hardware experiment: ~$530, or ~$670
+if V4 is the premium Auk; see §4.0a.)
 
 ---
 
@@ -998,8 +1000,8 @@ removes. Take it only for the float-switch interlock or the CSI camera.
   **~$205 → ~$189**, **V1 ~$255 → ~$232**, V2 ~$280 → **~$256**, V3 ~$335 → **~$311**;
   EP10-single floor **~$238 → ~$215**, pure-Kratky **~$210 → ~$200**; V4a **~$95 → ~$85**,
   V4b **~$235 → ~$225**; superset **~$565/$705 → ~$530/$670**; §4i 2-yr TCO V1 **~$445 →
-  ~$422**, V2 **~$470 → ~$446**. `docs/index.html`'s at-a-glance range (still ~$255–335) is
-  now stale and needs a manual bump to **~$232–311**.
+  ~$422**, V2 **~$470 → ~$446**. `docs/index.html`'s at-a-glance range was later
+  corrected to **~$232–311**.
 - **v1.3.3 (2026-07-05)** — Made **transplanting a grown herb the default day-one path** —
   buy 2–4 potted herbs (basil, parsley), wash all soil off the roots, and set the root balls
   into net cups for a full working garden the same day — with **growing from seed reframed

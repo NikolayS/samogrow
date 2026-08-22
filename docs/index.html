@@ -3,7 +3,7 @@
 <meta charset="utf-8">
 <title>samogrow by Nombox — DIY AI herb garden</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="samogrow by Nombox — an open-source (MIT), AI-run indoor herb garden you build from commodity parts. Starts at ~$255 (manual), ~$280 automated core, to ~$335 with add-ons. A camera checks the plants, smart plugs control light and water, and Telegram reports. No vendor subscription and no proprietary pods; recurring cost is $3–7/mo in Claude API calls plus ~$35/yr in commodity consumables. Runs on a machine you already keep on; try it in mock mode with zero hardware.">
+<meta name="description" content="samogrow by Nombox — an open-source (MIT) DIY indoor herb garden built from commodity parts. A camera watches the plants while smart plugs run light and water, with reports on Telegram. No vendor subscription and no proprietary pods; AI/API use is optional and excluded from the sourcing comparison — the page shows rough prices per market. Try it in mock mode with zero hardware.">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <style>
   :root {
@@ -283,7 +283,18 @@
   .feat .ico { position: absolute; top: 22px; right: 24px; font-size: 1.35rem; opacity: .85; }
 
   /* ---------- cost ---------- */
+  .market-picker { margin: -10px 0 30px; }
+  .market-picker-label { display: block; margin-bottom: 9px; font-family: var(--font-mono); font-size: .68rem; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-faint); }
+  .market-tabs { display: inline-flex; flex-wrap: wrap; gap: 6px; padding: 5px; border: 1px solid var(--line); border-radius: 9px; background: var(--card); }
+  .market-tab { appearance: none; border: 1px solid transparent; border-radius: 6px; background: transparent; color: var(--ink-soft); cursor: pointer; font-family: var(--font-mono); font-size: .75rem; letter-spacing: .04em; padding: 9px 14px; }
+  .market-tab:hover { color: var(--ink); border-color: var(--line); }
+  .market-tab[aria-selected="true"] { background: var(--leaf); color: var(--paper); border-color: var(--leaf); }
+  .market-tab:focus-visible { outline: 2px solid var(--soil); outline-offset: 2px; }
+  .market-summary { color: var(--ink-soft); max-width: 76ch; margin: 0 0 28px; font-size: .98rem; line-height: 1.6; }
+  .market-summary[hidden] { display: none; }
+  .market-copy { display: none; }
   .cost-grid { display: grid; grid-template-columns: 1fr 1.15fr; gap: 34px; align-items: start; }
+  .cost-grid > * { min-width: 0; }
   @media (max-width: 820px) { .cost-grid { grid-template-columns: 1fr; gap: 28px; } }
 
   .cost-stack { border: 1px solid var(--line); background: var(--card); }
@@ -310,6 +321,9 @@
   .cmp .us td:first-child { color: var(--leaf); }
   .cmp .yes { color: var(--leaf); }
   .cmp .no { color: var(--ink-faint); }
+  .cmp a { color: inherit; text-decoration-color: var(--line); text-underline-offset: 3px; }
+  .cmp a:hover { color: var(--leaf); }
+  .cmp .status { color: var(--ink-faint); font-style: italic; white-space: nowrap; }
   .cmp-note { font-size: .95rem; color: var(--ink-soft); margin-top: 18px; line-height: 1.55; }
   .cmp-note b { color: var(--ink); font-style: italic; font-weight: 400; }
   .cmp-scroll { overflow-x: auto; }
@@ -395,7 +409,7 @@
   .hero-illo figcaption { margin-top: 9px; }
 
   /* schematic sits on its own cream card, legible on dark */
-  .schematic { margin: 34px auto 0; max-width: 720px; }
+  figure.shot.schematic { margin: 34px auto 0; max-width: 720px; }
   .schematic img {
     display: block; width: 100%; height: auto; max-width: 100%;
     border: 1px solid var(--line); border-radius: 10px;
@@ -435,7 +449,7 @@
         <a href="#cost" data-i18n="nav.cost">Cost</a>
         <a href="#features" data-i18n="nav.features">Features</a>
         <a href="#start" data-i18n="nav.start">Quickstart</a>
-        <a href="blog.html" data-lang-link data-i18n="nav.incidents">Incidents</a>
+        <a href="blog.html" data-lang-link data-i18n="nav.incidents">Blog</a>
         <a href="https://github.com/NikolayS/samogrow" data-i18n="nav.github">GitHub ↗</a>
       </nav>
       <div class="lang" id="lang-switcher">
@@ -483,9 +497,9 @@
         <aside class="spec-card fade d4">
           <span class="eyebrow" data-i18n="spec.eyebrow">At a glance</span>
           <div class="spec-row"><span data-i18n="spec.allin.label">All-in hardware</span><span class="hi" data-i18n="spec.allin.value">~$232–311 (U.S., variants)</span></div>
-          <div class="spec-row"><span data-i18n="spec.eu.label">Poland / EU example</span><span class="hi" data-i18n="spec.eu.value">~$190–260 (USD, rough)</span></div>
+          <div class="spec-row"><span data-i18n="spec.eu.label">AliExpress budget example</span><span class="hi" data-i18n="spec.eu.value">~$190–260 (USD, rough)</span></div>
           <div class="spec-row"><span data-i18n="spec.appliance.label">Appliance side</span><span data-i18n="spec.appliance.value">$33–68</span></div>
-          <div class="spec-row"><span data-i18n="spec.grow.label">Grow side</span><span data-i18n="spec.grow.value">$205–211</span></div>
+          <div class="spec-row"><span data-i18n="spec.grow.label">Grow side</span><span data-i18n="spec.grow.value">$188 (U.S.)</span></div>
           <div class="spec-row"><span data-i18n="spec.consumables.label">Consumables</span><span data-i18n="spec.consumables.value">~$35 / yr</span></div>
           <div class="spec-row"><span data-i18n="spec.api.label">Claude API</span><span data-i18n="spec.api.value">$3–7 / mo</span></div>
           <div class="spec-row"><span data-i18n="spec.source.label">Source</span><span class="hi" data-i18n="spec.source.value">MIT · tests + CI</span></div>
@@ -586,64 +600,82 @@
         <span class="sec-num">02</span>
         <h2 data-i18n="cost.title">What it costs</h2>
       </div>
-      <p class="sec-sub" data-i18n="cost.sub">
-        One price frame — a rough <b>U.S. mid-2026 baseline</b>, not a quote, and very much
-        location-dependent: <b>~$255</b> for the manual build to start, <b>~$280</b> for the
-        automated core, up to <b>~$335</b> with the water-safety add-ons. That is the same
-        one-time bracket as the <em>no-AI</em> countertop units, while delivering the camera +
-        AI capability that otherwise only ships on a $899 Gardyn with a ~$408/yr subscription.
-      </p>
+      <p class="sec-sub" data-i18n="cost.sub">Choose where you would source the build. Every view uses rough USD estimates and keeps the comparison on the same basis: startup hardware plus two years of garden consumables, excluding electricity and optional AI/API usage.</p>
+
+      <div class="market-picker">
+        <span class="market-picker-label" id="market-picker-label" data-i18n="market.label">Sourcing market</span>
+        <div class="market-tabs" role="tablist" aria-labelledby="market-picker-label">
+          <button class="market-tab" id="market-tab-us" type="button" role="tab" aria-controls="market-panel-us" aria-selected="true" data-market-tab="us" data-i18n="market.us">USA retail</button>
+          <button class="market-tab" id="market-tab-eu" type="button" role="tab" aria-controls="market-panel-eu" aria-selected="false" tabindex="-1" data-market-tab="eu" data-i18n="market.eu">EU retail</button>
+          <button class="market-tab" id="market-tab-aliexpress" type="button" role="tab" aria-controls="market-panel-aliexpress" aria-selected="false" tabindex="-1" data-market-tab="aliexpress" data-i18n="market.aliexpress">AliExpress budget</button>
+        </div>
+      </div>
+
+      <p class="market-summary" id="market-panel-us" role="tabpanel" aria-labelledby="market-tab-us" data-market-panel="us" data-i18n="market.us.note">U.S. retail baseline from the documented build list. The automated V2 build is the comparison row; manual V1 and water-safety V3 remain visible as tiers.</p>
+      <p class="market-summary" id="market-panel-eu" role="tabpanel" aria-labelledby="market-tab-eu" data-market-panel="eu" data-i18n="market.eu.note" hidden>EU retail estimate using EU-plug equivalents and VAT-inclusive listings. AUK and Click &amp; Grow have verified EU storefront prices; Gardyn does not currently ship outside the U.S.</p>
+      <p class="market-summary" id="market-panel-aliexpress" role="tabpanel" aria-labelledby="market-tab-aliexpress" data-market-panel="aliexpress" data-i18n="market.aliexpress.note" hidden>Budget marketplace estimate using representative AliExpress listings plus locally sourced supplies. This is not a drop-in parts list: plug APIs, RTSP, voltage, warranty, and seller variants must be checked before ordering.</p>
+      <span class="market-copy" data-market-copy="cmp.notVerified" data-i18n="cmp.notVerified"><span class="code">Not verified</span></span>
+      <span class="market-copy" data-market-copy="cmp.unavailable" data-i18n="cmp.unavailable"><span class="code">Unavailable</span></span>
 
       <div class="cost-grid">
         <div>
         <div class="cost-stack">
           <div class="line">
             <span><span data-i18n="cost.stack.appliances.label">Network appliances</span><small data-i18n="cost.stack.appliances.sub">2-pack (both plugs) · camera · pump · tubing</small></span>
-            <span class="amt">$68</span>
+            <span class="amt" data-market-stack="appliances">$68</span>
           </div>
           <div class="line">
             <span><span data-i18n="cost.stack.grow.label">Grow side</span><small data-i18n="cost.stack.grow.sub">DWC reservoir · light · nutrient · seeds · EC meter</small></span>
-            <span class="amt">$211</span>
+            <span class="amt" data-market-stack="grow">$188</span>
           </div>
           <div class="line total">
             <span class="lbl" data-i18n="cost.stack.total.lbl">Core build total</span>
-            <span class="amt">~$280</span>
+            <span class="amt" data-market-stack="total">~$256</span>
           </div>
         </div>
 
         <div class="variants">
           <div class="vcap" data-i18n="cost.variants.cap">Build it in tiers</div>
-          <div class="vt pick"><span><span data-i18n="cost.variants.a.label">A · Manual start</span><small data-i18n="cost.variants.a.sub">you pour when the AI says</small></span><span class="amt">~$255</span></div>
-          <div class="vt"><span><span data-i18n="cost.variants.b.label">B · + Auto top-up</span><small data-i18n="cost.variants.b.sub">pump does the watering</small></span><span class="amt">~$280</span></div>
-          <div class="vt"><span><span data-i18n="cost.variants.c.label">C · + Water safety</span><small data-i18n="cost.variants.c.sub">gauge · leak sensor · tray</small></span><span class="amt">+~$55</span></div>
+          <div class="vt pick"><span><span data-i18n="cost.variants.a.label">A · Manual start</span><small data-i18n="cost.variants.a.sub">you pour when the AI says</small></span><span class="amt" data-market-stack="manual">~$232</span></div>
+          <div class="vt"><span><span data-i18n="cost.variants.b.label">B · + Auto top-up</span><small data-i18n="cost.variants.b.sub">pump does the watering</small></span><span class="amt" data-market-stack="automated">~$256</span></div>
+          <div class="vt"><span><span data-i18n="cost.variants.c.label">C · + Water safety</span><small data-i18n="cost.variants.c.sub">gauge · leak sensor · tray</small></span><span class="amt" data-market-stack="safety">+~$55</span></div>
         </div>
-        <p class="fine" style="margin-top:12px" data-i18n="cost.us.note">All amounts in USD, a rough U.S. mid-2026 snapshot — shipping, taxes, sellers, and season move every line. See the Poland / EU example below for how a different market changes the math.</p>
+        <p class="fine" style="margin-top:12px" data-i18n="cmp.market.note">Rough USD estimates, not checkout quotes. Shipping, tax/VAT, customs, promotions, plug type, and local availability vary. Electricity and optional AI/API usage are excluded from every total.</p>
         </div>
 
         <div>
           <div class="cmp-scroll">
             <table class="cmp">
-              <caption data-i18n="cmp.caption">2-year total cost of ownership</caption>
+              <caption data-i18n="cmp.caption">2-year cost — electricity and optional AI excluded</caption>
               <thead>
-                <tr><th data-i18n="cmp.th.system">System</th><th data-i18n="cmp.th.hardware">Hardware</th><th data-i18n="cmp.th.extras">2-yr extras</th><th data-i18n="cmp.th.ai">AI</th><th data-i18n="cmp.th.total">2-yr total</th></tr>
+                <tr><th data-i18n="cmp.th.system">System</th><th data-i18n="cmp.th.hardware">Build / startup</th><th data-i18n="cmp.th.extras">2-yr garden consumables</th><th data-i18n="cmp.th.total">2-yr total</th><th data-i18n="cmp.th.perSpot">Total / spot</th></tr>
               </thead>
               <tbody>
-                <tr class="us"><td>samogrow · 6 <span data-i18n="cmp.sites">sites</span></td><td>$280</td><td>$70 + $120 <span data-i18n="cmp.th.ai">AI</span></td><td class="yes" data-i18n="cmp.yes">yes</td><td>~$470</td></tr>
-                <tr><td>Gardyn Home 4 · 30 <span data-i18n="cmp.sites">sites</span></td><td>$899</td><td>$816</td><td class="yes" data-i18n="cmp.yes">yes</td><td>~$1,715</td></tr>
-                <tr><td>Click &amp; Grow SG9 · 9 <span data-i18n="cmp.sites">sites</span></td><td>$200</td><td>$400</td><td class="no" data-i18n="cmp.no">no</td><td>~$600</td></tr>
-                <tr><td>Auk Mini 2 · 4 <span data-i18n="cmp.pots">pots</span></td><td>$229</td><td>~$80–120*</td><td class="no" data-i18n="cmp.no">no</td><td>~$310–350*</td></tr>
+                <tr class="us"><td><a href="https://github.com/NikolayS/samogrow/blob/main/spec/SHOPPING-LIST.md" target="_blank" rel="noopener">samogrow</a> · 6 <span data-i18n="cmp.sites">sites</span></td><td data-market-cell="samo.hardware">$256</td><td data-market-cell="samo.consumables">~$70</td><td data-market-cell="samo.total">~$326</td><td data-market-cell="samo.perSpot">~$54</td></tr>
+                <tr><td><a href="https://www.auk.com/products/auk-mini-2" target="_blank" rel="noopener">Auk Mini 2</a> · 4 <span data-i18n="cmp.pots">pots</span></td><td data-market-cell="auk.hardware">$229</td><td data-market-cell="auk.consumables">~$80–120*</td><td data-market-cell="auk.total">~$309–349*</td><td data-market-cell="auk.perSpot">~$77–87*</td></tr>
+                <tr><td><a href="https://eu.clickandgrow.com/products/the-smart-garden-9" target="_blank" rel="noopener">Click &amp; Grow SG9</a> · 9 <span data-i18n="cmp.sites">sites</span></td><td data-market-cell="click.hardware">$200</td><td data-market-cell="click.consumables">~$400</td><td data-market-cell="click.total">~$600</td><td data-market-cell="click.perSpot">~$67</td></tr>
+                <tr><td><a href="https://mygardyn.com/products/gardyn-home-kit" target="_blank" rel="noopener">Gardyn Home 4</a> · 30 <span data-i18n="cmp.sites">sites</span></td><td data-market-cell="gardyn.hardware">$899</td><td class="status" data-market-cell="gardyn.consumables"><span class="code">Not verified</span></td><td class="status" data-market-cell="gardyn.total"><span class="code">Not verified</span></td><td class="status" data-market-cell="gardyn.perSpot"><span class="code">Not verified</span></td></tr>
               </tbody>
             </table>
           </div>
-          <p class="fine" data-i18n="cmp.auk.note">*Auk estimate, not a checkout quote: the first ~6 months of nutrients and one crop's coco are included. The range adds 2–3 refills using current Auk Mini pricing because Mini 2 refill prices are not published. Electricity is excluded from every table row; Auk publishes $0.5–2/month (~$12–48 over two years), putting its power-inclusive total around ~$320–400. No subscription or proprietary pods; U.S./Canada tax is added at checkout, while European VAT/taxes and delivery are included.</p>
+          <p class="fine" data-market-commercial-note data-i18n="cmp.auk.note">*AUK includes roughly six months of nutrients and one crop of coco. Its range adds 2–3 refills using AUK Mini's published €35 price because Mini 2 refills are not yet priced. Click &amp; Grow assumes six full nine-pod restarts per year at current direct-store pricing. Both are estimates, not prescribed replacement schedules.</p>
           <p class="cmp-note" data-i18n="cost.note">
-            Nothing here is a black box: commodity seeds, code you can fork, and no vendor who can
-            deprecate your garden or move the AI behind a paywall — the way <b>AeroGarden owners were
-            stranded</b> when the company wound down and the app and pods went with it. The two-year
-            math is just the receipt: ~$470 all-in, roughly $1,245 under Gardyn (the only commercial
-            unit with real camera + AI) and below even a Click &amp; Grow.
+            Per-spot cost keeps 4-, 6-, 9-, and 30-position systems from pretending to be the same size. Gardyn is left unpriced beyond hardware because its membership bundles plants with AI; inventing a consumables-only split would make the comparison less honest, not more.
           </p>
         </div>
+      </div>
+
+      <div class="cmp-scroll" style="margin-top:34px">
+        <table class="cmp">
+          <caption data-i18n="cap.caption">Capabilities — separate from cost</caption>
+          <thead><tr><th data-i18n="cmp.th.system">System</th><th data-i18n="cap.th.method">Growing method</th><th data-i18n="cap.th.camera">Camera / AI checks</th><th data-i18n="cap.th.watering">Watering</th><th data-i18n="cap.th.alerts">Remote alerts</th><th data-i18n="cap.th.open">Open source</th><th data-i18n="cap.th.consumables">Commodity consumables</th></tr></thead>
+          <tbody>
+            <tr class="us"><td>samogrow</td><td data-i18n="cap.method.samo">DWC hydroponics · LECA</td><td data-i18n="cap.optional">optional</td><td data-i18n="cmp.yes">yes</td><td data-i18n="cmp.yes">yes</td><td data-i18n="cmp.yes">yes</td><td data-i18n="cmp.yes">yes</td></tr>
+            <tr><td>Auk Mini 2</td><td data-i18n="cap.method.auk">Passive coco-substrate hydroponics</td><td data-i18n="cmp.no">no</td><td data-i18n="cap.passive">passive</td><td data-i18n="cmp.no">no</td><td data-i18n="cmp.no">no</td><td data-i18n="cmp.yes">yes</td></tr>
+            <tr><td>Click &amp; Grow SG9</td><td data-i18n="cap.method.click">Smart Soil · passive wick irrigation</td><td data-i18n="cmp.no">no</td><td data-i18n="cap.passive">passive</td><td data-i18n="cmp.no">no</td><td data-i18n="cmp.no">no</td><td data-i18n="cmp.no">no</td></tr>
+            <tr><td>Gardyn Home 4</td><td data-i18n="cap.method.gardyn">Recirculating hydroponic tower</td><td data-i18n="cap.membership">with membership</td><td data-i18n="cmp.yes">yes</td><td data-i18n="cap.membership">with membership</td><td data-i18n="cmp.no">no</td><td data-i18n="cmp.no">no</td></tr>
+          </tbody>
+        </table>
       </div>
 
       <div class="ongoing">
@@ -655,9 +687,9 @@
         The API line is arithmetic, not a guess: ~$0.0036 per analysis on Claude Haiku × 24 images/day ≈ $2.6/mo (≈ $5/mo at 48/day).
       </p>
 
-      <div class="pl-example variants">
-        <div class="vcap" data-i18n="pl.cap">Poland / EU-plug example — marketplace snapshot in USD, observed 2026-08-20</div>
-        <p class="pl-note" data-i18n="pl.intro">The U.S. numbers above don't travel. Here is what the same idea looks like shopped from Poland with EU plugs, using representative AliExpress listings whose prices were observed via PriceArchive on 2026-08-20 — kept in USD for comparison.</p>
+      <div class="pl-example variants" data-market-detail="aliexpress" hidden>
+        <div class="vcap" data-i18n="pl.cap">AliExpress / Poland example — marketplace snapshot in USD, observed 2026-08-20</div>
+        <p class="pl-note" data-i18n="pl.intro">One EU-plug AliExpress basket, shopped from Poland: representative listings whose prices were observed via PriceArchive on 2026-08-20 — kept in USD for comparison.</p>
         <div class="vt"><span><span data-i18n="pl.plugs.label">2 × EU Wi-Fi power-metering smart plugs</span><small data-i18n="pl.plugs.sub"><a href="https://www.aliexpress.com/w/wholesale-wifi-smart-plug-eu-power-meter.html" target="_blank" rel="noopener">AliExpress / PriceArchive search result</a> · ~$8.50 each · plug protocol/API compatibility unverified</small></span><span class="amt">~$17</span></div>
         <div class="vt"><span><span data-i18n="pl.camera.label">1080p Wi-Fi camera</span><small data-i18n="pl.camera.sub"><a href="https://www.aliexpress.com/item/1005010779026398.html" target="_blank" rel="noopener">PriceArchive item 1005010779026398</a> · RTSP support explicitly unverified</small></span><span class="amt">~$15</span></div>
         <div class="vt"><span><span data-i18n="pl.lamp.label">Full-spectrum grow lamp</span><small data-i18n="pl.lamp.sub"><a href="https://www.aliexpress.com/w/wholesale-full-spectrum-led-grow-light.html" target="_blank" rel="noopener">representative listing</a> · actual draw &amp; coverage must be verified</small></span><span class="amt">~$14</span></div>
@@ -830,13 +862,13 @@
     <div class="col">
       <div class="sec-head">
         <span class="sec-num">05</span>
-        <h2 data-i18n="inc.title">The incident blog</h2>
+        <h2 data-i18n="inc.title">Blog</h2>
       </div>
       <p class="sec-sub" data-i18n="inc.sub">
         Real gardens produce real incidents, and we run them like production outages: dated,
         severity-tagged, blameless, and written up in public.
       </p>
-      <p class="inc-link"><a data-lang-link href="blog.html" data-i18n="inc.title">The incident blog</a> →</p>
+      <p class="inc-link"><a data-lang-link href="blog.html" data-i18n="inc.title">Blog</a> →</p>
     </div>
   </section>
 
@@ -931,4 +963,5 @@
   </footer>
 </div>
 <script src="i18n.js" defer></script>
+<script src="market.js" defer></script>
 </html>

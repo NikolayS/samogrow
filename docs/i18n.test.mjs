@@ -12,13 +12,16 @@ import { JSDOM } from "jsdom";
 const docs = dirname(fileURLToPath(import.meta.url));
 const require = createRequire(import.meta.url);
 const I18N = require(join(docs, "i18n.js"));
+const MARKET = require(join(docs, "market.js"));
 
 const { LOCALES, CODES, chooseLocale, matchLocale, queryLocale, optionLabel, STORAGE_KEY } = I18N;
 
 const indexHtml = readFileSync(join(docs, "index.html"), "utf8");
 const i18nJs = readFileSync(join(docs, "i18n.js"), "utf8");
+const marketJs = readFileSync(join(docs, "market.js"), "utf8");
 const blogHtml = readFileSync(join(docs, "blog.html"), "utf8");
 const blogJs = readFileSync(join(docs, "blog.js"), "utf8");
+const blogCss = readFileSync(join(docs, "blog.css"), "utf8");
 const bootstrapJs = readFileSync(join(docs, "i18n-bootstrap.js"), "utf8");
 const faviconSvg = readFileSync(join(docs, "favicon.svg"), "utf8");
 const blogPageFiles = ["blog.html", "incident-i1.html", "incident-i3.html", "incident-i5.html", "incident-i6.html"];
@@ -175,7 +178,7 @@ test("brand / technical tokens are preserved in every translation", () => {
 });
 
 test("locale HTML uses only the reviewed tags and attributes", () => {
-  const allowedTags = new Set(["A", "B", "CODE", "EM", "I", "SPAN"]);
+  const allowedTags = new Set(["A", "B", "CODE", "EM", "I", "P", "SPAN"]);
   const allowedAttrs = {
     A: new Set(["href", "target", "rel"]),
     SPAN: new Set(["class"])
@@ -211,7 +214,7 @@ const usedKeys = new Set(
 );
 for (const key of ["inc.title", "inc.eyebrow", "inc.sub", "inc.readmore"]) usedKeys.add(key);
 for (const incident of ["i1", "i3", "i5", "i6"]) {
-  for (const part of ["title", "story", "impact", "lesson", "alt", "cap"]) {
+  for (const part of ["title", "summary", "story", "impact", "lesson", "alt", "cap"]) {
     usedKeys.add(`inc.${incident}.${part}`);
   }
 }
@@ -255,6 +258,15 @@ test("English defaults baked into index.html match en.json (no drift)", () => {
   for (const k of ["nav.cost", "spec.eyebrow", "how.title", "cost.title", "feat.title", "foot.gh"]) {
     assert.ok(indexHtml.includes(`>${en[k]}<`), `index.html default text drifted for ${k}`);
   }
+});
+
+test("metadata descriptions do not advertise stale fixed build prices", () => {
+  const stale = /~?\$\s*(255|280|335)|\$3[\u2013-]7|~?\$35/;
+  for (const [code, dict] of Object.entries(dicts)) {
+    assert.doesNotMatch(dict["meta.description"], stale, `${code} metadata contains stale pricing`);
+  }
+  const staticDescription = new JSDOM(indexHtml).window.document.querySelector('meta[name="description"]').content;
+  assert.equal(staticDescription, en["meta.description"]);
 });
 
 test("switcher markup is present, accessible, sticky-topbar hosted", () => {
@@ -669,7 +681,7 @@ test("blog.js executes the index and renders four correctly wired cards", () => 
     assert.equal(card.getAttribute("href"), inc.file);
     assert.equal(card.querySelector("img").getAttribute("src"), inc.img);
     assert.equal(card.querySelector("h2").dataset.i18n, `inc.${inc.key}.title`);
-    assert.equal(card.querySelector("p").dataset.i18n, `inc.${inc.key}.story`);
+    assert.equal(card.querySelector("p").dataset.i18n, `inc.${inc.key}.summary`);
   }
   assert.equal(dom.window.document.querySelector('[data-i18n="inc.sub"]').textContent.trim(), en["inc.sub"]);
   assert.equal(dom.window.document.querySelector('[data-i18n="inc.eyebrow"]').textContent.trim(), en["inc.eyebrow"]);
@@ -684,6 +696,24 @@ test("blog.js executes every incident page and renders the selected post", () =>
     assert.equal(article.querySelector("img").dataset.i18nAttrs, `alt:inc.${inc.key}.alt`);
     assert.equal(article.querySelector("img").getAttribute("src"), inc.img);
     assert.equal(article.querySelector('a[target="_blank"]').getAttribute("href"), inc.issue);
+  }
+});
+
+test("embedded English incident defaults exactly match the reviewed English catalog", () => {
+  const index = runBlog();
+  const cards = [...index.window.document.querySelectorAll(".post-card")];
+  for (const [position, inc] of INCIDENTS.entries()) {
+    const card = cards[position];
+    assert.equal(card.querySelector("h2").innerHTML, en[`inc.${inc.key}.title`]);
+    assert.equal(card.querySelector("p").innerHTML, en[`inc.${inc.key}.summary`]);
+
+    const post = runBlog(inc.file).window.document;
+    assert.equal(post.querySelector("h1").innerHTML, en[`inc.${inc.key}.title`]);
+    assert.equal(post.querySelector(".story").innerHTML, en[`inc.${inc.key}.story`]);
+    assert.equal(post.querySelector(".facts li:nth-child(1)").innerHTML, en[`inc.${inc.key}.impact`]);
+    assert.equal(post.querySelector(".facts li:nth-child(2)").innerHTML, en[`inc.${inc.key}.lesson`]);
+    assert.equal(post.querySelector("img").getAttribute("alt"), en[`inc.${inc.key}.alt`]);
+    assert.equal(post.querySelector("figcaption").innerHTML, en[`inc.${inc.key}.cap`]);
   }
 });
 
@@ -708,8 +738,25 @@ test("blog rendering is translated with page-scoped metadata and language-preser
   assert.equal(document.querySelector("h1").innerHTML, dicts.uk["inc.i1.title"]);
   assert.equal(document.title, dicts.uk["inc.i1.title"]);
   assert.equal(document.querySelector('meta[name="description"]').content,
-    dicts.uk["inc.i1.story"].replace(/<[^>]+>/g, ""));
+    dicts.uk["inc.i1.summary"]);
   assert.equal(document.querySelector('a[href^="/blog.html"]').getAttribute("href"), "/blog.html?lang=uk");
+});
+
+test("blog index localizes its page-scoped title and description", async () => {
+  const dom = new JSDOM(blogHtml, {
+    url: "https://samogrow.test/blog.html?lang=uk",
+    runScripts: "outside-only",
+    pretendToBeVisual: true
+  });
+  Object.defineProperty(dom.window.document, "readyState", { value: "complete", configurable: true });
+  dom.window.fetch = async (url) => {
+    const code = /\/([a-z]{2,3})\.json$/.exec(url)?.[1] || "en";
+    return { ok: true, json: async () => dicts[code] };
+  };
+  dom.window.eval(i18nJs);
+  await flush();
+  assert.equal(dom.window.document.title, dicts.uk["inc.title"]);
+  assert.equal(dom.window.document.querySelector('meta[name="description"]').content, dicts.uk["inc.sub"]);
 });
 
 test("incident blog and every post have separate language-preserving pages", () => {
@@ -741,12 +788,12 @@ test("incident evidence images exist locally (no remote image runtime dependency
   }
 });
 
-test("each incident has translated title/story/impact/lesson/alt/caption in every locale", () => {
+test("each incident has translated summary/story/impact/lesson/alt/caption in every locale", () => {
   for (const [code, dict] of Object.entries(dicts)) {
     assert.ok((dict["inc.eyebrow"] || "").trim(), `${code}.json inc.eyebrow empty`);
   }
   for (const inc of INCIDENTS) {
-    for (const part of ["title", "story", "impact", "lesson", "alt", "cap"]) {
+    for (const part of ["title", "summary", "story", "impact", "lesson", "alt", "cap"]) {
       const key = `inc.${inc.key}.${part}`;
       assert.ok(key in en, `missing en key ${key}`);
       for (const [code, dict] of Object.entries(dicts)) {
@@ -755,22 +802,35 @@ test("each incident has translated title/story/impact/lesson/alt/caption in ever
     }
     const dom = runBlog(inc.file);
     assert.equal(dom.window.document.querySelector("img").dataset.i18nAttrs, `alt:inc.${inc.key}.alt`);
+    assert.equal(dom.window.document.querySelectorAll(".story > p").length, 3,
+      `${inc.id} must render a three-paragraph narrative`);
   }
+});
+
+test("blog uses the light site palette and caps full-post image height", () => {
+  for (const declaration of ["--bg: #f2ede0", "--card: #f7f3e8", "--ink: #1c2216", "--leaf: #35722f"]) {
+    assert.ok(blogCss.includes(declaration), `blog palette missing ${declaration}`);
+  }
+  assert.match(blogCss, /\.post img\s*\{[^}]*max-height:\s*min\(62vh, 560px\);[^}]*object-fit:\s*contain;/,
+    "full-post images need a viewport-aware height cap");
+  assert.match(blogCss, /@media \(max-width: 720px\)[\s\S]*\.post img\s*\{\s*max-height:\s*50vh;/,
+    "mobile full-post images need a stricter height cap");
 });
 
 // ---------- pricing context ----------
 
-test("U.S. baseline labeling is explicit on every price frame", () => {
-  assert.ok(en["cost.sub"].includes("U.S. mid-2026 baseline"), "cost.sub not labeled U.S. baseline");
-  assert.ok(/not a quote/.test(en["cost.sub"]), "cost.sub must disclaim quote status");
+test("pricing frames identify their market, currency, and exclusions", () => {
+  assert.ok(en["cost.sub"].includes("rough USD estimates"), "cost.sub must frame prices as estimates");
+  assert.ok(en["cost.sub"].includes("excluding electricity") && en["cost.sub"].includes("AI/API"),
+    "cost.sub must state the comparison exclusions");
   assert.ok(en["spec.allin.value"].includes("U.S."), "spec-card all-in value not U.S.-labeled");
   assert.ok(en["spec.eu.value"].includes("~$190–260") && en["spec.eu.value"].includes("rough"),
     "spec-card must show the rough non-U.S. estimate immediately");
+  assert.ok(en["spec.eu.label"].includes("AliExpress"),
+    "spec-card must identify ~$190–260 as the AliExpress sourcing estimate");
   assert.match(indexHtml, /data-i18n="spec\.eu\.value"/);
   assert.ok(en["parts.fine"].includes("U.S. mid-2026"), "parts fine print not U.S.-labeled");
-  assert.ok(en["cost.us.note"].includes("USD") && en["cost.us.note"].includes("U.S. mid-2026"),
-    "cost.us.note must state USD + U.S. mid-2026");
-  assert.match(indexHtml, /data-i18n="cost.us.note"/);
+  assert.ok(en["market.us.note"].includes("U.S. retail baseline"), "U.S. tab must identify its baseline");
 });
 
 test("Poland / EU example: snapshot date, items, sources, subtotal arithmetic", () => {
@@ -801,44 +861,202 @@ test("Poland example caveats cover the compatibility and cost traps", () => {
   assert.ok(c.includes("Kasa") && c.includes("Tapo"), "must name the actually-supported hardware");
 });
 
-test("Auk comparison includes realistic recurring costs and capacity context", () => {
+test("market switcher is shareable, persistent, locale-aware, and keyboard wired", () => {
+  assert.deepEqual(MARKET.MARKETS, ["us", "eu", "aliexpress"]);
+  assert.equal(MARKET.queryMarket("?lang=uk&market=eu"), "eu");
+  assert.equal(MARKET.queryMarket("?market=bogus"), null);
+  assert.equal(MARKET.chooseMarket("?market=aliexpress", "eu", ["de-DE"]), "aliexpress");
+  assert.equal(MARKET.chooseMarket("", "eu", ["en-US"]), "eu");
+  assert.equal(MARKET.inferMarket(["de-DE"]), "eu");
+  assert.equal(MARKET.inferMarket(["de"]), "eu");
+  assert.equal(MARKET.inferMarket(["en-GB"]), "eu");
+  assert.equal(MARKET.inferMarket(["de-CH"]), "eu");
+  assert.equal(MARKET.inferMarket(["fr-CA"]), "us");
+  assert.equal(MARKET.inferMarket(["uk-UA"]), "eu");
+  assert.equal(MARKET.inferMarket(["pt-BR"]), "us");
+  assert.equal(MARKET.inferMarket(["es-MX"]), "us");
+  assert.equal(MARKET.inferMarket(["pt", "en-US"]), "eu");
+  assert.equal(MARKET.inferMarket([]), "us");
+  assert.equal(MARKET.inferMarket(["xx-XX"]), "us");
+  assert.equal(MARKET.chooseMarket("", "not-a-market", ["de-DE"]), "eu");
+  const dom = new JSDOM(indexHtml);
+  const tabs = [...dom.window.document.querySelectorAll("[data-market-tab]")];
+  assert.deepEqual(tabs.map((tab) => tab.dataset.marketTab), MARKET.MARKETS);
+  assert.ok(tabs.every((tab) => tab.getAttribute("role") === "tab"));
+  for (const tab of tabs) {
+    const panel = dom.window.document.getElementById(tab.getAttribute("aria-controls"));
+    assert.equal(panel?.getAttribute("role"), "tabpanel");
+    assert.equal(panel?.getAttribute("aria-labelledby"), tab.id);
+  }
+});
+
+function marketRuntimeDom({ url = "https://samogrow.test/?lang=en&market=us#cost", languages = ["en-US"], stored,
+  storageThrows = false } = {}) {
+  const dom = new JSDOM(indexHtml, { url, runScripts: "outside-only", pretendToBeVisual: true });
+  Object.defineProperty(dom.window.document, "readyState", { value: "complete", configurable: true });
+  Object.defineProperty(dom.window.navigator, "languages", { value: languages, configurable: true });
+  Object.defineProperty(dom.window.navigator, "language", { value: languages[0] || "en", configurable: true });
+  if (storageThrows) {
+    Object.defineProperty(dom.window, "localStorage", { get() { throw new Error("storage disabled"); } });
+  } else if (stored !== undefined) {
+    dom.window.localStorage.setItem(MARKET.STORAGE_KEY, stored);
+  }
+  dom.window.eval(marketJs);
+  return dom;
+}
+
+test("market runtime executes tab, keyboard, URL, storage, status, and popstate behavior", () => {
+  const dom = marketRuntimeDom();
+  const { document, KeyboardEvent, PopStateEvent } = dom.window;
+  const tabs = [...document.querySelectorAll("[data-market-tab]")];
+  const activeMarket = () => document.querySelector('[data-market-tab][aria-selected="true"]').dataset.marketTab;
+
+  tabs[1].click();
+  assert.equal(activeMarket(), "eu");
+  assert.equal(document.querySelector('[data-market-panel="eu"]').hidden, false);
+  assert.equal(document.querySelector('[data-market-panel="us"]').hidden, true);
+  assert.equal(document.querySelector('[data-market-cell="samo.total"]').textContent, "~$365–460");
+  assert.equal(dom.window.localStorage.getItem(MARKET.STORAGE_KEY), "eu");
+  assert.equal(new URL(dom.window.location.href).searchParams.get("market"), "eu");
+
+  tabs[1].dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true }));
+  assert.equal(activeMarket(), "aliexpress");
+  const auk = document.querySelector('[data-market-cell="auk.hardware"]');
+  assert.equal(auk.classList.contains("status"), true);
+  assert.ok(auk.querySelector(".code"));
+  assert.equal(document.querySelector("[data-market-commercial-note]").hidden, true);
+  assert.equal(document.querySelector('[data-market-detail="aliexpress"]').hidden, false);
+
+  tabs[2].dispatchEvent(new KeyboardEvent("keydown", { key: "Home", bubbles: true }));
+  assert.equal(activeMarket(), "us");
+  assert.equal(document.querySelector('[data-market-detail="aliexpress"]').hidden, true);
+  tabs[0].dispatchEvent(new KeyboardEvent("keydown", { key: "End", bubbles: true }));
+  assert.equal(activeMarket(), "aliexpress");
+  tabs[2].dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft", bubbles: true }));
+  assert.equal(activeMarket(), "eu");
+
+  dom.window.history.replaceState(null, "", "?lang=en&market=us#cost");
+  dom.window.dispatchEvent(new PopStateEvent("popstate"));
+  assert.equal(activeMarket(), "us");
+  assert.equal(new URL(dom.window.location.href).searchParams.get("market"), "us");
+
+  dom.window.history.replaceState(null, "", "?lang=en#cost");
+  dom.window.dispatchEvent(new PopStateEvent("popstate"));
+  assert.equal(activeMarket(), "eu", "popstate without a URL market must restore the saved manual choice");
+  assert.equal(new URL(dom.window.location.href).searchParams.get("market"), null);
+});
+
+test("market runtime degrades safely when localStorage is unavailable", () => {
+  const dom = marketRuntimeDom({
+    storageThrows: true,
+    languages: ["de-DE"],
+    url: "https://samogrow.test/?lang=en#cost"
+  });
+  const eu = dom.window.document.querySelector('[data-market-tab="eu"]');
+  assert.equal(eu.getAttribute("aria-selected"), "true");
+  assert.equal(new URL(dom.window.location.href).searchParams.get("market"), null,
+    "an inferred market must not become an explicit URL override");
+  dom.window.document.dispatchEvent(new dom.window.Event("samogrow:locale-applied"));
+  assert.equal(new URL(dom.window.location.href).searchParams.get("market"), null,
+    "locale re-render must not introduce a market URL parameter");
+  const ali = dom.window.document.querySelector('[data-market-tab="aliexpress"]');
+  assert.doesNotThrow(() => ali.click());
+  assert.equal(ali.getAttribute("aria-selected"), "true");
+  assert.equal(new URL(dom.window.location.href).searchParams.get("market"), "aliexpress");
+});
+
+test("remembered market stays implicit until the user selects a market", () => {
+  const dom = marketRuntimeDom({
+    stored: "eu",
+    languages: ["en-US"],
+    url: "https://samogrow.test/?lang=en#cost"
+  });
+  const active = dom.window.document.querySelector('[data-market-tab][aria-selected="true"]');
+  assert.equal(active.dataset.marketTab, "eu");
+  assert.equal(new URL(dom.window.location.href).searchParams.get("market"), null);
+  dom.window.document.dispatchEvent(new dom.window.Event("samogrow:locale-applied"));
+  assert.equal(new URL(dom.window.location.href).searchParams.get("market"), null);
+});
+
+test("each sourcing market has a complete and internally consistent SamoGrow estimate", () => {
+  const number = (value) => Number((value.match(/\d+/) || ["0"])[0]);
+  for (const market of MARKET.MARKETS) {
+    const row = MARKET.DATA[market].rows.samo;
+    assert.equal(row.length, 4, `${market} row must have four values`);
+    assert.ok(row.every(Boolean), `${market} SamoGrow values must all be present`);
+    const spots = 6;
+    const totalLow = number(row[2]);
+    const perSpotLow = number(row[3]);
+    assert.ok(Math.abs(Math.round(totalLow / spots) - perSpotLow) <= 1,
+      `${market} per-spot low end must match total / six spots`);
+  }
+  assert.equal(MARKET.DATA.eu.rows.gardyn[0], "unavailable");
+  assert.ok(MARKET.DATA.aliexpress.rows.auk.every((value) => value === null),
+    "AliExpress must not reuse commercial-system prices");
+});
+
+test("cost table excludes AI and normalizes every verified total per spot", () => {
+  assert.match(indexHtml, /\.cost-grid\s*>\s*\*\s*\{\s*min-width:\s*0;/,
+    "cost-grid children must shrink so comparison tables scroll inside the mobile viewport");
   const table = new JSDOM(indexHtml).window.document.querySelector("table.cmp");
   const rows = [...table.querySelectorAll("tbody tr")].map((row) =>
     [...row.querySelectorAll("td")].map((cell) => cell.textContent.trim())
   );
   assert.deepEqual(rows, [
-    ["samogrow · 6 sites", "$280", "$70 + $120 AI", "yes", "~$470"],
-    ["Gardyn Home 4 · 30 sites", "$899", "$816", "yes", "~$1,715"],
-    ["Click & Grow SG9 · 9 sites", "$200", "$400", "no", "~$600"],
-    ["Auk Mini 2 · 4 pots", "$229", "~$80–120*", "no", "~$310–350*"],
+    ["samogrow · 6 sites", "$256", "~$70", "~$326", "~$54"],
+    ["Auk Mini 2 · 4 pots", "$229", "~$80–120*", "~$309–349*", "~$77–87*"],
+    ["Click & Grow SG9 · 9 sites", "$200", "~$400", "~$600", "~$67"],
+    ["Gardyn Home 4 · 30 sites", "$899", "Not verified", "Not verified", "Not verified"],
   ]);
-  const amounts = (value) => [...value.matchAll(/\$(\d+(?:,\d+)?)/g)].map((match) => Number(match[1].replace(",", "")));
-  assert.equal(amounts(rows[0][1])[0] + amounts(rows[0][2]).reduce((a, b) => a + b), amounts(rows[0][4])[0],
-    "samogrow total must equal rendered hardware + grow + AI");
-  const aukRange = amounts(rows[3][2]).map((extra) => Math.round((amounts(rows[3][1])[0] + extra) / 10) * 10);
-  assert.deepEqual(aukRange, amounts(rows[3][4]), "Auk rendered total must equal rendered hardware + extras rounded to tens");
+  assert.ok(!table.textContent.includes("$120 AI"), "AI cost must not appear in comparison table");
+  assert.ok(en["cmp.market.note"].includes("optional AI/API usage") && en["cmp.market.note"].includes("Electricity"));
   const note = en["cmp.auk.note"];
-  for (const fact of ["~6 months", "2–3 refills", "$0.5–2", "$12–48", "~$320–400", "excluded from every", "not published", "No subscription", "tax", "VAT"]) {
+  for (const fact of ["six months", "2–3 refills", "€35", "not yet priced", "six full nine-pod restarts per year"]) {
     assert.ok(note.includes(fact), `Auk caveat missing: ${fact}`);
   }
   for (const [code, dict] of Object.entries(dicts)) {
     assert.ok(dict["cmp.sites"] && dict["cmp.pots"], `${code} missing translated capacity labels`);
-    for (const fact of ["$12–48", "Auk Mini"]) {
-      assert.ok(dict["cmp.auk.note"].includes(fact), `${code} Auk caveat missing: ${fact}`);
-    }
-    assert.match(dict["cmp.auk.note"], /Mini[- ]2/, `${code} Auk caveat missing Mini 2`);
+    assert.ok(dict["cmp.auk.note"].includes("€35"), `${code} Auk caveat missing refill price`);
+    assert.match(dict["cmp.auk.note"], /Mini 2/, `${code} Auk caveat missing Mini 2`);
   }
-  assert.match(spec, /Auk Mini 2 \| ~\$229 \| ~\$80–120 .*\| \*\*~\$310–350\*\*/,
-    "SPEC Auk comparison must match the website range");
-  for (const fact of ["$0.5–2/month", "~$12–48", "~$320–400", "Electricity is excluded from every row"]) {
-    assert.ok(spec.includes(fact), `SPEC Auk caveat missing: ${fact}`);
+});
+
+test("capability table labels each system's growing method", () => {
+  const dom = new JSDOM(indexHtml).window.document;
+  const table = [...dom.querySelectorAll("table.cmp")].find((candidate) =>
+    candidate.querySelector('[data-i18n="cap.th.method"]')
+  );
+  assert.ok(table, "capability table missing growing-method column");
+  const methods = [...table.querySelectorAll("tbody tr td:nth-child(2)")].map((cell) =>
+    cell.getAttribute("data-i18n")
+  );
+  assert.deepEqual(methods, ["cap.method.samo", "cap.method.auk", "cap.method.click", "cap.method.gardyn"]);
+  for (const [code, dict] of Object.entries(dicts)) {
+    for (const key of ["cap.th.method", ...methods]) {
+      assert.ok((dict[key] || "").trim(), `${code}.json ${key} empty`);
+    }
+  }
+});
+
+test("architecture schematic is centered despite the generic figure margin rule", () => {
+  assert.match(indexHtml, /figure\.shot\.schematic\s*\{[^}]*margin:\s*34px auto 0;/,
+    "schematic needs a selector specific enough to retain auto side margins");
+});
+
+test("SPEC cost comparison stays tied to the exported U.S. market data", () => {
+  assert.equal(en["spec.grow.value"], `${MARKET.DATA.us.stack.grow} (U.S.)`);
+  const auk = MARKET.DATA.us.rows.auk;
+  const escaped = auk.map((value) => value.replace(/\*/g, "\\*") );
+  assert.ok(spec.includes(`| Auk Mini 2, 4 pots | ${escaped[0]} | ${escaped[1]} | **${escaped[2].replace(/\\\*$/, "")}**\\* | **${escaped[3].replace(/\\\*$/, "")}**\\* |`));
+  for (const fact of ["six months", "€35", "Mini 2", "not published", "optional AI/API usage"]) {
+    assert.ok(spec.includes(fact), `SPEC Auk methodology missing: ${fact}`);
   }
 });
 
 test("new pricing/incident strings keep prices and links intact across all 20 locales", () => {
   // Covered structurally by the global parity tests; assert the new keys are present everywhere.
-  const newKeys = Object.keys(en).filter((k) => k.startsWith("pl.") || k.startsWith("inc.") || k === "cost.us.note" || k === "nav.incidents");
-  assert.ok(newKeys.length >= 45, "expected the new key families to exist");
+  const newKeys = Object.keys(en).filter((k) => k.startsWith("pl.") || k.startsWith("inc.") || k.startsWith("market.") || k.startsWith("cap.") || k === "cmp.market.note" || k === "nav.incidents");
+  assert.ok(newKeys.length >= 60, "expected the new key families to exist");
   for (const [code, dict] of Object.entries(dicts)) {
     for (const k of newKeys) assert.ok(k in dict, `${code}.json missing ${k}`);
   }
