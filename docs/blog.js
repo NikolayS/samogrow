@@ -87,7 +87,7 @@
       return;
     }
   }
-  root.innerHTML = '<header class="hero shell"><span class="eyebrow" data-i18n="inc.eyebrow">Field notes</span>' +
+  root.innerHTML = '<header class="hero shell"><span class="eyebrow" data-i18n="inc.eyebrow">Based on a true story</span>' +
     '<h1 data-i18n="inc.title">Blog</h1><p class="lede" data-i18n="inc.sub">Real gardens produce real incidents, and we run them like production outages: dated, severity-tagged, blameless, and written up in public.</p></header>' +
     '<div class="post-grid shell">' + incidents.map(card).join("") + '</div>';
 })();

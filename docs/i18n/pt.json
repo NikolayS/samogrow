@@ -217,7 +217,7 @@
   "pl.basket": "Uma cesta equivalente <b>completa</b>, por alto, fica em torno de <b>~$190–260</b> quando você soma nutrientes comprados localmente, LECA, sementes, itens de pH, adaptadores e uma caixa — uma inferência, <b>não um orçamento de checkout</b> e não um equivalente garantido, peça por peça, da montagem dos EUA.",
   "pl.caveats": "Frete, VAT/alfândega, variantes e promoções de vendedores, tensão da rede, tipo de plugue, suporte RTSP da câmera, compatibilidade de protocolo/API da tomada inteligente, garantia e compras locais mudam o resultado — verifique cada anúncio antes de pedir. E uma ressalva dura de software: hoje o samogrow controla <b>plugues Kasa (KLAP) e câmeras Tapo RTSP</b>; plugues e câmeras genéricos estilo Tuya <b>não funcionam com o software atual sem trabalho de adaptação</b>.",
   "inc.title": "Blog",
-  "inc.eyebrow": "Notas de campo",
+  "inc.eyebrow": "Baseado em uma história real",
   "inc.sub": "Hortas reais produzem incidentes reais, e nós os tratamos como quedas de produção: com data, etiqueta de severidade, sem caça a culpados e relatados em público.",
   "inc.readmore": "Relato completo &amp; RCA no GitHub →",
   "inc.i1.title": "O incidente ×10 — uma superdosagem de nutrientes de dez vezes",

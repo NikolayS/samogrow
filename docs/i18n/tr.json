@@ -217,7 +217,7 @@
   "pl.basket": "Kabaca <b>eksiksiz</b> bir eşdeğer sepet, yerel olarak tedarik edilen besinleri, LECA’yı, tohumları, pH malzemelerini, adaptörleri ve bir kabı eklediğinizde <b>~$190–260</b> civarına gelir — bu bir çıkarımdır, <b>ödeme ekranı tutarı değildir</b> ve ABD kurulumunun garantili birebir eşdeğeri değildir.",
   "pl.caveats": "Kargo, KDV/gümrük, satıcı varyasyonları ve promosyonları, şebeke gerilimi, fiş tipi, kameranın RTSP desteği, akıllı prizin protokol/API uyumluluğu, garanti ve yerel tedarik olanakları sonucu değiştirir — sipariş vermeden önce her ilanı doğrulayın. Ayrıca sert bir yazılım uyarısı: samogrow şu anda <b>Kasa (KLAP) prizlerini ve Tapo RTSP kameralarını</b> yönetmektedir; genel Tuya tarzı priz ve kameralar <b>adaptör çalışması yapılmadan mevcut yazılımla çalışmaz</b>.",
   "inc.title": "Blog",
-  "inc.eyebrow": "Saha notları",
+  "inc.eyebrow": "Gerçek bir hikâyeden uyarlandı",
   "inc.sub": "Gerçek bahçeler gerçek olaylar (incident) üretir ve biz de bunları üretim kesintileri gibi yönetiriz: tarihli, önem derecesi etiketlenmiş, suçlayıcı olmayan ve kamuya açık bir şekilde yazılmış.",
   "inc.readmore": "Tam yazı &amp; RCA GitHub’da →",
   "inc.i1.title": "×10 olayı — on kat besin aşırı dozu",

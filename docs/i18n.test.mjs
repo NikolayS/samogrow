@@ -230,6 +230,16 @@ test("every en.json key is used by index.html or the JS runtime", () => {
   }
 });
 
+test("quickstart is the primary hero action and the specification is secondary", () => {
+  const document = new JSDOM(indexHtml).window.document;
+  const actions = [...document.querySelectorAll(".hero-lead .cta-row a")];
+  assert.deepEqual(actions.map((action) => action.dataset.i18n),
+    ["hero.cta.quickstart", "hero.cta.spec"]);
+  assert.equal(actions[0].getAttribute("href"), "#start");
+  assert.ok(actions[0].classList.contains("btn-solid"));
+  assert.ok(actions[1].classList.contains("btn-ghost"));
+});
+
 test("shared bootstrap code list matches LOCALES and is loaded by every page", () => {
   const m = bootstrapJs.match(/var codes = \[([^\]]+)\]/);
   assert.ok(m, "bootstrap codes array not found");
