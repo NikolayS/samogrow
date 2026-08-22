@@ -818,9 +818,9 @@ test("blog uses the light site palette and caps full-post image height", () => {
 });
 
 test("blog cards use an explicit compact image height on desktop and mobile", () => {
-  assert.match(blogCss, /\.post-card img\s*\{[^}]*height:\s*min\(32vw, 320px\);[^}]*object-fit:\s*cover;/,
+  assert.match(blogCss, /\.post-card img\s*\{[^}]*height:\s*clamp\(140px, 18vw, 180px\);[^}]*object-fit:\s*cover;/,
     "blog card images need an explicit desktop height cap");
-  assert.match(blogCss, /@media \(max-width: 720px\)[\s\S]*\.post-card img\s*\{\s*height:\s*clamp\(180px, 52vw, 240px\);/,
+  assert.match(blogCss, /@media \(max-width: 720px\)[\s\S]*\.post-card img\s*\{\s*height:\s*clamp\(140px, 42vw, 180px\);/,
     "mobile blog card images must stay compact regardless of their intrinsic dimensions");
 });
 
