@@ -21,6 +21,7 @@ const i18nJs = readFileSync(join(docs, "i18n.js"), "utf8");
 const marketJs = readFileSync(join(docs, "market.js"), "utf8");
 const blogHtml = readFileSync(join(docs, "blog.html"), "utf8");
 const blogJs = readFileSync(join(docs, "blog.js"), "utf8");
+const blogCss = readFileSync(join(docs, "blog.css"), "utf8");
 const bootstrapJs = readFileSync(join(docs, "i18n-bootstrap.js"), "utf8");
 const blogPageFiles = ["blog.html", "incident-i1.html", "incident-i3.html", "incident-i5.html", "incident-i6.html"];
 const readme = readFileSync(join(docs, "..", "README.md"), "utf8");
@@ -176,7 +177,7 @@ test("brand / technical tokens are preserved in every translation", () => {
 });
 
 test("locale HTML uses only the reviewed tags and attributes", () => {
-  const allowedTags = new Set(["A", "B", "CODE", "EM", "I", "SPAN"]);
+  const allowedTags = new Set(["A", "B", "CODE", "EM", "I", "P", "SPAN"]);
   const allowedAttrs = {
     A: new Set(["href", "target", "rel"]),
     SPAN: new Set(["class"])
@@ -212,7 +213,7 @@ const usedKeys = new Set(
 );
 for (const key of ["inc.title", "inc.eyebrow", "inc.sub", "inc.readmore"]) usedKeys.add(key);
 for (const incident of ["i1", "i3", "i5", "i6"]) {
-  for (const part of ["title", "story", "impact", "lesson", "alt", "cap"]) {
+  for (const part of ["title", "summary", "story", "impact", "lesson", "alt", "cap"]) {
     usedKeys.add(`inc.${incident}.${part}`);
   }
 }
@@ -667,7 +668,7 @@ test("blog.js executes the index and renders four correctly wired cards", () => 
     assert.equal(card.getAttribute("href"), inc.file);
     assert.equal(card.querySelector("img").getAttribute("src"), inc.img);
     assert.equal(card.querySelector("h2").dataset.i18n, `inc.${inc.key}.title`);
-    assert.equal(card.querySelector("p").dataset.i18n, `inc.${inc.key}.story`);
+    assert.equal(card.querySelector("p").dataset.i18n, `inc.${inc.key}.summary`);
   }
   assert.equal(dom.window.document.querySelector('[data-i18n="inc.sub"]').textContent.trim(), en["inc.sub"]);
   assert.equal(dom.window.document.querySelector('[data-i18n="inc.eyebrow"]').textContent.trim(), en["inc.eyebrow"]);
@@ -706,7 +707,7 @@ test("blog rendering is translated with page-scoped metadata and language-preser
   assert.equal(document.querySelector("h1").innerHTML, dicts.uk["inc.i1.title"]);
   assert.equal(document.title, dicts.uk["inc.i1.title"]);
   assert.equal(document.querySelector('meta[name="description"]').content,
-    dicts.uk["inc.i1.story"].replace(/<[^>]+>/g, ""));
+    dicts.uk["inc.i1.summary"]);
   assert.equal(document.querySelector('a[href^="/blog.html"]').getAttribute("href"), "/blog.html?lang=uk");
 });
 
@@ -739,12 +740,12 @@ test("incident evidence images exist locally (no remote image runtime dependency
   }
 });
 
-test("each incident has translated title/story/impact/lesson/alt/caption in every locale", () => {
+test("each incident has translated summary/story/impact/lesson/alt/caption in every locale", () => {
   for (const [code, dict] of Object.entries(dicts)) {
     assert.ok((dict["inc.eyebrow"] || "").trim(), `${code}.json inc.eyebrow empty`);
   }
   for (const inc of INCIDENTS) {
-    for (const part of ["title", "story", "impact", "lesson", "alt", "cap"]) {
+    for (const part of ["title", "summary", "story", "impact", "lesson", "alt", "cap"]) {
       const key = `inc.${inc.key}.${part}`;
       assert.ok(key in en, `missing en key ${key}`);
       for (const [code, dict] of Object.entries(dicts)) {
@@ -753,7 +754,19 @@ test("each incident has translated title/story/impact/lesson/alt/caption in ever
     }
     const dom = runBlog(inc.file);
     assert.equal(dom.window.document.querySelector("img").dataset.i18nAttrs, `alt:inc.${inc.key}.alt`);
+    assert.equal(dom.window.document.querySelectorAll(".story > p").length, 3,
+      `${inc.id} must render a three-paragraph narrative`);
   }
+});
+
+test("blog uses the light site palette and caps full-post image height", () => {
+  for (const declaration of ["--bg: #f2ede0", "--card: #f7f3e8", "--ink: #1c2216", "--leaf: #35722f"]) {
+    assert.ok(blogCss.includes(declaration), `blog palette missing ${declaration}`);
+  }
+  assert.match(blogCss, /\.post img\s*\{[^}]*max-height:\s*min\(62vh, 560px\);[^}]*object-fit:\s*contain;/,
+    "full-post images need a viewport-aware height cap");
+  assert.match(blogCss, /@media \(max-width: 720px\)[\s\S]*\.post img\s*\{\s*max-height:\s*50vh;/,
+    "mobile full-post images need a stricter height cap");
 });
 
 // ---------- pricing context ----------
@@ -933,6 +946,28 @@ test("cost table excludes AI and normalizes every verified total per spot", () =
     assert.ok(dict["cmp.auk.note"].includes("€35"), `${code} Auk caveat missing refill price`);
     assert.match(dict["cmp.auk.note"], /Mini 2/, `${code} Auk caveat missing Mini 2`);
   }
+});
+
+test("capability table labels each system's growing method", () => {
+  const dom = new JSDOM(indexHtml).window.document;
+  const table = [...dom.querySelectorAll("table.cmp")].find((candidate) =>
+    candidate.querySelector('[data-i18n="cap.th.method"]')
+  );
+  assert.ok(table, "capability table missing growing-method column");
+  const methods = [...table.querySelectorAll("tbody tr td:nth-child(2)")].map((cell) =>
+    cell.getAttribute("data-i18n")
+  );
+  assert.deepEqual(methods, ["cap.method.samo", "cap.method.auk", "cap.method.click", "cap.method.gardyn"]);
+  for (const [code, dict] of Object.entries(dicts)) {
+    for (const key of ["cap.th.method", ...methods]) {
+      assert.ok((dict[key] || "").trim(), `${code}.json ${key} empty`);
+    }
+  }
+});
+
+test("architecture schematic is centered despite the generic figure margin rule", () => {
+  assert.match(indexHtml, /figure\.shot\.schematic\s*\{[^}]*margin:\s*34px auto 0;/,
+    "schematic needs a selector specific enough to retain auto side margins");
 });
 
 test("SPEC cost comparison stays tied to the exported U.S. market data", () => {
