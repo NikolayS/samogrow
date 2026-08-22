@@ -699,6 +699,24 @@ test("blog.js executes every incident page and renders the selected post", () =>
   }
 });
 
+test("embedded English incident defaults exactly match the reviewed English catalog", () => {
+  const index = runBlog();
+  const cards = [...index.window.document.querySelectorAll(".post-card")];
+  for (const [position, inc] of INCIDENTS.entries()) {
+    const card = cards[position];
+    assert.equal(card.querySelector("h2").innerHTML, en[`inc.${inc.key}.title`]);
+    assert.equal(card.querySelector("p").innerHTML, en[`inc.${inc.key}.summary`]);
+
+    const post = runBlog(inc.file).window.document;
+    assert.equal(post.querySelector("h1").innerHTML, en[`inc.${inc.key}.title`]);
+    assert.equal(post.querySelector(".story").innerHTML, en[`inc.${inc.key}.story`]);
+    assert.equal(post.querySelector(".facts li:nth-child(1)").innerHTML, en[`inc.${inc.key}.impact`]);
+    assert.equal(post.querySelector(".facts li:nth-child(2)").innerHTML, en[`inc.${inc.key}.lesson`]);
+    assert.equal(post.querySelector("img").getAttribute("alt"), en[`inc.${inc.key}.alt`]);
+    assert.equal(post.querySelector("figcaption").innerHTML, en[`inc.${inc.key}.cap`]);
+  }
+});
+
 test("unknown incident key safely falls back to the blog index", () => {
   const html = readFileSync(join(docs, "incident-i1.html"), "utf8").replace('data-post="i1"', 'data-post="unknown"');
   const dom = new JSDOM(html, { url: "https://samogrow.test/incident-unknown.html", runScripts: "outside-only" });
