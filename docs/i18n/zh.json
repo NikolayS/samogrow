@@ -23,7 +23,7 @@
   "spec.appliance.label": "设备侧",
   "spec.appliance.value": "$33–68",
   "spec.grow.label": "种植侧",
-  "spec.grow.value": "$205–211",
+  "spec.grow.value": "$188 (U.S.)",
   "spec.consumables.label": "耗材",
   "spec.consumables.value": "~$35 / 年",
   "spec.api.label": "Claude API",

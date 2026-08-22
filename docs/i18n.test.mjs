@@ -724,6 +724,23 @@ test("blog rendering is translated with page-scoped metadata and language-preser
   assert.equal(document.querySelector('a[href^="/blog.html"]').getAttribute("href"), "/blog.html?lang=uk");
 });
 
+test("blog index localizes its page-scoped title and description", async () => {
+  const dom = new JSDOM(blogHtml, {
+    url: "https://samogrow.test/blog.html?lang=uk",
+    runScripts: "outside-only",
+    pretendToBeVisual: true
+  });
+  Object.defineProperty(dom.window.document, "readyState", { value: "complete", configurable: true });
+  dom.window.fetch = async (url) => {
+    const code = /\/([a-z]{2,3})\.json$/.exec(url)?.[1] || "en";
+    return { ok: true, json: async () => dicts[code] };
+  };
+  dom.window.eval(i18nJs);
+  await flush();
+  assert.equal(dom.window.document.title, dicts.uk["inc.title"]);
+  assert.equal(dom.window.document.querySelector('meta[name="description"]').content, dicts.uk["inc.sub"]);
+});
+
 test("incident blog and every post have separate language-preserving pages", () => {
   assert.match(indexHtml, /<section id="incidents">/);
   assert.match(indexHtml, /<a href="blog\.html" data-lang-link data-i18n="nav\.incidents">/);
@@ -989,6 +1006,7 @@ test("architecture schematic is centered despite the generic figure margin rule"
 });
 
 test("SPEC cost comparison stays tied to the exported U.S. market data", () => {
+  assert.equal(en["spec.grow.value"], `${MARKET.DATA.us.stack.grow} (U.S.)`);
   const auk = MARKET.DATA.us.rows.auk;
   const escaped = auk.map((value) => value.replace(/\*/g, "\\*") );
   assert.ok(spec.includes(`| Auk Mini 2, 4 pots | ${escaped[0]} | ${escaped[1]} | **${escaped[2].replace(/\\\*$/, "")}**\\* | **${escaped[3].replace(/\\\*$/, "")}**\\* |`));
