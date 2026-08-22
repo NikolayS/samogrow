@@ -817,6 +817,39 @@ test("blog uses the light site palette and caps full-post image height", () => {
     "mobile full-post images need a stricter height cap");
 });
 
+test("blog cards use an explicit compact image height on desktop and mobile", () => {
+  assert.match(blogCss, /\.post-card img\s*\{[^}]*height:\s*min\(32vw, 320px\);[^}]*object-fit:\s*cover;/,
+    "blog card images need an explicit desktop height cap");
+  assert.match(blogCss, /@media \(max-width: 720px\)[\s\S]*\.post-card img\s*\{\s*height:\s*clamp\(180px, 52vw, 240px\);/,
+    "mobile blog card images must stay compact regardless of their intrinsic dimensions");
+});
+
+test("primary destinations are available from the mobile menu on home and blog pages", () => {
+  const expectedKeys = ["nav.how", "nav.cost", "nav.features", "nav.start", "nav.incidents", "nav.github"];
+  for (const [name, html] of [["home", indexHtml], ["blog", blogHtml]]) {
+    const document = new JSDOM(html).window.document;
+    const menu = document.querySelector("details.site-menu");
+    assert.ok(menu, `${name} page mobile menu missing`);
+    assert.equal(menu.querySelector("summary")?.getAttribute("aria-label"), "Site menu");
+    assert.deepEqual([...menu.querySelectorAll("nav a")].map((link) => link.dataset.i18n), expectedKeys,
+      `${name} page mobile menu destinations changed`);
+  }
+});
+
+test("site menu closes after choosing a destination or pressing Escape", async () => {
+  const dom = new JSDOM(indexHtml, { url: "https://samogrow.test/index.html?lang=en", runScripts: "outside-only" });
+  Object.defineProperty(dom.window.document, "readyState", { value: "complete", configurable: true });
+  dom.window.eval(i18nJs);
+  await flush();
+  const menu = dom.window.document.querySelector("details.site-menu");
+  menu.open = true;
+  menu.querySelector('a[href="#how"]').dispatchEvent(new dom.window.MouseEvent("click", { bubbles: true }));
+  assert.equal(menu.open, false);
+  menu.open = true;
+  dom.window.document.dispatchEvent(new dom.window.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+  assert.equal(menu.open, false);
+});
+
 // ---------- pricing context ----------
 
 test("pricing frames identify their market, currency, and exclusions", () => {
@@ -888,6 +921,13 @@ test("market switcher is shareable, persistent, locale-aware, and keyboard wired
     assert.equal(panel?.getAttribute("role"), "tabpanel");
     assert.equal(panel?.getAttribute("aria-labelledby"), tab.id);
   }
+});
+
+test("market tabs remain a single scrollable row on narrow screens", () => {
+  assert.match(indexHtml, /\.market-tabs\s*\{[^}]*flex-wrap:\s*nowrap;[^}]*overflow-x:\s*auto;/,
+    "market tabs must not wrap into a second row");
+  assert.match(indexHtml, /\.market-tab\s*\{[^}]*flex:\s*0 0 auto;[^}]*white-space:\s*nowrap;/,
+    "market tab labels must remain intact while the row scrolls");
 });
 
 function marketRuntimeDom({ url = "https://samogrow.test/?lang=en&market=us#cost", languages = ["en-US"], stored,

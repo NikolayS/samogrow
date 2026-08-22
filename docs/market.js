@@ -114,6 +114,19 @@
     return source ? source.innerHTML : (status === "unavailable" ? "Unavailable" : "Not verified");
   }
 
+  function keepTabVisible(tab) {
+    var list = tab && tab.parentElement;
+    if (!list || list.scrollWidth <= list.clientWidth) return;
+    var listRect = list.getBoundingClientRect();
+    var tabRect = tab.getBoundingClientRect();
+    var delta = 0;
+    if (tabRect.left < listRect.left) delta = tabRect.left - listRect.left - 5;
+    else if (tabRect.right > listRect.right) delta = tabRect.right - listRect.right + 5;
+    if (!delta) return;
+    if (typeof list.scrollBy === "function") list.scrollBy({ left: delta, behavior: "auto" });
+    else list.scrollLeft += delta;
+  }
+
   function render(market, persist, sync) {
     var data = DATA[market];
     if (!data) return;
@@ -137,11 +150,14 @@
     });
 
     var tabs = document.querySelectorAll("[data-market-tab]");
+    var activeTab = null;
     for (var i = 0; i < tabs.length; i++) {
       var active = tabs[i].getAttribute("data-market-tab") === market;
       tabs[i].setAttribute("aria-selected", active ? "true" : "false");
       tabs[i].setAttribute("tabindex", active ? "0" : "-1");
+      if (active) activeTab = tabs[i];
     }
+    keepTabVisible(activeTab);
     var panels = document.querySelectorAll("[data-market-panel]");
     for (var j = 0; j < panels.length; j++) {
       panels[j].hidden = panels[j].getAttribute("data-market-panel") !== market;

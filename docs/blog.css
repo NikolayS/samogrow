@@ -19,7 +19,16 @@ a { color: var(--leaf); }
 .topbar .shell { min-height: 68px; display: flex; align-items: center; gap: 22px; }
 .brand { color: var(--ink); text-decoration: none; font: 1.35rem var(--serif); }
 .brand b { color: var(--leaf); }
-.home { margin-left: auto; font: .75rem var(--mono); text-decoration: none; }
+.home { margin-inline-start: auto; font: .75rem var(--mono); text-decoration: none; }
+.site-menu { display: block; position: relative; }
+.site-menu summary { width: 44px; height: 44px; display: grid; place-items: center; cursor: pointer; color: var(--ink); background: var(--card); border: 1px solid var(--line); list-style: none; }
+.site-menu summary::-webkit-details-marker { display: none; }
+.site-menu summary::before { content: "☰"; font: 1.2rem/1 var(--mono); }
+.site-menu[open] summary { color: var(--leaf); border-color: var(--leaf); }
+.site-menu[open] summary::before { content: "×"; font-size: 1.45rem; }
+.site-menu nav { position: absolute; inset-inline-end: 0; top: calc(100% + 8px); z-index: 40; width: min(280px, calc(100vw - 32px)); padding: 6px; background: var(--card); border: 1px solid var(--line); box-shadow: 0 18px 40px -20px rgba(28,34,22,.22); }
+.site-menu nav a { display: block; padding: 11px 12px; color: var(--soft); text-decoration: none; font: .76rem var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+.site-menu nav a:hover, .site-menu nav a:focus-visible { color: var(--leaf); background: #e7e1d1; }
 .lang { position: relative; }
 .lang-btn { border: 1px solid var(--leaf); background: transparent; color: var(--ink); padding: 8px 11px; font: 700 .76rem var(--mono); cursor: pointer; }
 .lang-globe { width: 15px; vertical-align: -3px; margin-right: 5px; }
@@ -34,7 +43,7 @@ h1 { max-width: 850px; margin: 10px 0 16px; font: 400 clamp(2.3rem, 7vw, 5.2rem)
 .post-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; padding-bottom: 80px; }
 .post-card { display: block; color: inherit; text-decoration: none; border: 1px solid var(--line); background: var(--card); }
 .post-card:hover { border-color: var(--leaf); transform: translateY(-2px); }
-.post-card img { display: block; width: 100%; aspect-ratio: 16/10; object-fit: cover; border-bottom: 1px solid var(--line); }
+.post-card img { display: block; width: 100%; height: min(32vw, 320px); object-fit: cover; border-bottom: 1px solid var(--line); }
 .post-card .copy { padding: 19px 20px 22px; }
 .post-card h2 { margin: 9px 0; font: 400 1.45rem/1.15 var(--serif); }
 .post-card p { margin: 0; color: var(--soft); }
@@ -53,8 +62,10 @@ h1 { max-width: 850px; margin: 10px 0 16px; font: 400 clamp(2.3rem, 7vw, 5.2rem)
   .shell { width: min(100% - 22px, 1080px); }
   .topbar .shell { gap: 10px; }
   .post-grid { grid-template-columns: 1fr; }
+  .post-card img { height: clamp(180px, 52vw, 240px); }
   .hero { padding-top: 48px; }
   .home { display: none; }
-  .lang { position: absolute; right: 11px; top: 14px; }
+  .site-menu { margin-inline-start: auto; }
+  .site-menu nav { position: fixed; inset-inline: 11px; top: 76px; width: auto; }
   .post img { max-height: 50vh; }
 }
