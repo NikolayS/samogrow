@@ -185,12 +185,12 @@
       });
     });
 
-    render(current, false);
+    render(current, false, Boolean(queryMarket(root.location.search)));
     root.addEventListener("popstate", function () {
       current = chooseMarket(root.location.search, storedMarket(), languages);
       render(current, false, false);
     });
-    document.addEventListener("samogrow:locale-applied", function () { render(current, false); });
+    document.addEventListener("samogrow:locale-applied", function () { render(current, false, false); });
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init, { once: true });

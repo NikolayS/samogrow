@@ -954,10 +954,28 @@ test("market runtime degrades safely when localStorage is unavailable", () => {
   });
   const eu = dom.window.document.querySelector('[data-market-tab="eu"]');
   assert.equal(eu.getAttribute("aria-selected"), "true");
+  assert.equal(new URL(dom.window.location.href).searchParams.get("market"), null,
+    "an inferred market must not become an explicit URL override");
+  dom.window.document.dispatchEvent(new dom.window.Event("samogrow:locale-applied"));
+  assert.equal(new URL(dom.window.location.href).searchParams.get("market"), null,
+    "locale re-render must not introduce a market URL parameter");
   const ali = dom.window.document.querySelector('[data-market-tab="aliexpress"]');
   assert.doesNotThrow(() => ali.click());
   assert.equal(ali.getAttribute("aria-selected"), "true");
   assert.equal(new URL(dom.window.location.href).searchParams.get("market"), "aliexpress");
+});
+
+test("remembered market stays implicit until the user selects a market", () => {
+  const dom = marketRuntimeDom({
+    stored: "eu",
+    languages: ["en-US"],
+    url: "https://samogrow.test/?lang=en#cost"
+  });
+  const active = dom.window.document.querySelector('[data-market-tab][aria-selected="true"]');
+  assert.equal(active.dataset.marketTab, "eu");
+  assert.equal(new URL(dom.window.location.href).searchParams.get("market"), null);
+  dom.window.document.dispatchEvent(new dom.window.Event("samogrow:locale-applied"));
+  assert.equal(new URL(dom.window.location.href).searchParams.get("market"), null);
 });
 
 test("each sourcing market has a complete and internally consistent SamoGrow estimate", () => {
