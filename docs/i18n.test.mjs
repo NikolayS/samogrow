@@ -23,6 +23,7 @@ const blogHtml = readFileSync(join(docs, "blog.html"), "utf8");
 const blogJs = readFileSync(join(docs, "blog.js"), "utf8");
 const blogCss = readFileSync(join(docs, "blog.css"), "utf8");
 const bootstrapJs = readFileSync(join(docs, "i18n-bootstrap.js"), "utf8");
+const faviconSvg = readFileSync(join(docs, "favicon.svg"), "utf8");
 const blogPageFiles = ["blog.html", "incident-i1.html", "incident-i3.html", "incident-i5.html", "incident-i6.html"];
 const readme = readFileSync(join(docs, "..", "README.md"), "utf8");
 const spec = readFileSync(join(docs, "..", "spec", "SPEC.md"), "utf8");
@@ -237,6 +238,18 @@ test("shared bootstrap code list matches LOCALES and is loaded by every page", (
   for (const file of ["index.html", ...blogPageFiles]) {
     const html = file === "index.html" ? indexHtml : readFileSync(join(docs, file), "utf8");
     assert.match(html, /<script src="i18n-bootstrap\.js"><\/script>/, `${file} missing pre-paint bootstrap`);
+  }
+});
+
+test("every page declares the local SVG favicon", () => {
+  assert.match(faviconSvg, /^<svg\b/);
+  assert.match(faviconSvg, /viewBox="0 0 64 64"/);
+  for (const file of ["index.html", ...blogPageFiles]) {
+    const html = file === "index.html" ? indexHtml : readFileSync(join(docs, file), "utf8");
+    const dom = new JSDOM(html);
+    const icon = dom.window.document.querySelector('link[rel="icon"]');
+    assert.equal(icon?.getAttribute("href"), "favicon.svg", `${file} missing favicon href`);
+    assert.equal(icon?.getAttribute("type"), "image/svg+xml", `${file} missing favicon MIME type`);
   }
 });
 
