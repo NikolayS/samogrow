@@ -294,6 +294,7 @@
   .market-summary[hidden] { display: none; }
   .market-copy { display: none; }
   .cost-grid { display: grid; grid-template-columns: 1fr 1.15fr; gap: 34px; align-items: start; }
+  .cost-grid > * { min-width: 0; }
   @media (max-width: 820px) { .cost-grid { grid-template-columns: 1fr; gap: 28px; } }
 
   .cost-stack { border: 1px solid var(--line); background: var(--card); }

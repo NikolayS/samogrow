@@ -960,6 +960,8 @@ test("each sourcing market has a complete and internally consistent SamoGrow est
 });
 
 test("cost table excludes AI and normalizes every verified total per spot", () => {
+  assert.match(indexHtml, /\.cost-grid\s*>\s*\*\s*\{\s*min-width:\s*0;/,
+    "cost-grid children must shrink so comparison tables scroll inside the mobile viewport");
   const table = new JSDOM(indexHtml).window.document.querySelector("table.cmp");
   const rows = [...table.querySelectorAll("tbody tr")].map((row) =>
     [...row.querySelectorAll("td")].map((cell) => cell.textContent.trim())
