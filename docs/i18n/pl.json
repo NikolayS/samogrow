@@ -217,7 +217,7 @@
   "pl.basket": "Zgrubny <b>kompletny</b> koszyk-odpowiednik wychodzi około <b>~$190–260</b>, gdy doliczyć kupione lokalnie nawozy, LECA, nasiona, zestaw pH, przejściówki i skrzynkę — to szacunek, <b>nie kwota z koszyka</b> i nie gwarantowany odpowiednik 1:1 zestawu z USA.",
   "pl.caveats": "Wysyłka, VAT/cło, warianty i promocje sprzedawców, napięcie sieci, typ wtyczki, obsługa RTSP w kamerze, zgodność protokołu/API inteligentnej wtyczki, gwarancja i lokalne zakupy — wszystko to zmienia wynik; sprawdź każdą ofertę przed zamówieniem. I twarde zastrzeżenie programowe: samogrow obsługuje dziś <b>wtyczki Kasa (KLAP) i kamery Tapo RTSP</b>; generyczne wtyczki i kamery w stylu Tuya <b>nie zadziałają z obecnym oprogramowaniem bez pracy nad adapterem</b>.",
   "inc.title": "Blog",
-  "inc.eyebrow": "Notatki terenowe",
+  "inc.eyebrow": "Na podstawie prawdziwej historii",
   "inc.sub": "Prawdziwe ogrody produkują prawdziwe incydenty, a my prowadzimy je jak awarie produkcyjne: z datą, znacznikiem severity, bez szukania winnych i z publicznym opisem.",
   "inc.readmore": "Pełny opis &amp; RCA na GitHub →",
   "inc.i1.title": "Incydent ×10 — dziesięciokrotne przedawkowanie nawozu",

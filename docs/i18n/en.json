@@ -217,7 +217,7 @@
   "pl.basket": "A rough <b>complete</b> equivalent basket lands around <b>~$190–260</b> once you add locally sourced nutrients, LECA, seeds, pH supplies, adapters, and a tote — an inference, <b>not a checkout quote</b> and not a guaranteed drop-in equivalent of the U.S. build.",
   "pl.caveats": "Shipping, VAT/customs, seller variants and promos, mains voltage, plug type, camera RTSP support, smart-plug protocol/API compatibility, warranty, and local sourcing all change the result — verify every listing before ordering. And a hard software caveat: samogrow currently drives <b>Kasa (KLAP) plugs and Tapo RTSP cameras</b>; generic Tuya-style plugs and cameras <b>do not work with the current software without adapter work</b>.",
   "inc.title": "Blog",
-  "inc.eyebrow": "Field notes",
+  "inc.eyebrow": "Based on a true story",
   "inc.sub": "Real gardens produce real incidents, and we run them like production outages: dated, severity-tagged, blameless, and written up in public.",
   "inc.readmore": "Full write-up &amp; RCA on GitHub →",
   "inc.i1.title": "The ×10 incident — a tenfold nutrient overdose",
