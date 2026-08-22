@@ -310,7 +310,27 @@
     updateSwitcher();
   }
 
+  function buildSiteMenus() {
+    var siteMenus = document.querySelectorAll("details.site-menu");
+    if (!siteMenus.length) return;
+    for (var i = 0; i < siteMenus.length; i++) {
+      siteMenus[i].addEventListener("click", function (e) {
+        if (e.target.closest("a")) this.open = false;
+      });
+    }
+    document.addEventListener("click", function (e) {
+      for (var j = 0; j < siteMenus.length; j++) {
+        if (siteMenus[j].open && !siteMenus[j].contains(e.target)) siteMenus[j].open = false;
+      }
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key !== "Escape") return;
+      for (var j = 0; j < siteMenus.length; j++) siteMenus[j].open = false;
+    });
+  }
+
   function init() {
+    buildSiteMenus();
     buildSwitcher();
     var initial = queryLocale(root.location && root.location.search);
     if (!initial) initial = matchLocale(document.documentElement.getAttribute("data-i18n-initial"));
