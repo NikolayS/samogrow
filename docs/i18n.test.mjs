@@ -923,6 +923,13 @@ test("market switcher is shareable, persistent, locale-aware, and keyboard wired
   }
 });
 
+test("market tabs remain a single scrollable row on narrow screens", () => {
+  assert.match(indexHtml, /\.market-tabs\s*\{[^}]*flex-wrap:\s*nowrap;[^}]*overflow-x:\s*auto;/,
+    "market tabs must not wrap into a second row");
+  assert.match(indexHtml, /\.market-tab\s*\{[^}]*flex:\s*0 0 auto;[^}]*white-space:\s*nowrap;/,
+    "market tab labels must remain intact while the row scrolls");
+});
+
 function marketRuntimeDom({ url = "https://samogrow.test/?lang=en&market=us#cost", languages = ["en-US"], stored,
   storageThrows = false } = {}) {
   const dom = new JSDOM(indexHtml, { url, runScripts: "outside-only", pretendToBeVisual: true });
