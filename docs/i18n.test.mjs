@@ -904,6 +904,11 @@ test("market runtime executes tab, keyboard, URL, storage, status, and popstate 
   dom.window.dispatchEvent(new PopStateEvent("popstate"));
   assert.equal(activeMarket(), "us");
   assert.equal(new URL(dom.window.location.href).searchParams.get("market"), "us");
+
+  dom.window.history.replaceState(null, "", "?lang=en#cost");
+  dom.window.dispatchEvent(new PopStateEvent("popstate"));
+  assert.equal(activeMarket(), "eu", "popstate without a URL market must restore the saved manual choice");
+  assert.equal(new URL(dom.window.location.href).searchParams.get("market"), null);
 });
 
 test("market runtime degrades safely when localStorage is unavailable", () => {

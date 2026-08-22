@@ -187,7 +187,7 @@
 
     render(current, false);
     root.addEventListener("popstate", function () {
-      current = queryMarket(root.location.search) || inferMarket(languages);
+      current = chooseMarket(root.location.search, storedMarket(), languages);
       render(current, false, false);
     });
     document.addEventListener("samogrow:locale-applied", function () { render(current, false); });
